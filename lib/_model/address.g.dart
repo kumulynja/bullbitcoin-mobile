@@ -12,7 +12,8 @@ _$AddressImpl _$$AddressImplFromJson(Map<String, dynamic> json) =>
       index: json['index'] as int?,
       kind: $enumDecode(_$AddressKindEnumMap, json['kind']),
       state: $enumDecode(_$AddressStatusEnumMap, json['state']),
-      label: json['label'] as String?,
+      labels:
+          (json['labels'] as List<dynamic>?)?.map((e) => e as String).toList(),
       spentTxId: json['spentTxId'] as String?,
       spendable: json['spendable'] as bool? ?? true,
       highestPreviousBalance: json['highestPreviousBalance'] as int? ?? 0,
@@ -25,7 +26,7 @@ Map<String, dynamic> _$$AddressImplToJson(_$AddressImpl instance) =>
       'index': instance.index,
       'kind': _$AddressKindEnumMap[instance.kind]!,
       'state': _$AddressStatusEnumMap[instance.state]!,
-      'label': instance.label,
+      'labels': instance.labels,
       'spentTxId': instance.spentTxId,
       'spendable': instance.spendable,
       'highestPreviousBalance': instance.highestPreviousBalance,

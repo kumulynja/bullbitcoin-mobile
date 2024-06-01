@@ -426,7 +426,7 @@ class HomeTxItem2 extends StatelessWidget {
     final isSwap = tx.swapTx != null;
     if (isSwap) return SwapTxHomeListItem(transaction: tx);
 
-    final label = tx.label ?? '';
+    final label = tx.labels?.join(', ') ?? '';
 
     final amount = context
         .select((CurrencyCubit x) => x.state.getAmountInUnits(tx.getAmount(sentAsTotal: true)));

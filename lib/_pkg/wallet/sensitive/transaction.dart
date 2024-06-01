@@ -47,7 +47,7 @@ class WalletSensitiveTx {
         fee: txDetails.fee ?? 0,
         height: txDetails.confirmationTime?.height,
         timestamp: txDetails.confirmationTime?.timestamp ?? 0,
-        label: tx.label,
+        // label: tx.label,
         toAddress: tx.toAddress,
         psbt: signedPSBT.psbtBase64,
       );

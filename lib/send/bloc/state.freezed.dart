@@ -34,6 +34,7 @@ mixin _$SendState {
   List<UTXO> get selectedUtxos => throw _privateConstructorUsedError;
   String get errAddresses => throw _privateConstructorUsedError;
   bool get signed => throw _privateConstructorUsedError;
+  List<String> get labels => throw _privateConstructorUsedError;
   String? get psbtSigned => throw _privateConstructorUsedError;
   int? get psbtSignedFeeAmount => throw _privateConstructorUsedError;
   WalletBloc? get selectedWalletBloc => throw _privateConstructorUsedError;
@@ -67,6 +68,7 @@ abstract class $SendStateCopyWith<$Res> {
       List<UTXO> selectedUtxos,
       String errAddresses,
       bool signed,
+      List<String> labels,
       String? psbtSigned,
       int? psbtSignedFeeAmount,
       WalletBloc? selectedWalletBloc});
@@ -105,6 +107,7 @@ class _$SendStateCopyWithImpl<$Res, $Val extends SendState>
     Object? selectedUtxos = null,
     Object? errAddresses = null,
     Object? signed = null,
+    Object? labels = null,
     Object? psbtSigned = freezed,
     Object? psbtSignedFeeAmount = freezed,
     Object? selectedWalletBloc = freezed,
@@ -182,6 +185,10 @@ class _$SendStateCopyWithImpl<$Res, $Val extends SendState>
           ? _value.signed
           : signed // ignore: cast_nullable_to_non_nullable
               as bool,
+      labels: null == labels
+          ? _value.labels
+          : labels // ignore: cast_nullable_to_non_nullable
+              as List<String>,
       psbtSigned: freezed == psbtSigned
           ? _value.psbtSigned
           : psbtSigned // ignore: cast_nullable_to_non_nullable
@@ -237,6 +244,7 @@ abstract class _$$SendStateImplCopyWith<$Res>
       List<UTXO> selectedUtxos,
       String errAddresses,
       bool signed,
+      List<String> labels,
       String? psbtSigned,
       int? psbtSignedFeeAmount,
       WalletBloc? selectedWalletBloc});
@@ -274,6 +282,7 @@ class __$$SendStateImplCopyWithImpl<$Res>
     Object? selectedUtxos = null,
     Object? errAddresses = null,
     Object? signed = null,
+    Object? labels = null,
     Object? psbtSigned = freezed,
     Object? psbtSignedFeeAmount = freezed,
     Object? selectedWalletBloc = freezed,
@@ -351,6 +360,10 @@ class __$$SendStateImplCopyWithImpl<$Res>
           ? _value.signed
           : signed // ignore: cast_nullable_to_non_nullable
               as bool,
+      labels: null == labels
+          ? _value._labels
+          : labels // ignore: cast_nullable_to_non_nullable
+              as List<String>,
       psbtSigned: freezed == psbtSigned
           ? _value.psbtSigned
           : psbtSigned // ignore: cast_nullable_to_non_nullable
@@ -389,10 +402,12 @@ class _$SendStateImpl extends _SendState {
       final List<UTXO> selectedUtxos = const [],
       this.errAddresses = '',
       this.signed = false,
+      final List<String> labels = const [],
       this.psbtSigned,
       this.psbtSignedFeeAmount,
       this.selectedWalletBloc})
       : _selectedUtxos = selectedUtxos,
+        _labels = labels,
         super._();
 
   @override
@@ -454,6 +469,15 @@ class _$SendStateImpl extends _SendState {
   @override
   @JsonKey()
   final bool signed;
+  final List<String> _labels;
+  @override
+  @JsonKey()
+  List<String> get labels {
+    if (_labels is EqualUnmodifiableListView) return _labels;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_labels);
+  }
+
   @override
   final String? psbtSigned;
   @override
@@ -463,7 +487,7 @@ class _$SendStateImpl extends _SendState {
 
   @override
   String toString() {
-    return 'SendState(address: $address, note: $note, scanningAddress: $scanningAddress, errScanningAddress: $errScanningAddress, showSendButton: $showSendButton, sending: $sending, errSending: $errSending, sent: $sent, psbt: $psbt, tx: $tx, downloadingFile: $downloadingFile, errDownloadingFile: $errDownloadingFile, downloaded: $downloaded, disableRBF: $disableRBF, sendAllCoin: $sendAllCoin, selectedUtxos: $selectedUtxos, errAddresses: $errAddresses, signed: $signed, psbtSigned: $psbtSigned, psbtSignedFeeAmount: $psbtSignedFeeAmount, selectedWalletBloc: $selectedWalletBloc)';
+    return 'SendState(address: $address, note: $note, scanningAddress: $scanningAddress, errScanningAddress: $errScanningAddress, showSendButton: $showSendButton, sending: $sending, errSending: $errSending, sent: $sent, psbt: $psbt, tx: $tx, downloadingFile: $downloadingFile, errDownloadingFile: $errDownloadingFile, downloaded: $downloaded, disableRBF: $disableRBF, sendAllCoin: $sendAllCoin, selectedUtxos: $selectedUtxos, errAddresses: $errAddresses, signed: $signed, labels: $labels, psbtSigned: $psbtSigned, psbtSignedFeeAmount: $psbtSignedFeeAmount, selectedWalletBloc: $selectedWalletBloc)';
   }
 
   @override
@@ -500,6 +524,7 @@ class _$SendStateImpl extends _SendState {
             (identical(other.errAddresses, errAddresses) ||
                 other.errAddresses == errAddresses) &&
             (identical(other.signed, signed) || other.signed == signed) &&
+            const DeepCollectionEquality().equals(other._labels, _labels) &&
             (identical(other.psbtSigned, psbtSigned) ||
                 other.psbtSigned == psbtSigned) &&
             (identical(other.psbtSignedFeeAmount, psbtSignedFeeAmount) ||
@@ -529,6 +554,7 @@ class _$SendStateImpl extends _SendState {
         const DeepCollectionEquality().hash(_selectedUtxos),
         errAddresses,
         signed,
+        const DeepCollectionEquality().hash(_labels),
         psbtSigned,
         psbtSignedFeeAmount,
         selectedWalletBloc
@@ -561,6 +587,7 @@ abstract class _SendState extends SendState {
       final List<UTXO> selectedUtxos,
       final String errAddresses,
       final bool signed,
+      final List<String> labels,
       final String? psbtSigned,
       final int? psbtSignedFeeAmount,
       final WalletBloc? selectedWalletBloc}) = _$SendStateImpl;
@@ -602,6 +629,8 @@ abstract class _SendState extends SendState {
   String get errAddresses;
   @override
   bool get signed;
+  @override
+  List<String> get labels;
   @override
   String? get psbtSigned;
   @override

@@ -16,6 +16,7 @@ import 'package:bb_mobile/_pkg/wallet/transaction.dart';
 import 'package:bb_mobile/_ui/components/button.dart';
 import 'package:bb_mobile/_ui/components/text.dart';
 import 'package:bb_mobile/_ui/components/text_input.dart';
+import 'package:bb_mobile/_ui/label_field.dart';
 import 'package:bb_mobile/currency/amount_input.dart';
 import 'package:bb_mobile/currency/bloc/currency_cubit.dart';
 import 'package:bb_mobile/locator.dart';
@@ -346,14 +347,24 @@ class _EnterNoteState extends State<EnterNote> {
   @override
   Widget build(BuildContext context) {
     final note = context.select((SendCubit cubit) => cubit.state.note);
+    //final List<String> suggestions =
+    //    context.select((ReceiveCubit _) => _.state.walletBloc?.state.wallet?.globalLabels ?? []);
+    final List<String> suggestions = context
+        .select((SendCubit _) => _.state.selectedWalletBloc?.state.wallet?.globalLabels ?? []);
 
-    return BBTextInput.big(
-      value: note,
-      hint: 'Enter a description',
-      onChanged: (txt) {
-        context.read<SendCubit>().updateNote(txt);
+    return LabelField(
+      suggestions: suggestions,
+      onChanged: (List<String> lbls) {
+        context.read<SendCubit>().updateLabels(lbls);
       },
     );
+    // return BBTextInput.big(
+    //   value: note,
+    //   hint: 'Enter a description',
+    //   onChanged: (txt) {
+    //     context.read<SendCubit>().updateNote(txt);
+    //   },
+    // );
   }
 
   @override

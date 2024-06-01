@@ -34,7 +34,7 @@ class AddressCubit extends Cubit<AddressState> {
 
     final (address, w) = await walletAddress.addAddressToWallet(
       address: (state.address!.index, state.address!.address),
-      label: state.address?.label,
+      // label: state.address?.label,
       wallet: walletBloc.state.wallet!,
       kind: state.address!.kind,
       state: state.address!.state,
@@ -64,7 +64,7 @@ class AddressCubit extends Cubit<AddressState> {
 
     final (address, w) = await walletAddress.addAddressToWallet(
       address: (state.address!.index, state.address!.address),
-      label: state.address?.label,
+      // label: state.address?.label,
       wallet: walletBloc.state.wallet!,
       kind: state.address!.kind,
       state: state.address!.state,
@@ -95,12 +95,12 @@ class AddressCubit extends Cubit<AddressState> {
     );
   }
 
-  void saveAddressName(Address address, String label) async {
+  void saveAddressName(Address address, List<String> labels) async {
     emit(state.copyWith(savingAddressName: true, errSavingAddressName: ''));
 
     final (addr, w) = await walletAddress.addAddressToWallet(
       address: (address.index, address.address),
-      label: label,
+      labels: labels,
       wallet: walletBloc.state.wallet!,
       kind: address.kind,
       state: address.state,
@@ -127,11 +127,10 @@ class AddressCubit extends Cubit<AddressState> {
     emit(
       state.copyWith(
         address: addr,
-        savingAddressName: false,
         savedAddressName: true,
       ),
     );
     await Future.delayed(const Duration(seconds: 3));
-    emit(state.copyWith(savedAddressName: false));
+    emit(state.copyWith(savedAddressName: false, savingAddressName: false));
   }
 }

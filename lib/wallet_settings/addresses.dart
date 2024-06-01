@@ -1,4 +1,5 @@
 import 'package:bb_mobile/_model/address.dart';
+import 'package:bb_mobile/_model/wallet.dart';
 import 'package:bb_mobile/_ui/bottom_sheet.dart';
 import 'package:bb_mobile/_ui/components/text.dart';
 import 'package:bb_mobile/_ui/headers.dart';
@@ -39,7 +40,7 @@ class AddressesScreen extends HookWidget {
     final selectedOption = useState(0);
 
     var addresses = context.select((WalletBloc cubit) => cubit.state.wallet!.myAddressBook);
-    print('');
+    final wallet = context.select((WalletBloc cubit) => cubit.state.wallet!);
     addresses = addresses.toList()..sort((a, b) => (b.index ?? 0).compareTo(a.index ?? 0));
     final recieveEmpty = addresses.where((element) => element.kind == AddressKind.deposit).isEmpty;
     final changeEmpty = addresses.where((element) => element.kind == AddressKind.change).isEmpty;
@@ -103,7 +104,10 @@ class AddressesScreen extends HookWidget {
               for (var i = 0; i < addresses.length; i++)
                 if (addresses[i].kind == AddressKind.deposit &&
                     addresses[i].state == AddressStatus.active)
-                  AddressItem(address: addresses[i]),
+                  AddressItem(
+                    address: addresses[i],
+                    wallet: wallet,
+                  ),
               const Gap(16),
             ],
             if (addresses
@@ -119,7 +123,7 @@ class AddressesScreen extends HookWidget {
               for (var i = 0; i < addresses.length; i++)
                 if (addresses[i].kind == AddressKind.deposit &&
                     addresses[i].state == AddressStatus.unused)
-                  AddressItem(address: addresses[i]),
+                  AddressItem(address: addresses[i], wallet: wallet),
               const Gap(16),
             ],
             if (addresses
@@ -135,7 +139,7 @@ class AddressesScreen extends HookWidget {
               for (var i = 0; i < addresses.length; i++)
                 if (addresses[i].kind == AddressKind.deposit &&
                     addresses[i].state == AddressStatus.used)
-                  AddressItem(address: addresses[i]),
+                  AddressItem(address: addresses[i], wallet: wallet),
               const Gap(16),
             ],
           ] else ...[
@@ -160,7 +164,7 @@ class AddressesScreen extends HookWidget {
               for (var i = 0; i < addresses.length; i++)
                 if (addresses[i].kind == AddressKind.change &&
                     addresses[i].state == AddressStatus.active)
-                  AddressItem(address: addresses[i]),
+                  AddressItem(address: addresses[i], wallet: wallet),
               const Gap(16),
             ],
             if (addresses
@@ -176,7 +180,7 @@ class AddressesScreen extends HookWidget {
               for (var i = 0; i < addresses.length; i++)
                 if (addresses[i].kind == AddressKind.change &&
                     addresses[i].state == AddressStatus.used)
-                  AddressItem(address: addresses[i]),
+                  AddressItem(address: addresses[i], wallet: wallet),
               const Gap(16),
             ],
             if (addresses
@@ -192,7 +196,7 @@ class AddressesScreen extends HookWidget {
               for (var i = 0; i < addresses.length; i++)
                 if (addresses[i].kind == AddressKind.change &&
                     addresses[i].state == AddressStatus.unused)
-                  AddressItem(address: addresses[i]),
+                  AddressItem(address: addresses[i], wallet: wallet),
               const Gap(16),
             ],
           ],
@@ -247,9 +251,11 @@ class AddressItem extends StatelessWidget {
   const AddressItem({
     super.key,
     required this.address,
+    required this.wallet,
   });
 
   final Address address;
+  final Wallet wallet;
 
   @override
   Widget build(BuildContext context) {
@@ -257,6 +263,7 @@ class AddressItem extends StatelessWidget {
     final amt = context.select(
       (CurrencyCubit x) => x.state.getAmountInUnits(balance),
     );
+    final (labels, labelsInherited) = address.getLabels(wallet);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -279,9 +286,12 @@ class AddressItem extends StatelessWidget {
           ),
           const Gap(4),
           if (amt.isNotEmpty) InlineLabel(title: 'Balance', body: amt),
-          if (address.label != null && address.label!.isNotEmpty) ...[
+          if (labels.isNotEmpty) ...[
             const Gap(4),
-            InlineLabel(title: 'Label', body: address.label!),
+            InlineLabel(
+              title: 'Label',
+              body: (labelsInherited ? '[I]' : '') + (labels.isNotEmpty ? labels.join(', ') : ''),
+            ),
             const Gap(8),
           ],
         ],

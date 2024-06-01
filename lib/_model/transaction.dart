@@ -20,7 +20,8 @@ class Transaction with _$Transaction {
     int? sent,
     int? fee,
     int? height,
-    String? label,
+    // String? label,
+    List<String>? labels,
     String? toAddress,
     String? psbt,
     @Default(true) bool rbfEnabled,
@@ -28,6 +29,7 @@ class Transaction with _$Transaction {
     int? broadcastTime,
     // String? serializedTx,
     @Default([]) List<Address> outAddrs,
+    @Default([]) List<String> prevTxIds,
     @JsonKey(
       includeFromJson: false,
       includeToJson: false,
@@ -38,7 +40,6 @@ class Transaction with _$Transaction {
     int? swapIndex,
     SwapTx? swapTx,
   }) = _Transaction;
-  const Transaction._();
 
   factory Transaction.fromJson(Map<String, dynamic> json) => _$TransactionFromJson(json);
 
@@ -49,6 +50,35 @@ class Transaction with _$Transaction {
       swapTx: swapTx,
       isSwap: true,
     );
+  }
+  const Transaction._();
+
+  (List<String>, bool) getLabels(Wallet w) {
+    if (labels != null && labels!.isNotEmpty) return (labels!, false);
+
+    final List<String> lbls = [];
+    // TODO: Calling this on every build is super inefficient. Ideally have a address / txid map for labels
+    for (final outAddr in outAddrs) {
+      for (final addr in w.myAddressBook) {
+        if (outAddr.address == addr.address) {
+          lbls.addAll(addr.labels ?? []);
+        }
+      }
+      // TODO: Should look in external address book?
+
+      if (!isReceived() && txid.endsWith('316b')) {
+        for (final prevTxId in prevTxIds) {
+          for (final txx in w.transactions) {
+            if (txx.labels != null && txx.labels!.isNotEmpty) {
+              if (prevTxId == txx.txid) {
+                lbls.addAll(txx.labels ?? []);
+              }
+            }
+          }
+        }
+      }
+    }
+    return (Set<String>.from(lbls).toList(), true);
   }
 
   Address? mapOutValueToAddress(int value) {

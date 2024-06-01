@@ -248,6 +248,9 @@ class AdvancedOptionAdress extends StatelessWidget {
     final isSelected = context.select(
       (SendCubit x) => x.state.utxoIsSelected(utxo),
     );
+    final w = context.select(
+      (SendCubit x) => x.state.selectedWalletBloc?.state.wallet,
+    );
 
     final balance = utxo.value;
 
@@ -259,8 +262,11 @@ class AdvancedOptionAdress extends StatelessWidget {
 
     final label = utxo.label;
 
-    final addessStr =
-        utxo.address.toShortString() + (utxo.address.label != null ? utxo.address.label! : '');
+    // final addessStr =
+    //     utxo.address.toShortString() + (utxo.address.label != null ? utxo.address.label! : '');
+
+    final (addrsLabels, isInherited) = utxo.address.getLabels(w!);
+    final addessStr = utxo.address.toShortString() + (addrsLabels.join(', ') ?? '');
 
     return AnimatedOpacity(
       opacity: isFrozen ? 0.5 : 1,

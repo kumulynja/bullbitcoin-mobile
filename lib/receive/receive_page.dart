@@ -12,6 +12,7 @@ import 'package:bb_mobile/_ui/components/button.dart';
 import 'package:bb_mobile/_ui/components/text.dart';
 import 'package:bb_mobile/_ui/components/text_input.dart';
 import 'package:bb_mobile/_ui/headers.dart';
+import 'package:bb_mobile/_ui/label_field.dart';
 import 'package:bb_mobile/currency/amount_input.dart';
 import 'package:bb_mobile/currency/bloc/currency_cubit.dart';
 import 'package:bb_mobile/locator.dart';
@@ -126,6 +127,7 @@ class AddressDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = context.select((ReceiveCubit x) => x.state.privateLabel);
+    final labels = context.select((ReceiveCubit x) => x.state.privateLabels.join(', '));
     final amount = context.select((ReceiveCubit x) => x.state.savedInvoiceAmount);
     final description = context.select((ReceiveCubit x) => x.state.savedDescription);
     final amountStr = context.select(
@@ -137,9 +139,9 @@ class AddressDetails extends StatelessWidget {
     );
     return Column(
       children: [
-        if (label.isNotEmpty) ...[
+        if (labels.isNotEmpty) ...[
           _DetailRow(
-            text: label,
+            text: labels,
             onTap: () {
               RenameLabel.openPopUp(context);
             },
@@ -472,6 +474,7 @@ class RenameLabel extends StatelessWidget {
 
   static Future openPopUp(BuildContext context) async {
     final receiveCubit = context.read<ReceiveCubit>();
+    // final walletBloc = context.read<WalletBloc>();
 
     return showBBBottomSheet(
       context: context,
@@ -479,9 +482,9 @@ class RenameLabel extends StatelessWidget {
         value: receiveCubit,
         child: BlocListener<ReceiveCubit, ReceiveState>(
           listenWhen: (previous, current) =>
-              previous.defaultAddress?.label != current.defaultAddress?.label,
+              previous.defaultAddress?.labels?.join() != current.defaultAddress?.labels?.join(),
           listener: (context, state) {
-            context.pop();
+            // context.pop();
           },
           child: const Padding(
             padding: EdgeInsets.all(30),
@@ -494,27 +497,49 @@ class RenameLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = context.select((ReceiveCubit _) => _.state.privateLabel);
+    final labels = context.select((ReceiveCubit _) => _.state.privateLabels);
+    final List<String> suggestions =
+        context.select((ReceiveCubit _) => _.state.walletBloc?.state.wallet?.globalLabels ?? []);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const BBHeader.popUpCenteredText(text: 'Address Label'),
-        const Gap(40),
-        const BBText.title('Address Label (Optional)'),
-        const Gap(4),
-        BBTextInput.big(
-          value: label,
-          hint: 'Enter Private Label',
-          onChanged: (txt) {
-            context.read<ReceiveCubit>().privateLabelChanged(txt);
+        BBHeader.popUpCenteredText(
+          text: 'Address Label',
+          onBack: () {
+            context.read<ReceiveCubit>().loadAddress();
+            Navigator.of(context).pop();
           },
         ),
         const Gap(40),
+        const BBText.title('Address Label (Optional)'),
+        const Gap(4),
+        LabelField(
+          suggestions: suggestions,
+          labels: labels,
+          onChanged: (List<String> lbls) {
+            context.read<ReceiveCubit>().privateLabelsChanged(lbls);
+          },
+        ),
+        // BBTextInput.big(
+        //   value: label,
+        //   hint: 'Enter Private Label',
+        //   onChanged: (txt) {
+        //     context.read<ReceiveCubit>().privateLabelChanged(txt);
+        //   },
+        // ),
+        const Gap(40),
         BBButton.bigRed(
           label: 'Save',
-          onPressed: () {
+          onPressed: () async {
+            // TODO: Improve
+            FocusScope.of(context).requestFocus(FocusNode());
+            await Future.delayed(const Duration(seconds: 1));
             context.read<ReceiveCubit>().saveDefaultAddressLabel();
+            // TODO: To Improve
+            await Future.delayed(const Duration(milliseconds: 900));
+            context.read<ReceiveCubit>().loadAddress();
+            context.pop();
           },
         ),
         const Gap(40),

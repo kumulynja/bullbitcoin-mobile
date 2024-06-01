@@ -17,8 +17,9 @@ import 'package:bb_mobile/_ui/app_bar.dart';
 import 'package:bb_mobile/_ui/bottom_sheet.dart';
 import 'package:bb_mobile/_ui/components/button.dart';
 import 'package:bb_mobile/_ui/components/text.dart';
-import 'package:bb_mobile/_ui/components/text_input.dart';
 import 'package:bb_mobile/_ui/headers.dart';
+import 'package:bb_mobile/_ui/label_field.dart';
+import 'package:bb_mobile/_ui/toast.dart';
 import 'package:bb_mobile/currency/bloc/currency_cubit.dart';
 import 'package:bb_mobile/home/bloc/home_cubit.dart';
 import 'package:bb_mobile/locator.dart';
@@ -34,7 +35,6 @@ import 'package:bb_mobile/wallet/bloc/wallet_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -107,10 +107,12 @@ class TxAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = context.select((TransactionCubit cubit) => cubit.state.tx.label ?? '');
+    final tx = context.select((TransactionCubit cubit) => cubit.state.tx);
+    final w = context.select((TransactionCubit cubit) => cubit.walletBloc.state.wallet!);
+    final (labels, isInherited) = tx.getLabels(w);
 
     return BBAppBar(
-      text: label.isNotEmpty ? label : 'Transaction',
+      text: labels.isNotEmpty ? labels.join(', ') : 'Transaction',
       onBack: () {
         context.pop();
       },
@@ -124,6 +126,7 @@ class _Screen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tx = context.select((TransactionCubit cubit) => cubit.state.tx);
+    final w = context.select((WalletBloc cubit) => cubit.state.wallet!);
 
     final isSwap = tx.swapTx != null;
     if (isSwap) return const SwapTxPage();
@@ -167,6 +170,8 @@ class _Screen extends StatelessWidget {
               state: AddressStatus.used,
             ),
           );
+
+    final (labels, labelsInherited) = tx.getLabels(w);
 
     return SingleChildScrollView(
       child: Padding(
@@ -285,7 +290,7 @@ class _Screen extends StatelessWidget {
                 'Change Label',
               ),
               const Gap(4),
-              const TxLabelTextField(),
+              TxLabelTextField(labels: labels),
               const Gap(24),
               if (err.isNotEmpty) ...[
                 const Gap(32),
@@ -302,39 +307,56 @@ class _Screen extends StatelessWidget {
   }
 }
 
-class TxLabelTextField extends HookWidget {
-  const TxLabelTextField({super.key});
+class TxLabelTextField extends StatefulWidget {
+  TxLabelTextField({super.key, required this.labels});
+
+  List<String> labels;
+
+  @override
+  State<TxLabelTextField> createState() => _TxLabelTextFieldState();
+}
+
+class _TxLabelTextFieldState extends State<TxLabelTextField> {
+  late List<String> _labels;
+
+  @override
+  void initState() {
+    _labels = widget.labels;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final storedLabel = context.select((TransactionCubit x) => x.state.tx.label ?? '');
+    // final storedLabel = context.select((TransactionCubit x) => x.state.tx.label ?? '');
     final showButton = context.select(
       (TransactionCubit x) => x.state.showSaveButton(),
       // && storedLabel.isEmpty,
     );
     final label = context.select((TransactionCubit x) => x.state.label);
+    final suggestions =
+        context.select((TransactionCubit x) => x.walletBloc.state.wallet?.globalLabels ?? []);
 
     return Row(
       children: [
         Expanded(
-          child: SizedBox(
-            height: 45,
-            child: BBTextInput.small(
-              // disabled: storedLabel.isNotEmpty,
-              hint: storedLabel.isNotEmpty ? storedLabel : 'Enter Label',
-              value: label,
-              onChanged: (value) {
-                context.read<TransactionCubit>().labelChanged(value);
-              },
-            ),
+          child: LabelField(
+            suggestions: suggestions,
+            labels: _labels,
+            onChanged: (List<String> lbls) {
+              setState(() {
+                _labels = lbls;
+              });
+            },
           ),
         ),
         const Gap(8),
         BBButton.smallRed(
-          disabled: !showButton,
-          onPressed: () {
+          onPressed: () async {
+            // TODO: Improve
             FocusScope.of(context).requestFocus(FocusNode());
-            context.read<TransactionCubit>().saveLabelClicked();
+            await Future.delayed(const Duration(seconds: 1));
+            ScaffoldMessenger.of(context).showSnackBar(context.showToast('Labels saved'));
+            context.read<TransactionCubit>().saveLabelsClicked(_labels);
           },
           label: 'SAVE',
         ),

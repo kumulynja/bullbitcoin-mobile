@@ -1,4 +1,5 @@
 import 'package:bb_mobile/_model/address.dart';
+import 'package:bb_mobile/_model/wallet.dart';
 import 'package:bb_mobile/_pkg/clipboard.dart';
 import 'package:bb_mobile/_pkg/launcher.dart';
 import 'package:bb_mobile/_pkg/storage/hive.dart';
@@ -10,6 +11,7 @@ import 'package:bb_mobile/_ui/components/button.dart';
 import 'package:bb_mobile/_ui/components/text.dart';
 import 'package:bb_mobile/_ui/headers.dart';
 import 'package:bb_mobile/_ui/inline_label.dart';
+import 'package:bb_mobile/_ui/label_field.dart';
 import 'package:bb_mobile/address/bloc/address_cubit.dart';
 import 'package:bb_mobile/address/bloc/address_state.dart';
 import 'package:bb_mobile/currency/bloc/currency_cubit.dart';
@@ -109,7 +111,8 @@ class Title extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _ = context.select((AddressCubit cubit) => cubit.state.address!);
-    final label = context.select((AddressCubit cubit) => cubit.state.address!.label ?? '');
+    final labels =
+        context.select((AddressCubit cubit) => cubit.state.address!.labels?.join(', ') ?? '');
     final address = context.select((AddressCubit cubit) => cubit.state.address!.miniString());
 
     final walletName = context.select((WalletBloc cubit) => cubit.state.wallet!.name ?? '');
@@ -122,7 +125,7 @@ class Title extends StatelessWidget {
       child: Column(
         children: [
           BBText.body(
-            label.isEmpty ? address : label,
+            labels.isEmpty ? address : labels,
           ),
           const Gap(8),
           BBText.title(
@@ -174,8 +177,9 @@ class AddressDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final wallet = context.select((WalletBloc bloc) => bloc.state.wallet!);
     final address = context.select((AddressCubit cubit) => cubit.state.address!);
-    final label = address.label ?? '';
+    final (labels, labelsInherited) = address.getLabels(wallet);
     final isReceive = address.kind == AddressKind.deposit;
     final balance = address.balance;
     final amt = context.select((CurrencyCubit cubit) => cubit.state.getAmountInUnits(balance));
@@ -190,9 +194,12 @@ class AddressDetails extends StatelessWidget {
         ),
         const Gap(8),
         InlineLabel(title: 'Balance', body: amt),
-        if (label.isNotEmpty) ...[
+        if (labels.isNotEmpty) ...[
           const Gap(8),
-          InlineLabel(title: 'Label', body: label),
+          InlineLabel(
+            title: 'Labels',
+            body: (labelsInherited ? '[I]' : '') + (labels.isNotEmpty ? labels.join(', ') : ''),
+          ),
         ],
         const Gap(8),
         InlineLabel(
@@ -299,9 +306,10 @@ class _CopyButtonState extends State<CopyButton> {
 }
 
 class AddressLabelFieldPopUp extends StatelessWidget {
-  const AddressLabelFieldPopUp({super.key, required this.address});
+  const AddressLabelFieldPopUp({super.key, required this.address, required this.wallet});
 
   final Address address;
+  final Wallet wallet;
 
   static Future openPopup(
     BuildContext context,
@@ -328,7 +336,7 @@ class AddressLabelFieldPopUp extends StatelessWidget {
 
             context.pop();
           },
-          child: AddressLabelFieldPopUp(address: address),
+          child: AddressLabelFieldPopUp(address: address, wallet: wallet.state.wallet!),
         ),
       ),
     );
@@ -365,7 +373,10 @@ class AddressLabelFieldPopUp extends StatelessWidget {
             ),
           ),
           const Gap(24),
-          AddressLabelTextField(address: address),
+          AddressLabelTextField(
+            address: address,
+            wallet: wallet,
+          ),
           const Gap(80),
         ],
       ),
@@ -374,33 +385,51 @@ class AddressLabelFieldPopUp extends StatelessWidget {
 }
 
 class AddressLabelTextField extends StatefulWidget {
-  const AddressLabelTextField({super.key, required this.address});
+  const AddressLabelTextField({super.key, required this.address, required this.wallet});
 
   final Address address;
+  final Wallet wallet;
 
   @override
   State<AddressLabelTextField> createState() => _AddressLabelTextFieldState();
 }
 
 class _AddressLabelTextFieldState extends State<AddressLabelTextField> {
-  final _controller = TextEditingController();
+  late List<String> labels;
+
+  @override
+  void initState() {
+    final (lbls, labelsInherited) = widget.address.getLabels(widget.wallet);
+    labels = lbls;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final saving = context.select((AddressCubit cubit) => cubit.state.savingAddressName);
     final err = context.select((AddressCubit cubit) => cubit.state.errSavingAddressName);
     final saved = context.select((AddressCubit cubit) => cubit.state.savedAddressName);
-    final _ = widget.address.label ?? 'Enter Label';
+    // final _ = widget.address.label ?? 'Enter Label';
+
+    final suggestions =
+        context.select((AddressCubit _) => _.walletBloc.state.wallet?.globalLabels ?? []);
 
     if (saved) const Center(child: BBText.body('Saved!')).animate(delay: 300.ms).fadeIn();
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: TextField(
-            controller: _controller,
+          padding: const EdgeInsets.all(12.0),
+          child: LabelField(
+            suggestions: suggestions,
+            labels: labels,
+            onChanged: (List<String> lbls) {
+              setState(() {
+                labels = lbls;
+              });
+            },
           ),
         ),
-        const Gap(60),
+        const Gap(10),
         if (err.isNotEmpty) ...[
           BBText.body(
             err,
@@ -412,10 +441,11 @@ class _AddressLabelTextFieldState extends State<AddressLabelTextField> {
             width: 250,
             child: BBButton.bigRed(
               loading: saving,
-              onPressed: () {
-                if (_controller.text.isEmpty) return;
+              onPressed: () async {
+                // TODO: [Bad practice] wait for LabelField.inputfield's focus lost event to propagate to onChanged
                 FocusScope.of(context).requestFocus(FocusNode());
-                context.read<AddressCubit>().saveAddressName(widget.address, _controller.text);
+                await Future.delayed(const Duration(seconds: 1));
+                context.read<AddressCubit>().saveAddressName(widget.address, labels);
               },
               label: 'Save',
             ),

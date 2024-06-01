@@ -1,6 +1,7 @@
 import 'package:bb_mobile/_model/transaction.dart';
 import 'package:bb_mobile/_pkg/logger.dart';
 import 'package:bb_mobile/_ui/logger_page.dart';
+import 'package:bb_mobile/_ui/testground.dart';
 import 'package:bb_mobile/auth/page.dart';
 import 'package:bb_mobile/create/page.dart';
 import 'package:bb_mobile/home/home_page.dart';
@@ -31,6 +32,12 @@ final GoRouter router = GoRouter(
   navigatorKey: navigatorKey,
   initialLocation: '/',
   routes: <RouteBase>[
+    GoRoute(
+      path: '/testground',
+      builder: (context, state) {
+        return const Testground();
+      },
+    ),
     GoRoute(
       path: '/',
       builder: (context, state) {

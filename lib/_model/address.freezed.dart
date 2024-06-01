@@ -23,8 +23,9 @@ mixin _$Address {
   String get address => throw _privateConstructorUsedError;
   int? get index => throw _privateConstructorUsedError;
   AddressKind get kind => throw _privateConstructorUsedError;
-  AddressStatus get state => throw _privateConstructorUsedError;
-  String? get label => throw _privateConstructorUsedError;
+  AddressStatus get state =>
+      throw _privateConstructorUsedError; // String? label,
+  List<String>? get labels => throw _privateConstructorUsedError;
   String? get spentTxId => throw _privateConstructorUsedError;
   bool get spendable => throw _privateConstructorUsedError;
   int get highestPreviousBalance => throw _privateConstructorUsedError;
@@ -45,7 +46,7 @@ abstract class $AddressCopyWith<$Res> {
       int? index,
       AddressKind kind,
       AddressStatus state,
-      String? label,
+      List<String>? labels,
       String? spentTxId,
       bool spendable,
       int highestPreviousBalance,
@@ -69,7 +70,7 @@ class _$AddressCopyWithImpl<$Res, $Val extends Address>
     Object? index = freezed,
     Object? kind = null,
     Object? state = null,
-    Object? label = freezed,
+    Object? labels = freezed,
     Object? spentTxId = freezed,
     Object? spendable = null,
     Object? highestPreviousBalance = null,
@@ -92,10 +93,10 @@ class _$AddressCopyWithImpl<$Res, $Val extends Address>
           ? _value.state
           : state // ignore: cast_nullable_to_non_nullable
               as AddressStatus,
-      label: freezed == label
-          ? _value.label
-          : label // ignore: cast_nullable_to_non_nullable
-              as String?,
+      labels: freezed == labels
+          ? _value.labels
+          : labels // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
       spentTxId: freezed == spentTxId
           ? _value.spentTxId
           : spentTxId // ignore: cast_nullable_to_non_nullable
@@ -128,7 +129,7 @@ abstract class _$$AddressImplCopyWith<$Res> implements $AddressCopyWith<$Res> {
       int? index,
       AddressKind kind,
       AddressStatus state,
-      String? label,
+      List<String>? labels,
       String? spentTxId,
       bool spendable,
       int highestPreviousBalance,
@@ -150,7 +151,7 @@ class __$$AddressImplCopyWithImpl<$Res>
     Object? index = freezed,
     Object? kind = null,
     Object? state = null,
-    Object? label = freezed,
+    Object? labels = freezed,
     Object? spentTxId = freezed,
     Object? spendable = null,
     Object? highestPreviousBalance = null,
@@ -173,10 +174,10 @@ class __$$AddressImplCopyWithImpl<$Res>
           ? _value.state
           : state // ignore: cast_nullable_to_non_nullable
               as AddressStatus,
-      label: freezed == label
-          ? _value.label
-          : label // ignore: cast_nullable_to_non_nullable
-              as String?,
+      labels: freezed == labels
+          ? _value._labels
+          : labels // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
       spentTxId: freezed == spentTxId
           ? _value.spentTxId
           : spentTxId // ignore: cast_nullable_to_non_nullable
@@ -205,12 +206,13 @@ class _$AddressImpl extends _Address {
       this.index,
       required this.kind,
       required this.state,
-      this.label,
+      final List<String>? labels,
       this.spentTxId,
       this.spendable = true,
       this.highestPreviousBalance = 0,
       this.balance = 0})
-      : super._();
+      : _labels = labels,
+        super._();
 
   factory _$AddressImpl.fromJson(Map<String, dynamic> json) =>
       _$$AddressImplFromJson(json);
@@ -223,8 +225,18 @@ class _$AddressImpl extends _Address {
   final AddressKind kind;
   @override
   final AddressStatus state;
+// String? label,
+  final List<String>? _labels;
+// String? label,
   @override
-  final String? label;
+  List<String>? get labels {
+    final value = _labels;
+    if (value == null) return null;
+    if (_labels is EqualUnmodifiableListView) return _labels;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
+
   @override
   final String? spentTxId;
   @override
@@ -239,7 +251,7 @@ class _$AddressImpl extends _Address {
 
   @override
   String toString() {
-    return 'Address(address: $address, index: $index, kind: $kind, state: $state, label: $label, spentTxId: $spentTxId, spendable: $spendable, highestPreviousBalance: $highestPreviousBalance, balance: $balance)';
+    return 'Address(address: $address, index: $index, kind: $kind, state: $state, labels: $labels, spentTxId: $spentTxId, spendable: $spendable, highestPreviousBalance: $highestPreviousBalance, balance: $balance)';
   }
 
   @override
@@ -251,7 +263,7 @@ class _$AddressImpl extends _Address {
             (identical(other.index, index) || other.index == index) &&
             (identical(other.kind, kind) || other.kind == kind) &&
             (identical(other.state, state) || other.state == state) &&
-            (identical(other.label, label) || other.label == label) &&
+            const DeepCollectionEquality().equals(other._labels, _labels) &&
             (identical(other.spentTxId, spentTxId) ||
                 other.spentTxId == spentTxId) &&
             (identical(other.spendable, spendable) ||
@@ -263,8 +275,17 @@ class _$AddressImpl extends _Address {
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, address, index, kind, state,
-      label, spentTxId, spendable, highestPreviousBalance, balance);
+  int get hashCode => Object.hash(
+      runtimeType,
+      address,
+      index,
+      kind,
+      state,
+      const DeepCollectionEquality().hash(_labels),
+      spentTxId,
+      spendable,
+      highestPreviousBalance,
+      balance);
 
   @JsonKey(ignore: true)
   @override
@@ -286,7 +307,7 @@ abstract class _Address extends Address {
       final int? index,
       required final AddressKind kind,
       required final AddressStatus state,
-      final String? label,
+      final List<String>? labels,
       final String? spentTxId,
       final bool spendable,
       final int highestPreviousBalance,
@@ -303,8 +324,8 @@ abstract class _Address extends Address {
   AddressKind get kind;
   @override
   AddressStatus get state;
-  @override
-  String? get label;
+  @override // String? label,
+  List<String>? get labels;
   @override
   String? get spentTxId;
   @override

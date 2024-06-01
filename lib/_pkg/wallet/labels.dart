@@ -5,12 +5,12 @@ import 'package:bb_mobile/_model/transaction.dart';
 class WalletLabels {
   Future<List<Bip329Label>> txsToBip329(List<Transaction> txs, String origin) async {
     return txs
-        .where((tx) => tx.label != null)
+        .where((tx) => tx.labels != null && tx.labels!.isNotEmpty)
         .map(
           (tx) => Bip329Label(
             type: BIP329Type.tx,
             ref: tx.txid,
-            label: tx.label,
+            label: tx.labels!.join(', '),
             origin: origin,
           ),
         )
@@ -24,7 +24,7 @@ class WalletLabels {
           (label) => Transaction(
             timestamp: 0,
             txid: label.ref,
-            label: label.label,
+            labels: label.label!.split(', '),
           ),
         )
         .toList();
@@ -32,12 +32,12 @@ class WalletLabels {
 
   Future<List<Bip329Label>> addressesToBip329(List<Address> addresses, String origin) async {
     return addresses
-        .where((address) => address.label != null)
+        .where((address) => address.labels != null && address.labels!.isNotEmpty)
         .map(
           (address) => Bip329Label(
             type: BIP329Type.address,
             ref: address.address,
-            label: address.label,
+            label: address.labels!.join(', '),
             spendable: address.spendable,
             origin: origin,
           ),
@@ -53,7 +53,7 @@ class WalletLabels {
             address: label.ref,
             kind: AddressKind.deposit,
             state: AddressStatus.unused,
-            label: label.label,
+            labels: label.label!.split(', '),
             spendable: label.spendable ?? true,
           ),
         )

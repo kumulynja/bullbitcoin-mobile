@@ -15,6 +15,7 @@ class ReceiveState with _$ReceiveState {
     @Default('') String errLoadingAddress,
     Address? defaultAddress,
     @Default('') String privateLabel,
+    @Default([]) List<String> privateLabels,
     @Default(false) bool savingLabel,
     @Default('') String errSavingLabel,
     @Default(false) bool labelSaved,

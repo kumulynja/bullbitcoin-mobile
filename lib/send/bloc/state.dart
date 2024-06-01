@@ -26,6 +26,7 @@ class SendState with _$SendState {
     @Default([]) List<UTXO> selectedUtxos,
     @Default('') String errAddresses,
     @Default(false) bool signed,
+    @Default([]) List<String> labels,
     String? psbtSigned,
     int? psbtSignedFeeAmount,
     WalletBloc? selectedWalletBloc,

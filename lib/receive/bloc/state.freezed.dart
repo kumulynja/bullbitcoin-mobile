@@ -20,6 +20,7 @@ mixin _$ReceiveState {
   String get errLoadingAddress => throw _privateConstructorUsedError;
   Address? get defaultAddress => throw _privateConstructorUsedError;
   String get privateLabel => throw _privateConstructorUsedError;
+  List<String> get privateLabels => throw _privateConstructorUsedError;
   bool get savingLabel => throw _privateConstructorUsedError;
   String get errSavingLabel => throw _privateConstructorUsedError;
   bool get labelSaved => throw _privateConstructorUsedError;
@@ -48,6 +49,7 @@ abstract class $ReceiveStateCopyWith<$Res> {
       String errLoadingAddress,
       Address? defaultAddress,
       String privateLabel,
+      List<String> privateLabels,
       bool savingLabel,
       String errSavingLabel,
       bool labelSaved,
@@ -80,6 +82,7 @@ class _$ReceiveStateCopyWithImpl<$Res, $Val extends ReceiveState>
     Object? errLoadingAddress = null,
     Object? defaultAddress = freezed,
     Object? privateLabel = null,
+    Object? privateLabels = null,
     Object? savingLabel = null,
     Object? errSavingLabel = null,
     Object? labelSaved = null,
@@ -109,6 +112,10 @@ class _$ReceiveStateCopyWithImpl<$Res, $Val extends ReceiveState>
           ? _value.privateLabel
           : privateLabel // ignore: cast_nullable_to_non_nullable
               as String,
+      privateLabels: null == privateLabels
+          ? _value.privateLabels
+          : privateLabels // ignore: cast_nullable_to_non_nullable
+              as List<String>,
       savingLabel: null == savingLabel
           ? _value.savingLabel
           : savingLabel // ignore: cast_nullable_to_non_nullable
@@ -182,6 +189,7 @@ abstract class _$$ReceiveStateImplCopyWith<$Res>
       String errLoadingAddress,
       Address? defaultAddress,
       String privateLabel,
+      List<String> privateLabels,
       bool savingLabel,
       String errSavingLabel,
       bool labelSaved,
@@ -213,6 +221,7 @@ class __$$ReceiveStateImplCopyWithImpl<$Res>
     Object? errLoadingAddress = null,
     Object? defaultAddress = freezed,
     Object? privateLabel = null,
+    Object? privateLabels = null,
     Object? savingLabel = null,
     Object? errSavingLabel = null,
     Object? labelSaved = null,
@@ -242,6 +251,10 @@ class __$$ReceiveStateImplCopyWithImpl<$Res>
           ? _value.privateLabel
           : privateLabel // ignore: cast_nullable_to_non_nullable
               as String,
+      privateLabels: null == privateLabels
+          ? _value._privateLabels
+          : privateLabels // ignore: cast_nullable_to_non_nullable
+              as List<String>,
       savingLabel: null == savingLabel
           ? _value.savingLabel
           : savingLabel // ignore: cast_nullable_to_non_nullable
@@ -298,6 +311,7 @@ class _$ReceiveStateImpl extends _ReceiveState {
       this.errLoadingAddress = '',
       this.defaultAddress,
       this.privateLabel = '',
+      final List<String> privateLabels = const [],
       this.savingLabel = false,
       this.errSavingLabel = '',
       this.labelSaved = false,
@@ -309,7 +323,8 @@ class _$ReceiveStateImpl extends _ReceiveState {
       this.walletBloc,
       this.walletType = ReceiveWalletType.secure,
       required this.swapBloc})
-      : super._();
+      : _privateLabels = privateLabels,
+        super._();
 
   @override
   @JsonKey()
@@ -322,6 +337,15 @@ class _$ReceiveStateImpl extends _ReceiveState {
   @override
   @JsonKey()
   final String privateLabel;
+  final List<String> _privateLabels;
+  @override
+  @JsonKey()
+  List<String> get privateLabels {
+    if (_privateLabels is EqualUnmodifiableListView) return _privateLabels;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_privateLabels);
+  }
+
   @override
   @JsonKey()
   final bool savingLabel;
@@ -356,7 +380,7 @@ class _$ReceiveStateImpl extends _ReceiveState {
 
   @override
   String toString() {
-    return 'ReceiveState(loadingAddress: $loadingAddress, errLoadingAddress: $errLoadingAddress, defaultAddress: $defaultAddress, privateLabel: $privateLabel, savingLabel: $savingLabel, errSavingLabel: $errSavingLabel, labelSaved: $labelSaved, savedInvoiceAmount: $savedInvoiceAmount, description: $description, savedDescription: $savedDescription, creatingInvoice: $creatingInvoice, errCreatingInvoice: $errCreatingInvoice, walletBloc: $walletBloc, walletType: $walletType, swapBloc: $swapBloc)';
+    return 'ReceiveState(loadingAddress: $loadingAddress, errLoadingAddress: $errLoadingAddress, defaultAddress: $defaultAddress, privateLabel: $privateLabel, privateLabels: $privateLabels, savingLabel: $savingLabel, errSavingLabel: $errSavingLabel, labelSaved: $labelSaved, savedInvoiceAmount: $savedInvoiceAmount, description: $description, savedDescription: $savedDescription, creatingInvoice: $creatingInvoice, errCreatingInvoice: $errCreatingInvoice, walletBloc: $walletBloc, walletType: $walletType, swapBloc: $swapBloc)';
   }
 
   @override
@@ -372,6 +396,8 @@ class _$ReceiveStateImpl extends _ReceiveState {
                 other.defaultAddress == defaultAddress) &&
             (identical(other.privateLabel, privateLabel) ||
                 other.privateLabel == privateLabel) &&
+            const DeepCollectionEquality()
+                .equals(other._privateLabels, _privateLabels) &&
             (identical(other.savingLabel, savingLabel) ||
                 other.savingLabel == savingLabel) &&
             (identical(other.errSavingLabel, errSavingLabel) ||
@@ -403,6 +429,7 @@ class _$ReceiveStateImpl extends _ReceiveState {
       errLoadingAddress,
       defaultAddress,
       privateLabel,
+      const DeepCollectionEquality().hash(_privateLabels),
       savingLabel,
       errSavingLabel,
       labelSaved,
@@ -428,6 +455,7 @@ abstract class _ReceiveState extends ReceiveState {
       final String errLoadingAddress,
       final Address? defaultAddress,
       final String privateLabel,
+      final List<String> privateLabels,
       final bool savingLabel,
       final String errSavingLabel,
       final bool labelSaved,
@@ -449,6 +477,8 @@ abstract class _ReceiveState extends ReceiveState {
   Address? get defaultAddress;
   @override
   String get privateLabel;
+  @override
+  List<String> get privateLabels;
   @override
   bool get savingLabel;
   @override

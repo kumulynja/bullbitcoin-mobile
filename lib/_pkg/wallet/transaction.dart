@@ -130,6 +130,9 @@ class WalletTx {
         if (idxUnsignedTx != -1) {
           if (tx.txid == unsignedTxs[idxUnsignedTx].txid) unsignedTxs.removeAt(idxUnsignedTx);
         }
+
+        final ips = await tx.transaction?.input();
+
         var txObj = Transaction(
           txid: tx.txid,
           received: tx.received,
@@ -140,15 +143,17 @@ class WalletTx {
           bdkTx: tx,
           rbfEnabled: storedTx?.rbfEnabled ?? false,
           outAddrs: storedTx?.outAddrs ?? [],
+          labels: storedTx?.labels ?? [],
+          prevTxIds: ips?.map((e) => e.previousOutput.txid).toList() ?? [],
         );
         // var outAddrs;
         // var inAddres;
         final SerializedTx sTx = SerializedTx.fromJson(
           jsonDecode(txObj.bdkTx!.serializedTx!) as Map<String, dynamic>,
         );
-        if (storedTxIdx != -1 &&
-            storedTxs[storedTxIdx].label != null &&
-            storedTxs[storedTxIdx].label!.isNotEmpty) label = storedTxs[storedTxIdx].label;
+        // if (storedTxIdx != -1 &&
+        //     storedTxs[storedTxIdx].label != null &&
+        //     storedTxs[storedTxIdx].label!.isNotEmpty) label = storedTxs[storedTxIdx].label;
 
         Address? externalAddress;
         Address? changeAddress;
@@ -170,10 +175,10 @@ class WalletTx {
           final amountSentToExternal = tx.sent - (tx.received + (tx.fee ?? 0));
 
           if (externalAddress != null) {
-            if (externalAddress.label != null && externalAddress.label!.isNotEmpty)
-              label = externalAddress.label;
-            else
-              externalAddress = externalAddress.copyWith(label: label);
+            // if (externalAddress.label != null && externalAddress.label!.isNotEmpty)
+            //   label = externalAddress.label;
+            // else
+            //   externalAddress = externalAddress.copyWith(label: label);
 
             // Future.delayed(const Duration(milliseconds: 100));
           } else {
@@ -232,11 +237,11 @@ class WalletTx {
           final amountChange = tx.received;
 
           if (changeAddress != null) {
-            if (changeAddress.label != null && changeAddress.label!.isNotEmpty)
-              label = changeAddress.label;
-            else {
-              changeAddress = changeAddress.copyWith(label: label);
-            }
+            // if (changeAddress.label != null && changeAddress.label!.isNotEmpty)
+            //   label = changeAddress.label;
+            // else {
+            //   changeAddress = changeAddress.copyWith(label: label);
+            // }
           } else {
             try {
               if (sTx.output == null) throw 'No output object';
@@ -281,10 +286,10 @@ class WalletTx {
           final amountReceived = tx.received;
 
           if (depositAddress != null) {
-            if (depositAddress.label != null && depositAddress.label!.isNotEmpty)
-              label = depositAddress.label;
-            else
-              depositAddress = depositAddress.copyWith(label: label);
+            // if (depositAddress.label != null && depositAddress.label!.isNotEmpty)
+            //   label = depositAddress.label;
+            // else
+            //   depositAddress = depositAddress.copyWith(label: label);
           } else {
             try {
               if (sTx.output == null) throw 'No output object';
@@ -328,11 +333,12 @@ class WalletTx {
           }
         }
 
-        if (storedTxIdx != -1 &&
-            storedTxs[storedTxIdx].label != null &&
-            storedTxs[storedTxIdx].label!.isNotEmpty) label = storedTxs[storedTxIdx].label;
+        // if (storedTxIdx != -1 &&
+        //     storedTxs[storedTxIdx].label != null &&
+        //     storedTxs[storedTxIdx].label!.isNotEmpty) label = storedTxs[storedTxIdx].label;
 
-        transactions.add(txObj.copyWith(label: label));
+        transactions.add(txObj);
+        // transactions.add(txObj.copyWith(label: label));
         // Future.delayed(const Duration(milliseconds: 100));
       }
 
@@ -395,9 +401,9 @@ class WalletTx {
           outAddrs: storedTx?.outAddrs ?? [],
         );
 
-        if (storedTxIdx != -1 &&
-            storedTxs[storedTxIdx].label != null &&
-            storedTxs[storedTxIdx].label!.isNotEmpty) label = storedTxs[storedTxIdx].label;
+        // if (storedTxIdx != -1 &&
+        //     storedTxs[storedTxIdx].label != null &&
+        //     storedTxs[storedTxIdx].label!.isNotEmpty) label = storedTxs[storedTxIdx].label;
 
         final SerializedTx sTx = SerializedTx.fromJson(
           jsonDecode(txObj.bdkTx!.serializedTx!) as Map<String, dynamic>,
@@ -419,12 +425,15 @@ class WalletTx {
           final existing = wallet.findAddressInWallet(addressStruct.toString());
           if (existing != null) {
             // txObj.outAddrs.add(existing);
+            /*
             if (existing.label == null && existing.label!.isEmpty)
               txObj = addOutputAddresses(existing.copyWith(label: label), txObj);
             else {
               label ??= existing.label;
               txObj = addOutputAddresses(existing, txObj);
             }
+            */
+            txObj = addOutputAddresses(existing, txObj);
           } else {
             if (txObj.isReceived()) {
               // AddressKind.deposit should exist in the addressBook
@@ -466,7 +475,8 @@ class WalletTx {
           );
         }
 
-        transactions.add(txObj.copyWith(label: label));
+        // transactions.add(txObj.copyWith(label: label));
+        transactions.add(txObj);
       }
 
       final w = wallet.copyWith(
@@ -497,6 +507,7 @@ class WalletTx {
     required double feeRate,
     required bool enableRbf,
     required List<UTXO> selectedUtxos,
+    required List<String> labels,
     String? note,
   }) async {
     try {
@@ -558,7 +569,7 @@ class WalletTx {
             state: AddressStatus.used,
             highestPreviousBalance: amount,
             balance: amount,
-            label: note ?? '',
+            // label: note ?? '',
             spendable: false,
           );
         } else {
@@ -568,7 +579,7 @@ class WalletTx {
             state: AddressStatus.used,
             highestPreviousBalance: txOut.value,
             balance: txOut.value,
-            label: note ?? '',
+            // label: note ?? '',
           );
         }
       });
@@ -584,10 +595,11 @@ class WalletTx {
         fee: feeAmt ?? 0,
         height: txDetails.confirmationTime?.height,
         timestamp: txDetails.confirmationTime?.timestamp ?? 0,
-        label: note,
+        // label: note,
         toAddress: address,
         outAddrs: outAddrs,
         psbt: txResult.psbt.psbtBase64,
+        labels: labels,
       );
       return ((tx, feeAmt, txResult.psbt.psbtBase64), null);
     } on Exception catch (e) {
@@ -654,7 +666,7 @@ class WalletTx {
       final txid = await psbtStruct.txId();
       final newTx = transaction.copyWith(
         txid: txid,
-        label: note,
+        // label: note,
         toAddress: address,
         broadcastTime: DateTime.now().millisecondsSinceEpoch,
         oldTx: false,

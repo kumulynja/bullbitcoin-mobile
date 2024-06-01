@@ -42,7 +42,8 @@ class PSBTPopUp extends StatelessWidget {
     final isSats = context.select((CurrencyCubit cubit) => cubit.state.unitsInSats);
     final txfee = context.select((SendCubit cubit) => cubit.state.tx?.fee ?? 0);
     final toAddress = tx.toAddress ?? '';
-    final label = tx.label;
+    final w = context.select((SendCubit cubit) => cubit.state.selectedWalletBloc?.state.wallet);
+    final (labels, isInherited) = tx.getLabels(w!);
 
     final amt = context.select(
       (CurrencyCubit cubit) => cubit.state.getAmountInUnits(
@@ -141,13 +142,13 @@ class PSBTPopUp extends StatelessWidget {
             fee,
             isBold: true,
           ),
-          if (label != null && label.isNotEmpty) ...[
+          if (labels.isNotEmpty) ...[
             const BBText.title(
               'Label',
             ),
             const Gap(4),
             BBText.titleLarge(
-              label,
+              labels.join(', '),
               isBold: true,
             ),
             const Gap(24),

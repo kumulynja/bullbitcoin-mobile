@@ -15,7 +15,7 @@ class WalletUpdate {
     if (existingAddressIndex != -1) {
       final updatedAddress = addressList[existingAddressIndex].copyWith(
         state: address.state,
-        label: addressList[existingAddressIndex].label ?? address.label,
+        // label: addressList[existingAddressIndex].label ?? address.label,
       );
       addressList[existingAddressIndex] = updatedAddress;
     } else {
@@ -32,7 +32,7 @@ class WalletUpdate {
       final existingMyAddressIndex = myAddressBook.indexWhere((a) => a.address == address.address);
       if (existingMyAddressIndex != -1) {
         final updatedAddress = myAddressBook[existingMyAddressIndex].copyWith(
-          label: address.label,
+          labels: address.labels,
         );
         myAddressBook[existingMyAddressIndex] = updatedAddress;
       }
@@ -42,7 +42,7 @@ class WalletUpdate {
 
       if (existingExternalAddressIndex != -1) {
         final updatedAddress = externalAddressBook[existingExternalAddressIndex].copyWith(
-          label: address.label,
+          labels: address.labels,
         );
         externalAddressBook[existingExternalAddressIndex] = updatedAddress;
       }
@@ -61,8 +61,8 @@ class WalletUpdate {
       final txIndex = transactions.indexWhere((a) => a.txid == tx.txid);
       if (txIndex != -1) {
         final updatedTx = transactions[txIndex].copyWith(
-          label: tx.label,
-          outAddrs: tx.outAddrs.map((addr) => addr.copyWith(label: tx.label)).toList(),
+          labels: tx.labels,
+          outAddrs: tx.outAddrs.map((addr) => addr.copyWith(labels: tx.labels)).toList(),
         );
         transactions[txIndex] = updatedTx;
       }

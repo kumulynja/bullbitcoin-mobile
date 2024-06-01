@@ -12,6 +12,7 @@ import 'package:bb_mobile/currency/bloc/currency_cubit.dart';
 import 'package:bb_mobile/home/bloc/home_cubit.dart';
 import 'package:bb_mobile/locator.dart';
 import 'package:bb_mobile/network/bloc/network_cubit.dart';
+import 'package:bb_mobile/send/bloc/send_cubit.dart';
 import 'package:bb_mobile/settings/bloc/broadcasttx_cubit.dart';
 import 'package:bb_mobile/settings/bloc/broadcasttx_state.dart';
 import 'package:bb_mobile/styles.dart';
@@ -336,7 +337,9 @@ class TxInfo extends StatelessWidget {
     final tx = context.select((BroadcastTxCubit cubit) => cubit.state.transaction);
     // final psbt = context.select((BroadcastTxCubit cubit) => cubit.state.psbtBDK);
     if (tx == null) return const SizedBox();
-    final label = tx.label ?? 'No Label';
+    final w = context.select((SendCubit cubit) => cubit.state.selectedWalletBloc?.state.wallet);
+    final (txLabels, isInherited) = tx.getLabels(w!);
+    final labels = txLabels.join(', ') ?? 'No Label';
 
     final txamt = context.select(
       (BroadcastTxCubit cubit) => cubit.state.amount ?? 0,
@@ -378,7 +381,7 @@ class TxInfo extends StatelessWidget {
               textBaseline: TextBaseline.alphabetic,
               children: [
                 BBText.bodySmall(
-                  'Label: ' + label,
+                  'Label: ' + labels,
                 ),
               ],
             ),

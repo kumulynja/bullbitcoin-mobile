@@ -149,6 +149,10 @@ class SendCubit extends Cubit<SendState> {
     emit(state.copyWith(note: note));
   }
 
+  void updateLabels(List<String> labels) {
+    emit(state.copyWith(labels: labels));
+  }
+
   void disableRBF(bool disable) {
     emit(state.copyWith(disableRBF: disable));
   }
@@ -262,6 +266,7 @@ class SendCubit extends Cubit<SendState> {
       enableRbf: !state.disableRBF,
       selectedUtxos: state.selectedUtxos,
       note: state.note,
+      labels: state.labels,
     );
     if (err != null) {
       emit(
@@ -356,9 +361,14 @@ class SendCubit extends Cubit<SendState> {
       state: AddressStatus.used,
     );
 
+    final finalList =
+        {...state.selectedWalletBloc!.state.wallet!.globalLabels, ...state.labels}.toList();
+
+    final updatedWallet2 = updatedWallet.copyWith(globalLabels: finalList);
+
     state.selectedWalletBloc!.add(
       UpdateWallet(
-        updatedWallet,
+        updatedWallet2,
         updateTypes: [
           UpdateWalletTypes.addresses,
           UpdateWalletTypes.transactions,

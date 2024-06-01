@@ -45,6 +45,7 @@ mixin _$Wallet {
   DateTime? get lastBackupTested => throw _privateConstructorUsedError;
   bool get hide => throw _privateConstructorUsedError;
   int get swapTxCount => throw _privateConstructorUsedError;
+  List<String> get globalLabels => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -79,7 +80,8 @@ abstract class $WalletCopyWith<$Res> {
       bool backupTested,
       DateTime? lastBackupTested,
       bool hide,
-      int swapTxCount});
+      int swapTxCount,
+      List<String> globalLabels});
 
   $BalanceCopyWith<$Res>? get fullBalance;
   $AddressCopyWith<$Res>? get lastGeneratedAddress;
@@ -121,6 +123,7 @@ class _$WalletCopyWithImpl<$Res, $Val extends Wallet>
     Object? lastBackupTested = freezed,
     Object? hide = null,
     Object? swapTxCount = null,
+    Object? globalLabels = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -215,6 +218,10 @@ class _$WalletCopyWithImpl<$Res, $Val extends Wallet>
           ? _value.swapTxCount
           : swapTxCount // ignore: cast_nullable_to_non_nullable
               as int,
+      globalLabels: null == globalLabels
+          ? _value.globalLabels
+          : globalLabels // ignore: cast_nullable_to_non_nullable
+              as List<String>,
     ) as $Val);
   }
 
@@ -273,7 +280,8 @@ abstract class _$$WalletImplCopyWith<$Res> implements $WalletCopyWith<$Res> {
       bool backupTested,
       DateTime? lastBackupTested,
       bool hide,
-      int swapTxCount});
+      int swapTxCount,
+      List<String> globalLabels});
 
   @override
   $BalanceCopyWith<$Res>? get fullBalance;
@@ -315,6 +323,7 @@ class __$$WalletImplCopyWithImpl<$Res>
     Object? lastBackupTested = freezed,
     Object? hide = null,
     Object? swapTxCount = null,
+    Object? globalLabels = null,
   }) {
     return _then(_$WalletImpl(
       id: null == id
@@ -409,6 +418,10 @@ class __$$WalletImplCopyWithImpl<$Res>
           ? _value.swapTxCount
           : swapTxCount // ignore: cast_nullable_to_non_nullable
               as int,
+      globalLabels: null == globalLabels
+          ? _value._globalLabels
+          : globalLabels // ignore: cast_nullable_to_non_nullable
+              as List<String>,
     ));
   }
 }
@@ -439,13 +452,15 @@ class _$WalletImpl extends _Wallet {
       this.backupTested = false,
       this.lastBackupTested,
       this.hide = false,
-      this.swapTxCount = 0})
+      this.swapTxCount = 0,
+      final List<String> globalLabels = const []})
       : _myAddressBook = myAddressBook,
         _externalAddressBook = externalAddressBook,
         _utxos = utxos,
         _transactions = transactions,
         _unsignedTxs = unsignedTxs,
         _swaps = swaps,
+        _globalLabels = globalLabels,
         super._();
 
   factory _$WalletImpl.fromJson(Map<String, dynamic> json) =>
@@ -551,10 +566,18 @@ class _$WalletImpl extends _Wallet {
   @override
   @JsonKey()
   final int swapTxCount;
+  final List<String> _globalLabels;
+  @override
+  @JsonKey()
+  List<String> get globalLabels {
+    if (_globalLabels is EqualUnmodifiableListView) return _globalLabels;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_globalLabels);
+  }
 
   @override
   String toString() {
-    return 'Wallet(id: $id, externalPublicDescriptor: $externalPublicDescriptor, internalPublicDescriptor: $internalPublicDescriptor, mnemonicFingerprint: $mnemonicFingerprint, sourceFingerprint: $sourceFingerprint, network: $network, type: $type, scriptType: $scriptType, name: $name, path: $path, balance: $balance, fullBalance: $fullBalance, lastGeneratedAddress: $lastGeneratedAddress, myAddressBook: $myAddressBook, externalAddressBook: $externalAddressBook, utxos: $utxos, transactions: $transactions, unsignedTxs: $unsignedTxs, swaps: $swaps, backupTested: $backupTested, lastBackupTested: $lastBackupTested, hide: $hide, swapTxCount: $swapTxCount)';
+    return 'Wallet(id: $id, externalPublicDescriptor: $externalPublicDescriptor, internalPublicDescriptor: $internalPublicDescriptor, mnemonicFingerprint: $mnemonicFingerprint, sourceFingerprint: $sourceFingerprint, network: $network, type: $type, scriptType: $scriptType, name: $name, path: $path, balance: $balance, fullBalance: $fullBalance, lastGeneratedAddress: $lastGeneratedAddress, myAddressBook: $myAddressBook, externalAddressBook: $externalAddressBook, utxos: $utxos, transactions: $transactions, unsignedTxs: $unsignedTxs, swaps: $swaps, backupTested: $backupTested, lastBackupTested: $lastBackupTested, hide: $hide, swapTxCount: $swapTxCount, globalLabels: $globalLabels)';
   }
 
   @override
@@ -600,7 +623,9 @@ class _$WalletImpl extends _Wallet {
                 other.lastBackupTested == lastBackupTested) &&
             (identical(other.hide, hide) || other.hide == hide) &&
             (identical(other.swapTxCount, swapTxCount) ||
-                other.swapTxCount == swapTxCount));
+                other.swapTxCount == swapTxCount) &&
+            const DeepCollectionEquality()
+                .equals(other._globalLabels, _globalLabels));
   }
 
   @JsonKey(ignore: true)
@@ -629,7 +654,8 @@ class _$WalletImpl extends _Wallet {
         backupTested,
         lastBackupTested,
         hide,
-        swapTxCount
+        swapTxCount,
+        const DeepCollectionEquality().hash(_globalLabels)
       ]);
 
   @JsonKey(ignore: true)
@@ -670,7 +696,8 @@ abstract class _Wallet extends Wallet {
       final bool backupTested,
       final DateTime? lastBackupTested,
       final bool hide,
-      final int swapTxCount}) = _$WalletImpl;
+      final int swapTxCount,
+      final List<String> globalLabels}) = _$WalletImpl;
   const _Wallet._() : super._();
 
   factory _Wallet.fromJson(Map<String, dynamic> json) = _$WalletImpl.fromJson;
@@ -722,6 +749,8 @@ abstract class _Wallet extends Wallet {
   bool get hide;
   @override
   int get swapTxCount;
+  @override
+  List<String> get globalLabels;
   @override
   @JsonKey(ignore: true)
   _$$WalletImplCopyWith<_$WalletImpl> get copyWith =>

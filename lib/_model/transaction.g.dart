@@ -14,7 +14,8 @@ _$TransactionImpl _$$TransactionImplFromJson(Map<String, dynamic> json) =>
       sent: json['sent'] as int?,
       fee: json['fee'] as int?,
       height: json['height'] as int?,
-      label: json['label'] as String?,
+      labels:
+          (json['labels'] as List<dynamic>?)?.map((e) => e as String).toList(),
       toAddress: json['toAddress'] as String?,
       psbt: json['psbt'] as String?,
       rbfEnabled: json['rbfEnabled'] as bool? ?? true,
@@ -22,6 +23,10 @@ _$TransactionImpl _$$TransactionImplFromJson(Map<String, dynamic> json) =>
       broadcastTime: json['broadcastTime'] as int?,
       outAddrs: (json['outAddrs'] as List<dynamic>?)
               ?.map((e) => Address.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      prevTxIds: (json['prevTxIds'] as List<dynamic>?)
+              ?.map((e) => e as String)
               .toList() ??
           const [],
       wallet: json['wallet'] == null
@@ -42,13 +47,14 @@ Map<String, dynamic> _$$TransactionImplToJson(_$TransactionImpl instance) =>
       'sent': instance.sent,
       'fee': instance.fee,
       'height': instance.height,
-      'label': instance.label,
+      'labels': instance.labels,
       'toAddress': instance.toAddress,
       'psbt': instance.psbt,
       'rbfEnabled': instance.rbfEnabled,
       'oldTx': instance.oldTx,
       'broadcastTime': instance.broadcastTime,
       'outAddrs': instance.outAddrs,
+      'prevTxIds': instance.prevTxIds,
       'wallet': instance.wallet,
       'isSwap': instance.isSwap,
       'swapIndex': instance.swapIndex,

@@ -44,6 +44,7 @@ class Wallet with _$Wallet {
     DateTime? lastBackupTested,
     @Default(false) bool hide,
     @Default(0) int swapTxCount,
+    @Default([]) List<String> globalLabels,
   }) = _Wallet;
   const Wallet._();
 

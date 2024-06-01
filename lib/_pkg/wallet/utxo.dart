@@ -32,7 +32,7 @@ class WalletUtxo {
         bool spendable = true;
         for (final addr in myAddresses) {
           if (addr.address == addressStr) {
-            addressLabel = addr.label ?? '';
+            addressLabel = addr.labels?.join(', ') ?? '';
             spendable = addr.spendable;
           }
         }

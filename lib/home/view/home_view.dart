@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:bb_arch/_pkg/misc.dart';
 import 'package:bb_arch/_pkg/tx/models/tx.dart';
 import 'package:bb_arch/_pkg/wallet/models/wallet.dart';
@@ -20,7 +18,8 @@ class HomeScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final loadStatus = context.select((WalletBloc cubit) => cubit.state.status);
     final wallets = context.select((WalletBloc cubit) => cubit.state.wallets);
-    final syncStatus = context.select((WalletBloc cubit) => cubit.state.syncWalletStatus);
+    final syncStatus =
+        context.select((WalletBloc cubit) => cubit.state.syncWalletStatus);
     final txsStatus = context.select((TxBloc cubit) => cubit.state.status);
     final txs = context.select((TxBloc cubit) => cubit.state.txs);
 
@@ -28,8 +27,13 @@ class HomeScaffold extends StatelessWidget {
 
     return BBScaffold(
       title: 'Bull Bitcoin',
+      blocs: [
+        BlocProvider.of<WalletBloc>(context),
+      ],
       actions: [
-        loadStatus == LoadStatus.loading ? const CircularProgressIndicator() : const SizedBox.shrink(),
+        loadStatus == LoadStatus.loading
+            ? const CircularProgressIndicator()
+            : const SizedBox.shrink(),
         IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'Settings',

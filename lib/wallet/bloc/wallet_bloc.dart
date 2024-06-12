@@ -39,7 +39,8 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
     on<SelectWallet>(_onSelectWallet);
     on<PersistWallet>(_onPersistWallet);
 
-    _loadWalletsTimer = Timer.periodic(const Duration(minutes: WALLET_SYNC_INTERVAL_MINS), (timer) {
+    _loadWalletsTimer = Timer.periodic(
+        const Duration(minutes: WALLET_SYNC_INTERVAL_MINS), (timer) {
       add(SyncAllWallets());
     });
   }
@@ -50,12 +51,13 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
     return super.close();
   }
 
-  void _onLoadAllWallets(LoadAllWallets event, Emitter<WalletState> emit) async {
+  void _onLoadAllWallets(
+      LoadAllWallets event, Emitter<WalletState> emit) async {
     emit(state.copyWith(status: LoadStatus.loading));
 
     final (wallets, err) = await walletRepository.loadWallets();
     if (err != null) {
-      emit(state.copyWith(wallets: [], syncWalletStatus: [], status: LoadStatus.failure, error: err.toString()));
+      addError(err);
       return;
     }
     emit(state.copyWith(
@@ -69,10 +71,13 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
   // WalletList is built based on state.wallets. And each wallet update results in
   // updating the entire state.wallets list. So entire list gets rebuilt, for each wallet sync.
   // This could be avoided by storing wallet states more granularly, and having wallet specific sync events/updates.
-  void _onSyncAllWallets(SyncAllWallets event, Emitter<WalletState> emit) async {
+  void _onSyncAllWallets(
+      SyncAllWallets event, Emitter<WalletState> emit) async {
     emit(state.copyWith(status: LoadStatus.loading));
     await Future.delayed(const Duration(seconds: 1));
-    emit(state.copyWith(syncWalletStatus: state.wallets.map((e) => LoadStatus.loading).toList()));
+    emit(state.copyWith(
+        syncWalletStatus:
+            state.wallets.map((e) => LoadStatus.loading).toList()));
 
     List<Wallet> loadedWallets = [];
     for (int i = 0; i < state.wallets.length; i++) {
@@ -103,26 +108,26 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
       print('Sync :: processTxs :: w.id');
       final (txs, err) = await txRepository.syncTxs(syncedWallet);
       if (err != null) {
-        emit(state.copyWith(status: LoadStatus.failure, error: err.toString()));
+        addError(err);
         return syncedWallet;
       }
       await txRepository.persistTxs(syncedWallet, txs!);
 
       print('Sync :: processAddress :: w.id');
       // TODO: Pass old address
-      final (depositAddresses, depositErr) =
-          await addressRepository.syncAddresses(txs, [], AddressKind.deposit, syncedWallet);
+      final (depositAddresses, depositErr) = await addressRepository
+          .syncAddresses(txs, [], AddressKind.deposit, syncedWallet);
       if (depositErr != null) {
-        emit(state.copyWith(status: LoadStatus.failure, error: depositErr.toString()));
+        addError(depositErr);
         return syncedWallet;
       }
       await addressRepository.persistAddresses(syncedWallet, depositAddresses!);
 
       // TODO: Pass old address
-      final (changeAddresses, changeErr) =
-          await addressRepository.syncAddresses(txs, [], AddressKind.change, syncedWallet);
+      final (changeAddresses, changeErr) = await addressRepository
+          .syncAddresses(txs, [], AddressKind.change, syncedWallet);
       if (changeErr != null) {
-        emit(state.copyWith(status: LoadStatus.failure, error: changeErr.toString()));
+        addError(changeErr);
         return syncedWallet;
       }
       await addressRepository.persistAddresses(syncedWallet, changeAddresses!);
@@ -173,9 +178,17 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
 
   void _onPersistWallet(PersistWallet event, Emitter<WalletState> emit) async {
     emit(state.copyWith(
-        wallets: [...state.wallets, event.wallet], syncWalletStatus: [...state.syncWalletStatus, LoadStatus.initial]));
+        wallets: [...state.wallets, event.wallet],
+        syncWalletStatus: [...state.syncWalletStatus, LoadStatus.initial]));
     await walletRepository.persistWallet(event.wallet);
     // await Future.delayed(const Duration(milliseconds: 10000));
     // add(LoadAllWallets());
+  }
+
+  @override
+  void onError(Object error, StackTrace stackTrace) {
+    emit(state.copyWith(status: LoadStatus.failure, error: error as Error));
+    print('$error, $stackTrace');
+    super.onError(error, stackTrace);
   }
 }

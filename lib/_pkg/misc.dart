@@ -14,3 +14,7 @@ extension LoadStatusExtension on LoadStatus {
     }
   }
 }
+
+abstract class ErrorState {
+  Error? get error;
+}

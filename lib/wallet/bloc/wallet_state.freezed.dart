@@ -21,7 +21,7 @@ mixin _$WalletState {
   List<Wallet> get wallets =>
       throw _privateConstructorUsedError; // TODO: Will be a problem, if at all a future requirement needs user to work with multiple wallets at a time.
   Wallet? get selectedWallet => throw _privateConstructorUsedError;
-  String get error => throw _privateConstructorUsedError;
+  Error? get error => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $WalletStateCopyWith<WalletState> get copyWith =>
@@ -39,7 +39,7 @@ abstract class $WalletStateCopyWith<$Res> {
       List<LoadStatus> syncWalletStatus,
       List<Wallet> wallets,
       Wallet? selectedWallet,
-      String error});
+      Error? error});
 }
 
 /// @nodoc
@@ -59,7 +59,7 @@ class _$WalletStateCopyWithImpl<$Res, $Val extends WalletState>
     Object? syncWalletStatus = null,
     Object? wallets = null,
     Object? selectedWallet = freezed,
-    Object? error = null,
+    Object? error = freezed,
   }) {
     return _then(_value.copyWith(
       status: null == status
@@ -78,10 +78,10 @@ class _$WalletStateCopyWithImpl<$Res, $Val extends WalletState>
           ? _value.selectedWallet
           : selectedWallet // ignore: cast_nullable_to_non_nullable
               as Wallet?,
-      error: null == error
+      error: freezed == error
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
-              as String,
+              as Error?,
     ) as $Val);
   }
 }
@@ -99,7 +99,7 @@ abstract class _$$WalletStateImplCopyWith<$Res>
       List<LoadStatus> syncWalletStatus,
       List<Wallet> wallets,
       Wallet? selectedWallet,
-      String error});
+      Error? error});
 }
 
 /// @nodoc
@@ -117,7 +117,7 @@ class __$$WalletStateImplCopyWithImpl<$Res>
     Object? syncWalletStatus = null,
     Object? wallets = null,
     Object? selectedWallet = freezed,
-    Object? error = null,
+    Object? error = freezed,
   }) {
     return _then(_$WalletStateImpl(
       status: null == status
@@ -136,10 +136,10 @@ class __$$WalletStateImplCopyWithImpl<$Res>
           ? _value.selectedWallet
           : selectedWallet // ignore: cast_nullable_to_non_nullable
               as Wallet?,
-      error: null == error
+      error: freezed == error
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
-              as String,
+              as Error?,
     ));
   }
 }
@@ -152,7 +152,7 @@ class _$WalletStateImpl implements _WalletState {
       final List<LoadStatus> syncWalletStatus = const [],
       final List<Wallet> wallets = const [],
       this.selectedWallet = null,
-      this.error = ''})
+      this.error = null})
       : _syncWalletStatus = syncWalletStatus,
         _wallets = wallets;
 
@@ -184,7 +184,7 @@ class _$WalletStateImpl implements _WalletState {
   final Wallet? selectedWallet;
   @override
   @JsonKey()
-  final String error;
+  final Error? error;
 
   @override
   String toString() {
@@ -227,7 +227,7 @@ abstract class _WalletState implements WalletState {
       final List<LoadStatus> syncWalletStatus,
       final List<Wallet> wallets,
       final Wallet? selectedWallet,
-      final String error}) = _$WalletStateImpl;
+      final Error? error}) = _$WalletStateImpl;
 
   @override
   LoadStatus get status;
@@ -238,7 +238,7 @@ abstract class _WalletState implements WalletState {
   @override // TODO: Will be a problem, if at all a future requirement needs user to work with multiple wallets at a time.
   Wallet? get selectedWallet;
   @override
-  String get error;
+  Error? get error;
   @override
   @JsonKey(ignore: true)
   _$$WalletStateImplCopyWith<_$WalletStateImpl> get copyWith =>

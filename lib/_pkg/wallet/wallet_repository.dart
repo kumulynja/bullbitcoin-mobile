@@ -12,12 +12,12 @@ import 'package:bb_arch/_pkg/wallet/models/wallet.dart';
 import 'package:isar/isar.dart';
 
 class WalletRepository {
-  WalletRepository({required this.storage, required this.isar}) {
+  WalletRepository({required this.storage, this.isar}) {
     initOnAppStart();
   }
 
   HiveStorage storage;
-  Isar isar;
+  Isar? isar;
 
   Future<void> initOnAppStart() async {
     print('Init on app start');
@@ -34,11 +34,13 @@ class WalletRepository {
 
   Future<(List<Wallet>?, dynamic)> loadWallets() async {
     try {
-      final wallets = await isar.wallets.where().findAll();
+      await Future.delayed(const Duration(seconds: 2));
+      isar = null;
+      final wallets = await isar!.wallets.where().findAll();
       // TODO: Find better way
       // This is to convert `Wallet` type returned by Isar to `BitcoinWallet` or `LiquidWallet`
       // Should this be even done here?
-      final ws = wallets.map((w) {
+      final ws = wallets!.map((w) {
         if (w.type == WalletType.Bitcoin) {
           return BitcoinWallet.fromJson(w.toJson());
         } else if (w.type == WalletType.Liquid) {
@@ -53,8 +55,8 @@ class WalletRepository {
   }
 
   Future<void> persistWallet(Wallet wallet) async {
-    await isar.writeTxn(() async {
-      await isar.wallets.putByIndex("id", wallet);
+    await isar?.writeTxn(() async {
+      await isar?.wallets.putByIndex("id", wallet);
     });
   }
 
@@ -65,7 +67,8 @@ class WalletRepository {
       final ws = await BitcoinWalletHelper.initializeAllWallets(seed);
       return (ws, null);
     } else if (seed.walletType == WalletType.Liquid) {
-      final ws = await LiquidWalletHelper.initializeAllWallets(seed, scriptType: [BitcoinScriptType.bip84]);
+      final ws = await LiquidWalletHelper.initializeAllWallets(seed,
+          scriptType: [BitcoinScriptType.bip84]);
       return (ws, null);
     }
     List<Wallet> ws = [];

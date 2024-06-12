@@ -1,9 +1,11 @@
 import 'package:bb_arch/_pkg/misc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class BBScaffold extends StatelessWidget {
   final String title;
   final Widget? child;
+  final List<BlocBase<ErrorState>>? blocs;
   final List<Widget>? actions;
   final Widget? floatingActionButton;
   final LoadStatus? loadStatus;
@@ -13,6 +15,7 @@ class BBScaffold extends StatelessWidget {
       {super.key,
       required this.title,
       this.child,
+      this.blocs,
       this.actions,
       this.floatingActionButton,
       this.loadStatus = LoadStatus.success,
@@ -42,8 +45,39 @@ class BBScaffold extends StatelessWidget {
         title: Text(title),
         actions: actions,
       ),
-      body: bodyWidget,
-      floatingActionButton: loadStatus == LoadStatus.success ? floatingActionButton : null,
+      body: (blocs != null)
+          ? MultiBlocListener(
+              listeners: blocs!
+                  .map((bloc) => BlocListener<BlocBase<ErrorState>, ErrorState>(
+                        bloc: bloc,
+                        listener: (context, state) {
+                          if (state.error != null) {
+                            _showErrorDialog(context, state.error!);
+                          }
+                        },
+                      ))
+                  .toList(),
+              child: bodyWidget,
+            )
+          : bodyWidget,
+      floatingActionButton:
+          loadStatus == LoadStatus.success ? floatingActionButton : null,
+    );
+  }
+
+  void _showErrorDialog(BuildContext context, Error error) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Error"),
+        content: Text(error.toString()),
+        actions: <Widget>[
+          ElevatedButton(
+            child: const Text("OK"),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
     );
   }
 }

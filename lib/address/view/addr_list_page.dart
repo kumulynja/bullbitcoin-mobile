@@ -1,6 +1,9 @@
 // ignore_for_file: avoid_print
 
+import 'dart:math';
+
 import 'package:bb_arch/_pkg/address/address_repository.dart';
+import 'package:bb_arch/_pkg/bb_logger.dart';
 import 'package:bb_arch/_pkg/tx/tx_repository.dart';
 import 'package:bb_arch/address/bloc/addr_bloc.dart';
 import 'package:bb_arch/address/bloc/address_cubit.dart';
@@ -21,16 +24,19 @@ class AddressListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final addressRepository = context.read<AddressRepository>();
     final txRepository = context.read<TxRepository>();
-    final selectedWallet =
-        context.select((WalletBloc cubit) => cubit.state.wallets.firstWhere((w) => w.id == walletId));
+    final logger = context.read<BBLogger>();
+    final selectedWallet = context.select((WalletBloc cubit) =>
+        cubit.state.wallets.firstWhere((w) => w.id == walletId));
     // final txs = context.select((TxBloc cubit) => cubit.state.txs);
 
     return MultiBlocProvider(providers: [
       BlocProvider(create: (_) => AddressCubit()),
-      BlocProvider(create: (_) => TxBloc(txRepository: txRepository)..add(LoadTxs(wallet: selectedWallet))),
       BlocProvider(
-          create: (_) =>
-              AddressBloc(addrRepository: addressRepository)..add(LoadAddresses(walletId: selectedWallet.id))),
+          create: (_) => TxBloc(txRepository: txRepository, logger: logger)
+            ..add(LoadTxs(wallet: selectedWallet))),
+      BlocProvider(
+          create: (_) => AddressBloc(addrRepository: addressRepository)
+            ..add(LoadAddresses(walletId: selectedWallet.id))),
     ], child: const AddressListScaffold());
     // child: BlocBuilder<TxBloc, TxState>(
     //     buildWhen: (previous, current) => current.txs.isNotEmpty, // TODO: Update this later

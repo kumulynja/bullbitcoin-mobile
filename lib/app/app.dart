@@ -1,4 +1,5 @@
 import 'package:bb_arch/_pkg/address/address_repository.dart';
+import 'package:bb_arch/_pkg/bb_logger.dart';
 import 'package:bb_arch/_pkg/seed/seed_repository.dart';
 import 'package:bb_arch/_pkg/storage/hive.dart';
 import 'package:bb_arch/_pkg/storage/secure_storage.dart';
@@ -12,6 +13,7 @@ import 'package:bb_arch/wallet/bloc/walletsensitive_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:isar/isar.dart';
+import 'package:logger/logger.dart';
 
 class App extends StatelessWidget {
   const App(
@@ -21,7 +23,8 @@ class App extends StatelessWidget {
       required this.seedRepository,
       required this.walletRepository,
       required this.txRepository,
-      required this.addressRepository});
+      required this.addressRepository,
+      required this.logger});
 
   final HiveStorage storage;
   final SecureStorage secureStorage;
@@ -29,6 +32,7 @@ class App extends StatelessWidget {
   final WalletRepository walletRepository;
   final TxRepository txRepository;
   final AddressRepository addressRepository;
+  final BBLogger logger;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +41,8 @@ class App extends StatelessWidget {
         RepositoryProvider.value(value: seedRepository),
         RepositoryProvider.value(value: walletRepository),
         RepositoryProvider.value(value: txRepository),
-        RepositoryProvider.value(value: addressRepository)
+        RepositoryProvider.value(value: addressRepository),
+        RepositoryProvider.value(value: logger)
       ],
       child: MultiBlocProvider(providers: [
         BlocProvider(
@@ -45,11 +50,15 @@ class App extends StatelessWidget {
                 walletRepository: walletRepository,
                 seedRepository: seedRepository,
                 txRepository: txRepository,
-                addressRepository: addressRepository)
+                addressRepository: addressRepository,
+                context: context,
+                logger: logger)
               ..add(LoadAllWallets())
               ..add(SyncAllWallets())),
         BlocProvider(
-            create: (_) => WalletSensitiveBloc(walletRepository: walletRepository, seedRepository: seedRepository)),
+            create: (_) => WalletSensitiveBloc(
+                walletRepository: walletRepository,
+                seedRepository: seedRepository)),
         // BlocProvider(create: (_) => TxBloc(txRepository: txRepository)),
         // BlocProvider(create: (_) => AddressBloc(addrRepository: addressRepository)),
       ], child: const AppView()),

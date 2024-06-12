@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_print
 
-import 'dart:convert';
-
+import 'package:bb_arch/_pkg/error.dart';
 import 'package:bb_arch/_pkg/seed/models/seed.dart';
 import 'package:bb_arch/_pkg/storage/hive.dart';
 import 'package:bb_arch/_pkg/wallet/bitcoin_wallet_helper.dart';
@@ -32,10 +31,10 @@ class WalletRepository {
     }
   }
 
-  Future<(List<Wallet>?, dynamic)> loadWallets() async {
+  Future<List<Wallet>> loadWallets() async {
     try {
       await Future.delayed(const Duration(seconds: 2));
-      isar = null;
+      // isar = null;
       final wallets = await isar!.wallets.where().findAll();
       // TODO: Find better way
       // This is to convert `Wallet` type returned by Isar to `BitcoinWallet` or `LiquidWallet`
@@ -48,9 +47,13 @@ class WalletRepository {
         }
         return w;
       }).toList();
-      return (ws, null);
-    } catch (e) {
-      return (null, e);
+      return ws;
+    } on IsarError catch (e, stackTrace) {
+      throw Error.throwWithStackTrace(DatabaseException(e), stackTrace);
+    } on ParseError catch (e, stackTrace) {
+      throw Error.throwWithStackTrace(ParseException(e), stackTrace);
+    } catch (e, stackTrace) {
+      throw Error.throwWithStackTrace(WalletLoadException(e), stackTrace);
     }
   }
 

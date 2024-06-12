@@ -4,7 +4,9 @@ import 'dart:async';
 
 import 'package:bb_arch/_pkg/address/address_repository.dart';
 import 'package:bb_arch/_pkg/address/models/address.dart';
+import 'package:bb_arch/_pkg/bb_logger.dart';
 import 'package:bb_arch/_pkg/constants.dart';
+import 'package:bb_arch/_pkg/error.dart';
 import 'package:bb_arch/_pkg/misc.dart';
 import 'package:bb_arch/_pkg/seed/models/seed.dart';
 import 'package:bb_arch/_pkg/seed/seed_repository.dart';
@@ -16,6 +18,7 @@ import 'package:bb_arch/_pkg/wallet/models/liquid_wallet.dart';
 import 'package:bb_arch/_pkg/wallet/models/wallet.dart';
 import 'package:bb_arch/_pkg/wallet/wallet_repository.dart';
 import 'package:bb_arch/wallet/bloc/wallet_state.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'wallet_event.dart';
@@ -25,14 +28,18 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
   final TxRepository txRepository;
   final AddressRepository addressRepository;
   final SeedRepository seedRepository;
+  final BuildContext context;
+  final BBLogger logger;
   Timer? _loadWalletsTimer;
 
-  WalletBloc(
-      {required this.walletRepository,
-      required this.seedRepository,
-      required this.txRepository,
-      required this.addressRepository})
-      : super(WalletState.initial()) {
+  WalletBloc({
+    required this.walletRepository,
+    required this.seedRepository,
+    required this.txRepository,
+    required this.addressRepository,
+    required this.context,
+    required this.logger,
+  }) : super(WalletState.initial()) {
     on<LoadAllWallets>(_onLoadAllWallets);
     on<SyncAllWallets>(_onSyncAllWallets);
     on<SyncWallet>(_onSyncWallet);
@@ -43,6 +50,8 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
         const Duration(minutes: WALLET_SYNC_INTERVAL_MINS), (timer) {
       add(SyncAllWallets());
     });
+
+    logger.log('WalletBloc :: Init');
   }
 
   @override
@@ -53,17 +62,18 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
 
   void _onLoadAllWallets(
       LoadAllWallets event, Emitter<WalletState> emit) async {
-    emit(state.copyWith(status: LoadStatus.loading));
+    try {
+      logger.log('WalletBloc :: LoadAllWallets');
+      emit(state.copyWith(status: LoadStatus.loading));
 
-    final (wallets, err) = await walletRepository.loadWallets();
-    if (err != null) {
-      addError(err);
-      return;
+      final wallets = await walletRepository.loadWallets();
+      emit(state.copyWith(
+          wallets: wallets,
+          syncWalletStatus: wallets.map((e) => LoadStatus.initial).toList(),
+          status: LoadStatus.success));
+    } catch (error, stackTrace) {
+      addError(error, stackTrace);
     }
-    emit(state.copyWith(
-        wallets: wallets!,
-        syncWalletStatus: wallets.map((e) => LoadStatus.initial).toList(),
-        status: LoadStatus.success));
   }
 
   // TODO: Or somehow dispatch SyncWallet for each wallet from here; Is it really needed?
@@ -73,6 +83,7 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
   // This could be avoided by storing wallet states more granularly, and having wallet specific sync events/updates.
   void _onSyncAllWallets(
       SyncAllWallets event, Emitter<WalletState> emit) async {
+    logger.log('WalletBloc :: SyncAllWallets');
     emit(state.copyWith(status: LoadStatus.loading));
     await Future.delayed(const Duration(seconds: 1));
     emit(state.copyWith(
@@ -173,10 +184,12 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
   void _onSyncWallet(SyncWallet event, Emitter<WalletState> emit) async {}
 
   void _onSelectWallet(SelectWallet event, Emitter<WalletState> emit) async {
+    logger.log('WalletBloc :: SelectWallet');
     emit(state.copyWith(selectedWallet: event.wallet));
   }
 
   void _onPersistWallet(PersistWallet event, Emitter<WalletState> emit) async {
+    logger.log('WalletBloc :: PersistWallet');
     emit(state.copyWith(
         wallets: [...state.wallets, event.wallet],
         syncWalletStatus: [...state.syncWalletStatus, LoadStatus.initial]));
@@ -187,8 +200,31 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
 
   @override
   void onError(Object error, StackTrace stackTrace) {
-    emit(state.copyWith(status: LoadStatus.failure, error: error as Error));
-    print('$error, $stackTrace');
-    super.onError(error, stackTrace);
+    if (error is WalletLoadException) {
+      emit(state.copyWith(
+          status: LoadStatus.failure, error: error.error as Error));
+      logger.error(error.error.toString(), stackTrace);
+      _showErrorDialog(context, error.error as Error);
+      super.onError(error.error, stackTrace);
+    } else {
+      logger.error(error.toString(), stackTrace);
+      super.onError(error, stackTrace);
+    }
   }
+}
+
+void _showErrorDialog(BuildContext context, Error error) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text("Error"),
+      content: Text(error.toString()),
+      actions: <Widget>[
+        ElevatedButton(
+          child: const Text("OK"),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ],
+    ),
+  );
 }

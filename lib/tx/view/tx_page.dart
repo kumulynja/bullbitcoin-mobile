@@ -1,4 +1,5 @@
 import 'package:bb_arch/_pkg/address/address_repository.dart';
+import 'package:bb_arch/_pkg/bb_logger.dart';
 import 'package:bb_arch/_pkg/tx/models/tx.dart';
 import 'package:bb_arch/_pkg/tx/tx_repository.dart';
 import 'package:bb_arch/_ui/bb_page.dart';
@@ -21,11 +22,14 @@ class TxPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final txRepository = context.read<TxRepository>();
     final addressRepository = context.read<AddressRepository>();
+    final logger = context.read<BBLogger>();
 
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => TxPageCubit()),
-        BlocProvider(create: (_) => TxBloc(txRepository: txRepository)..add(LoadTx(walletId: walletId, txid: id))),
+        BlocProvider(
+            create: (_) => TxBloc(txRepository: txRepository, logger: logger)
+              ..add(LoadTx(walletId: walletId, txid: id))),
         BlocProvider(
             create: (_) => AddressBloc(addrRepository: addressRepository)
               ..add(LoadAddresses(
@@ -51,6 +55,7 @@ class TxScaffold extends StatelessWidget {
     } else if (tx != null && tx.type == TxType.Liquid) {
       txView = LiquidTxView(tx: tx);
     }
-    return BBScaffold(title: 'Tx', loadStatus: loadstatus, child: tx != null ? txView : null);
+    return BBScaffold(
+        title: 'Tx', loadStatus: loadstatus, child: tx != null ? txView : null);
   }
 }

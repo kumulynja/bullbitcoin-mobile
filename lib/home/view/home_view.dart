@@ -1,3 +1,4 @@
+import 'package:bb_arch/_pkg/bb_logger.dart';
 import 'package:bb_arch/_pkg/misc.dart';
 import 'package:bb_arch/_pkg/tx/models/tx.dart';
 import 'package:bb_arch/_pkg/wallet/models/wallet.dart';
@@ -16,6 +17,7 @@ class HomeScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final logger = RepositoryProvider.of<BBLogger>(context);
     final loadStatus = context.select((WalletBloc cubit) => cubit.state.status);
     final wallets = context.select((WalletBloc cubit) => cubit.state.wallets);
     final syncStatus =
@@ -23,13 +25,10 @@ class HomeScaffold extends StatelessWidget {
     final txsStatus = context.select((TxBloc cubit) => cubit.state.status);
     final txs = context.select((TxBloc cubit) => cubit.state.txs);
 
-    print('HomeView.build: $loadStatus');
+    logger.log('HomeView :: build : $loadStatus');
 
     return BBScaffold(
       title: 'Bull Bitcoin',
-      blocs: [
-        BlocProvider.of<WalletBloc>(context),
-      ],
       actions: [
         loadStatus == LoadStatus.loading
             ? const CircularProgressIndicator()

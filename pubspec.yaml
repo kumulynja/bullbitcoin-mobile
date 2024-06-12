@@ -22,6 +22,7 @@ dependencies:
   go_router: ^13.2.1
   hex: ^0.2.0
   crypto: ^3.0.1
+  logger: ^2.3.0
 
   bdk_flutter: 0.30.0
   lwk_dart: 

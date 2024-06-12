@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:bb_arch/_pkg/bb_logger.dart';
 import 'package:bb_arch/_pkg/tx/tx_repository.dart';
 import 'package:bb_arch/home/home.dart';
 import 'package:bb_arch/tx/bloc/tx_bloc.dart';
@@ -10,11 +13,14 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final txRepository = context.read<TxRepository>();
+    final logger = context.read<BBLogger>();
 
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => HomeCubit()),
-        BlocProvider(create: (_) => TxBloc(txRepository: txRepository)..add(FetchLatestTxsAcrossWallets(limit: 10))),
+        BlocProvider(
+            create: (_) => TxBloc(txRepository: txRepository, logger: logger)
+              ..add(FetchLatestTxsAcrossWallets(limit: 10))),
       ],
       child: const HomeScaffold(),
     );

@@ -98,13 +98,21 @@ class SettingsView extends StatelessWidget {
                     GoRouter.of(context).push(ReceivePage.route);
                   },
                 );
+              case 9:
+                return ListTile(
+                  title: const Text('Logs'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    GoRouter.of(context).push('/settings/logs');
+                  },
+                );
               default:
                 return const ListTile(
                   title: Text('Hanled index'),
                 );
             }
           },
-          itemCount: 9),
+          itemCount: 10),
     );
   }
 }

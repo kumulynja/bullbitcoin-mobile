@@ -1,3 +1,4 @@
+import 'package:bb_arch/_pkg/bb_logger.dart';
 import 'package:bb_arch/_pkg/tx/tx_repository.dart';
 import 'package:bb_arch/tx/bloc/tx_bloc.dart';
 import 'package:bb_arch/wallet/bloc/wallet_bloc.dart';
@@ -13,11 +14,16 @@ class WalletPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final wallet = context.select((WalletBloc cubit) => cubit.state.selectedWallet!);
+    final wallet =
+        context.select((WalletBloc cubit) => cubit.state.selectedWallet!);
     final txRepository = context.read<TxRepository>();
+    final logger = context.read<BBLogger>();
+
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => TxBloc(txRepository: txRepository)..add(LoadTxs(wallet: wallet))),
+        BlocProvider(
+            create: (_) => TxBloc(txRepository: txRepository, logger: logger)
+              ..add(LoadTxs(wallet: wallet))),
         BlocProvider(create: (_) => WalletPageCubit()),
       ],
       child: WalletScaffold(id: id),

@@ -7,6 +7,7 @@ import 'package:bb_arch/settings/view/settings_page.dart';
 import 'package:bb_arch/tx/bloc/tx_bloc.dart';
 import 'package:bb_arch/tx/widgets/tx_list.dart';
 import 'package:bb_arch/wallet/bloc/wallet_bloc.dart';
+import 'package:bb_arch/wallet/bloc/walletlist_bloc.dart';
 import 'package:bb_arch/wallet/widgets/wallets_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,10 +19,10 @@ class HomeScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final logger = RepositoryProvider.of<BBLogger>(context);
-    final loadStatus = context.select((WalletBloc cubit) => cubit.state.status);
-    final wallets = context.select((WalletBloc cubit) => cubit.state.wallets);
-    final syncStatus =
-        context.select((WalletBloc cubit) => cubit.state.syncWalletStatus);
+    final loadStatus =
+        context.select((WalletListBloc cubit) => cubit.state.status);
+    final walletBlocs =
+        context.select((WalletListBloc cubit) => cubit.state.walletBlocs);
     final txsStatus = context.select((TxBloc cubit) => cubit.state.status);
     final txs = context.select((TxBloc cubit) => cubit.state.txs);
 
@@ -54,7 +55,7 @@ class HomeScaffold extends StatelessWidget {
           const SizedBox(height: 10),
           FloatingActionButton(
             onPressed: () {
-              context.read<WalletBloc>().add(SyncAllWallets());
+              context.read<WalletListBloc>().add(SyncAllWallets());
             },
             tooltip: 'Sync',
             heroTag: 'syncTag',
@@ -62,12 +63,13 @@ class HomeScaffold extends StatelessWidget {
           ),
         ],
       ),
-      child: HomeView(
-        wallets: wallets,
-        syncStatus: syncStatus,
-        txsStatus: txsStatus,
-        txs: txs,
-      ),
+      child: loadStatus == LoadStatus.success
+          ? HomeView(
+              walletBlocs: walletBlocs,
+              txsStatus: txsStatus,
+              txs: txs,
+            )
+          : Text('Loading...'),
     );
   }
 }
@@ -75,14 +77,12 @@ class HomeScaffold extends StatelessWidget {
 class HomeView extends StatelessWidget {
   const HomeView({
     super.key,
-    required this.wallets,
-    required this.syncStatus,
+    required this.walletBlocs,
     required this.txsStatus,
     required this.txs,
   });
 
-  final List<Wallet> wallets;
-  final List<LoadStatus> syncStatus;
+  final List<WalletBloc> walletBlocs;
   final LoadStatus txsStatus;
   final List<Tx> txs;
 
@@ -92,7 +92,7 @@ class HomeView extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: WalletList(wallets: wallets, syncStatus: syncStatus),
+          child: WalletList(walletBlocs: walletBlocs),
         ),
         Container(
           color: Colors.grey,

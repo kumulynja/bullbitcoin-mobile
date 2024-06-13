@@ -17,11 +17,8 @@ final _privateConstructorUsedError = UnsupportedError(
 /// @nodoc
 mixin _$WalletState {
   LoadStatus get status => throw _privateConstructorUsedError;
-  List<LoadStatus> get syncWalletStatus => throw _privateConstructorUsedError;
-  List<Wallet> get wallets =>
-      throw _privateConstructorUsedError; // TODO: Will be a problem, if at all a future requirement needs user to work with multiple wallets at a time.
-  Wallet? get selectedWallet => throw _privateConstructorUsedError;
-  Error? get error => throw _privateConstructorUsedError;
+  Wallet? get wallet => throw _privateConstructorUsedError;
+  BBException<dynamic>? get error => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $WalletStateCopyWith<WalletState> get copyWith =>
@@ -34,12 +31,7 @@ abstract class $WalletStateCopyWith<$Res> {
           WalletState value, $Res Function(WalletState) then) =
       _$WalletStateCopyWithImpl<$Res, WalletState>;
   @useResult
-  $Res call(
-      {LoadStatus status,
-      List<LoadStatus> syncWalletStatus,
-      List<Wallet> wallets,
-      Wallet? selectedWallet,
-      Error? error});
+  $Res call({LoadStatus status, Wallet? wallet, BBException<dynamic>? error});
 }
 
 /// @nodoc
@@ -56,9 +48,7 @@ class _$WalletStateCopyWithImpl<$Res, $Val extends WalletState>
   @override
   $Res call({
     Object? status = null,
-    Object? syncWalletStatus = null,
-    Object? wallets = null,
-    Object? selectedWallet = freezed,
+    Object? wallet = freezed,
     Object? error = freezed,
   }) {
     return _then(_value.copyWith(
@@ -66,22 +56,14 @@ class _$WalletStateCopyWithImpl<$Res, $Val extends WalletState>
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
               as LoadStatus,
-      syncWalletStatus: null == syncWalletStatus
-          ? _value.syncWalletStatus
-          : syncWalletStatus // ignore: cast_nullable_to_non_nullable
-              as List<LoadStatus>,
-      wallets: null == wallets
-          ? _value.wallets
-          : wallets // ignore: cast_nullable_to_non_nullable
-              as List<Wallet>,
-      selectedWallet: freezed == selectedWallet
-          ? _value.selectedWallet
-          : selectedWallet // ignore: cast_nullable_to_non_nullable
+      wallet: freezed == wallet
+          ? _value.wallet
+          : wallet // ignore: cast_nullable_to_non_nullable
               as Wallet?,
       error: freezed == error
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
-              as Error?,
+              as BBException<dynamic>?,
     ) as $Val);
   }
 }
@@ -94,12 +76,7 @@ abstract class _$$WalletStateImplCopyWith<$Res>
       __$$WalletStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {LoadStatus status,
-      List<LoadStatus> syncWalletStatus,
-      List<Wallet> wallets,
-      Wallet? selectedWallet,
-      Error? error});
+  $Res call({LoadStatus status, Wallet? wallet, BBException<dynamic>? error});
 }
 
 /// @nodoc
@@ -114,9 +91,7 @@ class __$$WalletStateImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? status = null,
-    Object? syncWalletStatus = null,
-    Object? wallets = null,
-    Object? selectedWallet = freezed,
+    Object? wallet = freezed,
     Object? error = freezed,
   }) {
     return _then(_$WalletStateImpl(
@@ -124,22 +99,14 @@ class __$$WalletStateImplCopyWithImpl<$Res>
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
               as LoadStatus,
-      syncWalletStatus: null == syncWalletStatus
-          ? _value._syncWalletStatus
-          : syncWalletStatus // ignore: cast_nullable_to_non_nullable
-              as List<LoadStatus>,
-      wallets: null == wallets
-          ? _value._wallets
-          : wallets // ignore: cast_nullable_to_non_nullable
-              as List<Wallet>,
-      selectedWallet: freezed == selectedWallet
-          ? _value.selectedWallet
-          : selectedWallet // ignore: cast_nullable_to_non_nullable
+      wallet: freezed == wallet
+          ? _value.wallet
+          : wallet // ignore: cast_nullable_to_non_nullable
               as Wallet?,
       error: freezed == error
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
-              as Error?,
+              as BBException<dynamic>?,
     ));
   }
 }
@@ -149,46 +116,22 @@ class __$$WalletStateImplCopyWithImpl<$Res>
 class _$WalletStateImpl implements _WalletState {
   const _$WalletStateImpl(
       {this.status = LoadStatus.initial,
-      final List<LoadStatus> syncWalletStatus = const [],
-      final List<Wallet> wallets = const [],
-      this.selectedWallet = null,
-      this.error = null})
-      : _syncWalletStatus = syncWalletStatus,
-        _wallets = wallets;
+      this.wallet = null,
+      this.error = null});
 
   @override
   @JsonKey()
   final LoadStatus status;
-  final List<LoadStatus> _syncWalletStatus;
   @override
   @JsonKey()
-  List<LoadStatus> get syncWalletStatus {
-    if (_syncWalletStatus is EqualUnmodifiableListView)
-      return _syncWalletStatus;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_syncWalletStatus);
-  }
-
-  final List<Wallet> _wallets;
+  final Wallet? wallet;
   @override
   @JsonKey()
-  List<Wallet> get wallets {
-    if (_wallets is EqualUnmodifiableListView) return _wallets;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_wallets);
-  }
-
-// TODO: Will be a problem, if at all a future requirement needs user to work with multiple wallets at a time.
-  @override
-  @JsonKey()
-  final Wallet? selectedWallet;
-  @override
-  @JsonKey()
-  final Error? error;
+  final BBException<dynamic>? error;
 
   @override
   String toString() {
-    return 'WalletState(status: $status, syncWalletStatus: $syncWalletStatus, wallets: $wallets, selectedWallet: $selectedWallet, error: $error)';
+    return 'WalletState(status: $status, wallet: $wallet, error: $error)';
   }
 
   @override
@@ -197,22 +140,12 @@ class _$WalletStateImpl implements _WalletState {
         (other.runtimeType == runtimeType &&
             other is _$WalletStateImpl &&
             (identical(other.status, status) || other.status == status) &&
-            const DeepCollectionEquality()
-                .equals(other._syncWalletStatus, _syncWalletStatus) &&
-            const DeepCollectionEquality().equals(other._wallets, _wallets) &&
-            (identical(other.selectedWallet, selectedWallet) ||
-                other.selectedWallet == selectedWallet) &&
+            (identical(other.wallet, wallet) || other.wallet == wallet) &&
             (identical(other.error, error) || other.error == error));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      status,
-      const DeepCollectionEquality().hash(_syncWalletStatus),
-      const DeepCollectionEquality().hash(_wallets),
-      selectedWallet,
-      error);
+  int get hashCode => Object.hash(runtimeType, status, wallet, error);
 
   @JsonKey(ignore: true)
   @override
@@ -224,21 +157,15 @@ class _$WalletStateImpl implements _WalletState {
 abstract class _WalletState implements WalletState {
   const factory _WalletState(
       {final LoadStatus status,
-      final List<LoadStatus> syncWalletStatus,
-      final List<Wallet> wallets,
-      final Wallet? selectedWallet,
-      final Error? error}) = _$WalletStateImpl;
+      final Wallet? wallet,
+      final BBException<dynamic>? error}) = _$WalletStateImpl;
 
   @override
   LoadStatus get status;
   @override
-  List<LoadStatus> get syncWalletStatus;
+  Wallet? get wallet;
   @override
-  List<Wallet> get wallets;
-  @override // TODO: Will be a problem, if at all a future requirement needs user to work with multiple wallets at a time.
-  Wallet? get selectedWallet;
-  @override
-  Error? get error;
+  BBException<dynamic>? get error;
   @override
   @JsonKey(ignore: true)
   _$$WalletStateImplCopyWith<_$WalletStateImpl> get copyWith =>

@@ -10,7 +10,9 @@ import 'package:bb_arch/_pkg/tx/tx_repository.dart';
 import 'package:bb_arch/_pkg/wallet/models/wallet.dart';
 import 'package:bb_arch/_pkg/wallet/wallet_repository.dart';
 import 'package:bb_arch/app/app.dart';
+import 'package:bb_arch/app/bloc_observer.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -21,6 +23,8 @@ void main() async {
 
   final logger = BBLogger();
   await logger.init();
+
+  Bloc.observer = SimpleBlocObserver(logger: logger);
 
   final dir = await getApplicationDocumentsDirectory();
 

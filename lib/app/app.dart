@@ -5,15 +5,11 @@ import 'package:bb_arch/_pkg/storage/hive.dart';
 import 'package:bb_arch/_pkg/storage/secure_storage.dart';
 import 'package:bb_arch/_pkg/tx/tx_repository.dart';
 import 'package:bb_arch/_pkg/wallet/wallet_repository.dart';
-import 'package:bb_arch/address/bloc/addr_bloc.dart';
 import 'package:bb_arch/router.dart';
-import 'package:bb_arch/tx/bloc/tx_bloc.dart';
-import 'package:bb_arch/wallet/bloc/wallet_bloc.dart';
+import 'package:bb_arch/wallet/bloc/walletlist_bloc.dart';
 import 'package:bb_arch/wallet/bloc/walletsensitive_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:isar/isar.dart';
-import 'package:logger/logger.dart';
 
 class App extends StatelessWidget {
   const App(
@@ -46,7 +42,7 @@ class App extends StatelessWidget {
       ],
       child: MultiBlocProvider(providers: [
         BlocProvider(
-            create: (_) => WalletBloc(
+            create: (_) => WalletListBloc(
                 walletRepository: walletRepository,
                 seedRepository: seedRepository,
                 txRepository: txRepository,

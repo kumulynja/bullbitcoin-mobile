@@ -125,7 +125,7 @@ class BitcoinWalletHelper {
       Error.throwWithStackTrace(
           BdkElectrumException(e, serverUrl: electrumUrl), stackTrace);
     } catch (e) {
-      throw e;
+      rethrow;
     }
   }
 

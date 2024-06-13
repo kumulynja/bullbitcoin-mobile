@@ -27,7 +27,7 @@ mixin _$BitcoinWallet {
   WalletType get type => throw _privateConstructorUsedError;
   NetworkType get network => throw _privateConstructorUsedError;
   String get seedFingerprint =>
-      throw _privateConstructorUsedError; // required bool breaker,
+      throw _privateConstructorUsedError; // required bool breaker, // TODO: Added for Parse testing
   BitcoinScriptType get scriptType => throw _privateConstructorUsedError;
   bool get backupTested => throw _privateConstructorUsedError;
   DateTime? get lastBackupTested => throw _privateConstructorUsedError;
@@ -327,7 +327,7 @@ class _$BitcoinWalletImpl extends _BitcoinWallet {
   final NetworkType network;
   @override
   final String seedFingerprint;
-// required bool breaker,
+// required bool breaker, // TODO: Added for Parse testing
   @override
   @JsonKey()
   final BitcoinScriptType scriptType;
@@ -460,7 +460,7 @@ abstract class _BitcoinWallet extends BitcoinWallet {
   NetworkType get network;
   @override
   String get seedFingerprint;
-  @override // required bool breaker,
+  @override // required bool breaker, // TODO: Added for Parse testing
   BitcoinScriptType get scriptType;
   @override
   bool get backupTested;

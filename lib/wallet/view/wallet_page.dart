@@ -1,7 +1,11 @@
+import 'dart:math';
+
+import 'package:bb_arch/_pkg/address/address_repository.dart';
 import 'package:bb_arch/_pkg/bb_logger.dart';
 import 'package:bb_arch/_pkg/tx/tx_repository.dart';
 import 'package:bb_arch/tx/bloc/tx_bloc.dart';
 import 'package:bb_arch/wallet/bloc/wallet_bloc.dart';
+import 'package:bb_arch/wallet/bloc/walletlist_bloc.dart';
 import 'package:bb_arch/wallet/cubit/wallet_page_cubit.dart';
 import 'package:bb_arch/wallet/view/wallet_view.dart';
 import 'package:flutter/material.dart';
@@ -14,8 +18,12 @@ class WalletPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final wallet =
-        context.select((WalletBloc cubit) => cubit.state.selectedWallet!);
+    final wallet = context.select((WalletListBloc cubit) => cubit
+        .state.walletBlocs
+        .firstWhere((bloc) => bloc.state.wallet?.id == id)
+        .state
+        .wallet);
+    ;
     final txRepository = context.read<TxRepository>();
     final logger = context.read<BBLogger>();
 
@@ -23,7 +31,7 @@ class WalletPage extends StatelessWidget {
       providers: [
         BlocProvider(
             create: (_) => TxBloc(txRepository: txRepository, logger: logger)
-              ..add(LoadTxs(wallet: wallet))),
+              ..add(LoadTxs(wallet: wallet!))),
         BlocProvider(create: (_) => WalletPageCubit()),
       ],
       child: WalletScaffold(id: id),

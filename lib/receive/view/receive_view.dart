@@ -5,7 +5,7 @@ import 'package:bb_arch/_ui/bb_page.dart';
 import 'package:bb_arch/receive/view/widgets/bitcoin_receive_view.dart';
 import 'package:bb_arch/receive/view/widgets/lightning_receive_view.dart';
 import 'package:bb_arch/receive/view/widgets/liquid_receive_view.dart';
-import 'package:bb_arch/wallet/bloc/wallet_bloc.dart';
+import 'package:bb_arch/wallet/bloc/walletlist_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -16,8 +16,13 @@ class ReceiveScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loadStatus = context.select((WalletBloc cubit) => cubit.state.status);
-    final wallets = context.select((WalletBloc cubit) => cubit.state.wallets);
+    final loadStatus =
+        context.select((WalletListBloc cubit) => cubit.state.status);
+    final wallets = context.select((WalletListBloc cubit) => cubit
+        .state.walletBlocs
+        .where((bloc) => bloc.state.wallet != null)
+        .map((bloc) => bloc.state.wallet!)
+        .toList());
     return BBScaffold(
       title: 'Receive',
       loadStatus: loadStatus,
@@ -92,7 +97,9 @@ class _ReceiveViewState extends State<ReceiveView> {
                 }).toList(),
                 onChanged: (value) {
                   setState(() {
-                    selectedWallet = widget.wallets.where((wallet) => wallet.id == value).first;
+                    selectedWallet = widget.wallets
+                        .where((wallet) => wallet.id == value)
+                        .first;
                   });
                 },
                 value: selectedWallet?.id,

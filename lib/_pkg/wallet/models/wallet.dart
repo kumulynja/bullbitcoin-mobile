@@ -44,7 +44,8 @@ class Wallet {
   static Wallet fromJson(Map<String, dynamic> json) {
     if (json.containsKey('type') && json['type'] == WalletType.Bitcoin.name) {
       return BitcoinWallet.fromJson(json);
-    } else if (json.containsKey('type') && json['type'] == WalletType.Liquid.name) {
+    } else if (json.containsKey('type') &&
+        json['type'] == WalletType.Liquid.name) {
       return LiquidWallet.fromJson(json);
     }
     throw UnimplementedError('Unsupported Wallet subclass');
@@ -79,7 +80,8 @@ class Wallet {
     };
   }
 
-  static Future<Wallet> setupNewWallet(WalletType type, String mnemonicStr, NetworkType network,
+  static Future<Wallet> setupNewWallet(
+      WalletType type, String mnemonicStr, NetworkType network,
       {String name = 'Wallet'}) async {
     if (type == WalletType.Bitcoin) {
       return BitcoinWallet.setupNewWallet(mnemonicStr, network, name: name);

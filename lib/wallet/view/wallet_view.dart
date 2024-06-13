@@ -4,7 +4,7 @@ import 'package:bb_arch/_pkg/wallet/models/wallet.dart';
 import 'package:bb_arch/_ui/bb_page.dart';
 import 'package:bb_arch/tx/bloc/tx_bloc.dart';
 import 'package:bb_arch/tx/widgets/tx_list.dart';
-import 'package:bb_arch/wallet/bloc/wallet_bloc.dart';
+import 'package:bb_arch/wallet/bloc/walletlist_bloc.dart';
 import 'package:bb_arch/wallet/widgets/wallet_heading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,14 +17,17 @@ class WalletScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loadStatus = context.select((TxBloc cubit) => cubit.state.status);
-    final wallet = context.select((WalletBloc cubit) => cubit.state.selectedWallet);
+    final wallet =
+        context.select((WalletListBloc cubit) => cubit.state.selectedWallet);
     final txs = context.select((TxBloc cubit) => cubit.state.txs);
 
     return BBScaffold(
         title: wallet?.name ?? '',
         loadStatus: loadStatus,
         actions: [
-          loadStatus == LoadStatus.loading ? const CircularProgressIndicator() : const SizedBox.shrink(),
+          loadStatus == LoadStatus.loading
+              ? const CircularProgressIndicator()
+              : const SizedBox.shrink(),
         ],
         floatingActionButton: loadStatus == LoadStatus.success
             ? Column(
@@ -61,7 +64,8 @@ class WalletScaffold extends StatelessWidget {
 }
 
 class WalletView extends StatelessWidget {
-  const WalletView({super.key, required this.id, required this.wallet, required this.txs});
+  const WalletView(
+      {super.key, required this.id, required this.wallet, required this.txs});
 
   final String id;
   final Wallet wallet;

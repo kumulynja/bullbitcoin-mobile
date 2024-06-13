@@ -1,3 +1,5 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
 sealed class ErrorState<T> {
   final Exception? dbError;
   final Exception? parseError;
@@ -29,36 +31,42 @@ enum NetworkException { noInternet, timeout, unknown }
 
 enum HttpException { notFound, badRequest, unauthorized, unknown }
 
-class DatabaseException implements Exception {
-  const DatabaseException(this.error);
-  final Object error;
+abstract class BBException<T> implements Exception {
+  const BBException(this.error, {this.message});
+  final T error;
+  final String? message;
 }
 
-// class IsarException extends DatabaseException {
-//   const IsarException(Object error) : super(error);
-// }
+class DatabaseException<T> implements BBException<T> {
+  const DatabaseException(this.error, {this.message});
+  final T error;
+  final String? message;
+}
 
-class JsonParseException implements Exception {
-  const JsonParseException(this.error, {this.modal});
-  final Object error;
+class JsonParseException<T> implements BBException<T> {
+  const JsonParseException(this.error, {this.message, this.modal});
+  final T error;
+  final String? message;
   final String? modal;
 }
 
-abstract class WalletException implements Exception {
-  const WalletException(this.error);
-  final Object error;
+abstract class WalletException<T> implements BBException<T> {
+  const WalletException(this.error, {this.message});
+  final T error;
+  final String? message;
 }
 
-class WalletLoadException extends WalletException {
-  const WalletLoadException(super.error);
+class WalletLoadException<T> extends WalletException<T> {
+  const WalletLoadException(super.error, {super.message});
 }
 
-abstract class BdkException implements Exception {
-  const BdkException(this.error);
-  final Object error;
+abstract class BdkException<T> implements BBException<T> {
+  const BdkException(this.error, {this.message});
+  final T error;
+  final String? message;
 }
 
-class BdkElectrumException extends BdkException {
-  const BdkElectrumException(super.error, {this.serverUrl});
+class BdkElectrumException<T> extends BdkException<T> {
+  const BdkElectrumException(super.error, {super.message, this.serverUrl});
   final String? serverUrl;
 }

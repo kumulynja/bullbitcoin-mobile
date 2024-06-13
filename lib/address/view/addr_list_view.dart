@@ -11,28 +11,39 @@ import 'package:bb_arch/address/widgets/bitcoin_address_list.dart';
 import 'package:bb_arch/address/widgets/liquid_address_list.dart';
 import 'package:bb_arch/tx/bloc/tx_bloc.dart';
 import 'package:bb_arch/tx/bloc/tx_state.dart';
-import 'package:bb_arch/wallet/bloc/wallet_bloc.dart';
+import 'package:bb_arch/wallet/bloc/walletlist_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddressListScaffold extends StatelessWidget {
-  const AddressListScaffold({super.key});
+  const AddressListScaffold({super.key, required this.walletId});
+
+  final String walletId;
 
   @override
   Widget build(BuildContext context) {
-    final addressLoadStatus = context.select((AddressBloc bloc) => bloc.state.status);
+    final addressLoadStatus =
+        context.select((AddressBloc bloc) => bloc.state.status);
     final txLoadStatus = context.select((TxBloc bloc) => bloc.state.status);
 
-    final wallet = context.select((WalletBloc bloc) => bloc.state.selectedWallet);
+    final wallet = context.select((WalletListBloc cubit) => cubit
+        .state.walletBlocs
+        .firstWhere((bloc) => bloc.state.wallet?.id == walletId)
+        .state
+        .wallet);
     final txs = context.select((TxBloc cubit) => cubit.state.txs);
-    final depositAddresses = context.select((AddressBloc bloc) => bloc.state.depositAddresses);
-    final changeAddresses = context.select((AddressBloc bloc) => bloc.state.changeAddresses);
+    final depositAddresses =
+        context.select((AddressBloc bloc) => bloc.state.depositAddresses);
+    final changeAddresses =
+        context.select((AddressBloc bloc) => bloc.state.changeAddresses);
 
     LoadStatus loadStatus;
 
-    if (addressLoadStatus == LoadStatus.success && txLoadStatus == LoadStatus.success) {
+    if (addressLoadStatus == LoadStatus.success &&
+        txLoadStatus == LoadStatus.success) {
       loadStatus = LoadStatus.success;
-    } else if (addressLoadStatus == LoadStatus.failure || txLoadStatus == LoadStatus.failure) {
+    } else if (addressLoadStatus == LoadStatus.failure ||
+        txLoadStatus == LoadStatus.failure) {
       loadStatus = LoadStatus.failure;
     } else {
       loadStatus = LoadStatus.loading;
@@ -60,7 +71,10 @@ class AddressListScaffold extends StatelessWidget {
 
 class AddressListView extends StatefulWidget {
   const AddressListView(
-      {super.key, required this.wallet, required this.depositAddresses, required this.changeAddresses});
+      {super.key,
+      required this.wallet,
+      required this.depositAddresses,
+      required this.changeAddresses});
 
   final Wallet wallet;
   final List<Address> depositAddresses;
@@ -86,19 +100,22 @@ class _AddressListView extends State<AddressListView> {
       if (selectedKind == AddressKind.deposit) {
         print('loading with deposit addr');
         bitcoinDepositAddressListView ??= BitcoinAddressList(
-            walletId: widget.wallet.id, addresses: List<BitcoinAddress>.from(widget.depositAddresses));
+            walletId: widget.wallet.id,
+            addresses: List<BitcoinAddress>.from(widget.depositAddresses));
         listView = bitcoinDepositAddressListView!;
       } else if (selectedKind == AddressKind.change) {
         print('loading with change addr');
         bitcoinChangeAddressListView ??= BitcoinAddressList(
-            walletId: widget.wallet.id, addresses: List<BitcoinAddress>.from(widget.changeAddresses));
+            walletId: widget.wallet.id,
+            addresses: List<BitcoinAddress>.from(widget.changeAddresses));
         listView = bitcoinChangeAddressListView!;
       } else {
         listView = const Text('Unsupported address kind');
       }
     } else if (widget.wallet.type == WalletType.Liquid) {
-      liquidAddressListView ??=
-          LiquidAddressList(walletId: widget.wallet.id, addresses: List<LiquidAddress>.from(widget.depositAddresses));
+      liquidAddressListView ??= LiquidAddressList(
+          walletId: widget.wallet.id,
+          addresses: List<LiquidAddress>.from(widget.depositAddresses));
       listView = liquidAddressListView!;
     } else {
       listView = const Text('Unsupported wallet type');

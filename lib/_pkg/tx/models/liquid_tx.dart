@@ -1,6 +1,5 @@
 // ignore_for_file: avoid_print, invalid_annotation_target
 
-import 'package:bb_arch/_pkg/error.dart';
 import 'package:bb_arch/_pkg/misc.dart';
 import 'package:bb_arch/_pkg/tx/models/bitcoin_tx.dart';
 import 'package:bb_arch/_pkg/wallet/models/liquid_wallet.dart';

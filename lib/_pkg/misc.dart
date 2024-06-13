@@ -19,8 +19,8 @@ extension LoadStatusExtension on LoadStatus {
   }
 }
 
-abstract class ErrorState {
-  Error? get error;
+abstract class ExceptionState {
+  BBException? get error;
 }
 
 T safeFromJson<T>(Map<String, dynamic> json,

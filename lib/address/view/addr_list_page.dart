@@ -1,7 +1,5 @@
 // ignore_for_file: avoid_print
 
-import 'dart:math';
-
 import 'package:bb_arch/_pkg/address/address_repository.dart';
 import 'package:bb_arch/_pkg/bb_logger.dart';
 import 'package:bb_arch/_pkg/tx/tx_repository.dart';
@@ -9,8 +7,7 @@ import 'package:bb_arch/address/bloc/addr_bloc.dart';
 import 'package:bb_arch/address/bloc/address_cubit.dart';
 import 'package:bb_arch/address/view/addr_list_view.dart';
 import 'package:bb_arch/tx/bloc/tx_bloc.dart';
-import 'package:bb_arch/tx/bloc/tx_state.dart';
-import 'package:bb_arch/wallet/bloc/wallet_bloc.dart';
+import 'package:bb_arch/wallet/bloc/walletlist_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,19 +22,22 @@ class AddressListPage extends StatelessWidget {
     final addressRepository = context.read<AddressRepository>();
     final txRepository = context.read<TxRepository>();
     final logger = context.read<BBLogger>();
-    final selectedWallet = context.select((WalletBloc cubit) =>
-        cubit.state.wallets.firstWhere((w) => w.id == walletId));
+    final selectedWallet = context.select((WalletListBloc cubit) => cubit
+        .state.walletBlocs
+        .firstWhere((bloc) => bloc.state.wallet?.id == walletId)
+        .state
+        .wallet);
     // final txs = context.select((TxBloc cubit) => cubit.state.txs);
 
     return MultiBlocProvider(providers: [
       BlocProvider(create: (_) => AddressCubit()),
       BlocProvider(
           create: (_) => TxBloc(txRepository: txRepository, logger: logger)
-            ..add(LoadTxs(wallet: selectedWallet))),
+            ..add(LoadTxs(wallet: selectedWallet!))),
       BlocProvider(
           create: (_) => AddressBloc(addrRepository: addressRepository)
-            ..add(LoadAddresses(walletId: selectedWallet.id))),
-    ], child: const AddressListScaffold());
+            ..add(LoadAddresses(walletId: selectedWallet?.id ?? ''))),
+    ], child: AddressListScaffold(walletId: walletId));
     // child: BlocBuilder<TxBloc, TxState>(
     //     buildWhen: (previous, current) => current.txs.isNotEmpty, // TODO: Update this later
     //     builder: (context, state) {

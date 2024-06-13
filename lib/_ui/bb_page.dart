@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class BBScaffold extends StatelessWidget {
   final String title;
   final Widget? child;
-  final List<BlocBase<ErrorState>>? blocs;
+  final List<BlocBase<ExceptionState>>? blocs;
   final List<Widget>? actions;
   final Widget? floatingActionButton;
   final LoadStatus? loadStatus;
@@ -48,7 +48,8 @@ class BBScaffold extends StatelessWidget {
       body: (blocs != null)
           ? MultiBlocListener(
               listeners: blocs!
-                  .map((bloc) => BlocListener<BlocBase<ErrorState>, ErrorState>(
+                  .map((bloc) =>
+                      BlocListener<BlocBase<ExceptionState>, ExceptionState>(
                         bloc: bloc,
                         listener: (context, state) {
                           if (state.error != null) {
@@ -65,7 +66,7 @@ class BBScaffold extends StatelessWidget {
     );
   }
 
-  void _showErrorDialog(BuildContext context, Error error) {
+  void _showErrorDialog(BuildContext context, Exception error) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

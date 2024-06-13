@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:bb_arch/_pkg/bb_logger.dart';
+import 'package:bb_arch/_pkg/clipboard.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LogListScreen extends StatelessWidget {
@@ -60,7 +62,17 @@ class LogDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Log File Details'),
+        title: const Text('Log File Details'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.copy),
+            onPressed: () async {
+              final logContent = await logger.readLogFile(logFile);
+              BBClipboard.copy(logContent);
+              print('Copied logs to clipboard');
+            },
+          ),
+        ],
       ),
       body: FutureBuilder<String>(
         future: logger.readLogFile(logFile),

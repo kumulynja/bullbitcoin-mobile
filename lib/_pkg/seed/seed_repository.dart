@@ -14,7 +14,8 @@ class SeedRepository {
 
   Future<(Seed?, dynamic)> loadSeed(String fingerprint) async {
     try {
-      final seed = await isar.seeds.where().fingerprintEqualTo(fingerprint).findAll();
+      final seed =
+          await isar.seeds.where().fingerprintEqualTo(fingerprint).findAll();
       //final (seedsStr, _) = await storage.getValue('seed.$fingerprint');
       //Seed seed = Seed.fromJson(jsonDecode(seedsStr!));
       return (seed.first, null);
@@ -23,11 +24,17 @@ class SeedRepository {
     }
   }
 
-  Future<(Seed?, dynamic)> newSeed(WalletType walletType, NetworkType network) async {
+  Future<(Seed?, dynamic)> newSeed(
+      WalletType walletType, NetworkType network) async {
     try {
       final mn = await bdk.Mnemonic.create(bdk.WordCount.Words12);
       return (
-        Seed(mnemonic: mn.asString(), passphrase: '', fingerprint: '', walletType: walletType, network: network),
+        Seed(
+            mnemonic: mn.asString(),
+            passphrase: '',
+            fingerprint: '',
+            walletType: walletType,
+            network: network),
         null
       );
     } catch (e) {
@@ -60,6 +67,9 @@ class SeedRepository {
     }
   }
 
+  // TODO: This function should return bool (true if all is okay).
+  // BdkException is to be thrown if there is a bdk related error (expected).
+  // Exception is to be thrown otherwise (unexpected).
   Future<String?> validateSeedPhrase(String seedphrase) async {
     try {
       // TODO: Added delay for testing

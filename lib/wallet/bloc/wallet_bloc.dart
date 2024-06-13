@@ -83,102 +83,97 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
   // This could be avoided by storing wallet states more granularly, and having wallet specific sync events/updates.
   void _onSyncAllWallets(
       SyncAllWallets event, Emitter<WalletState> emit) async {
-    logger.log('WalletBloc :: SyncAllWallets');
-    emit(state.copyWith(status: LoadStatus.loading));
-    await Future.delayed(const Duration(seconds: 1));
-    emit(state.copyWith(
-        syncWalletStatus:
-            state.wallets.map((e) => LoadStatus.loading).toList()));
+    try {
+      logger.log('WalletBloc :: SyncAllWallets');
+      emit(state.copyWith(status: LoadStatus.loading));
+      await Future.delayed(const Duration(seconds: 1));
+      emit(state.copyWith(
+          syncWalletStatus:
+              state.wallets.map((e) => LoadStatus.loading).toList()));
 
-    List<Wallet> loadedWallets = [];
-    for (int i = 0; i < state.wallets.length; i++) {
-      final w = state.wallets[i];
-      Wallet newWallet = w;
-      String seedId = '${w.seedFingerprint}_${w.type.name}_${w.network.name}';
-      if (w is BitcoinWallet) {
-        if (w.bdkWallet == null) {
-          final (seed, _) = await seedRepository.loadSeed(w.seedFingerprint);
-          newWallet = await BitcoinWalletHelper.loadNativeSdk(w, seed!);
-        }
-      } else if (w is LiquidWallet) {
-        LiquidWallet lw = w;
-        if (lw.lwkWallet == null) {
-          final (seed, _) = await seedRepository.loadSeed(w.seedFingerprint);
-          newWallet = await LiquidWalletHelper.loadNativeSdk(lw, seed!);
-        }
+      List<Wallet> loadedWallets = [];
+      for (int i = 0; i < state.wallets.length; i++) {
+        final w = state.wallets[i];
+        Wallet newWallet = w;
+        final (seed, _) = await seedRepository.loadSeed(w.seedFingerprint);
+        newWallet = await walletRepository.loadNativeSdk(w, seed!);
+        loadedWallets.add(newWallet);
       }
-      loadedWallets.add(newWallet);
-    }
 
-    emit(state.copyWith(wallets: loadedWallets));
+      emit(state.copyWith(wallets: loadedWallets));
 
-    List<Future<Wallet>> syncedFutures = state.wallets.map((w) async {
-      print('Sync :: init :: w.id');
-      final syncedWallet = await Wallet.syncWallet(w);
+      List<Future<Wallet>> syncedFutures = state.wallets.map((w) async {
+        print('Sync :: init :: w.id');
+        final syncedWallet = await Wallet.syncWallet(w);
 
-      print('Sync :: processTxs :: w.id');
-      final (txs, err) = await txRepository.syncTxs(syncedWallet);
-      if (err != null) {
-        addError(err);
+        print('Sync :: processTxs :: w.id');
+        final (txs, err) = await txRepository.syncTxs(syncedWallet);
+        if (err != null) {
+          addError(err);
+          return syncedWallet;
+        }
+        await txRepository.persistTxs(syncedWallet, txs!);
+
+        print('Sync :: processAddress :: w.id');
+        // TODO: Pass old address
+        final (depositAddresses, depositErr) = await addressRepository
+            .syncAddresses(txs, [], AddressKind.deposit, syncedWallet);
+        if (depositErr != null) {
+          addError(depositErr);
+          return syncedWallet;
+        }
+        await addressRepository.persistAddresses(
+            syncedWallet, depositAddresses!);
+
+        // TODO: Pass old address
+        final (changeAddresses, changeErr) = await addressRepository
+            .syncAddresses(txs, [], AddressKind.change, syncedWallet);
+        if (changeErr != null) {
+          addError(changeErr);
+          return syncedWallet;
+        }
+        await addressRepository.persistAddresses(
+            syncedWallet, changeAddresses!);
+
         return syncedWallet;
+      }).toList();
+
+      var completer = Completer();
+
+      int syncedCount = 0;
+      for (int i = 0; i < syncedFutures.length; i++) {
+        syncedFutures[i].then((Wallet result) {
+          if (++syncedCount == syncedFutures.length) {
+            completer.complete();
+          }
+          emit(state.copyWith(wallets: [
+            ...state.wallets.sublist(0, i),
+            result,
+            ...state.wallets.sublist(i + 1),
+          ], syncWalletStatus: [
+            ...state.syncWalletStatus.sublist(0, i),
+            LoadStatus.success,
+            ...state.syncWalletStatus.sublist(i + 1),
+          ]));
+          print('Future at index $i completed with result: $result');
+        }).catchError((error) {
+          if (++syncedCount == syncedFutures.length) {
+            completer.complete();
+          }
+          print('Future at index $i completed with error: $error');
+        });
       }
-      await txRepository.persistTxs(syncedWallet, txs!);
 
-      print('Sync :: processAddress :: w.id');
-      // TODO: Pass old address
-      final (depositAddresses, depositErr) = await addressRepository
-          .syncAddresses(txs, [], AddressKind.deposit, syncedWallet);
-      if (depositErr != null) {
-        addError(depositErr);
-        return syncedWallet;
+      await completer.future;
+
+      for (Wallet w in state.wallets) {
+        await walletRepository.persistWallet(w);
       }
-      await addressRepository.persistAddresses(syncedWallet, depositAddresses!);
-
-      // TODO: Pass old address
-      final (changeAddresses, changeErr) = await addressRepository
-          .syncAddresses(txs, [], AddressKind.change, syncedWallet);
-      if (changeErr != null) {
-        addError(changeErr);
-        return syncedWallet;
-      }
-      await addressRepository.persistAddresses(syncedWallet, changeAddresses!);
-
-      return syncedWallet;
-    }).toList();
-
-    var completer = Completer();
-
-    int syncedCount = 0;
-    for (int i = 0; i < syncedFutures.length; i++) {
-      syncedFutures[i].then((Wallet result) {
-        if (++syncedCount == syncedFutures.length) {
-          completer.complete();
-        }
-        emit(state.copyWith(wallets: [
-          ...state.wallets.sublist(0, i),
-          result,
-          ...state.wallets.sublist(i + 1),
-        ], syncWalletStatus: [
-          ...state.syncWalletStatus.sublist(0, i),
-          LoadStatus.success,
-          ...state.syncWalletStatus.sublist(i + 1),
-        ]));
-        print('Future at index $i completed with result: $result');
-      }).catchError((error) {
-        if (++syncedCount == syncedFutures.length) {
-          completer.complete();
-        }
-        print('Future at index $i completed with error: $error');
-      });
+      emit(state.copyWith(status: LoadStatus.success));
+      print('OnSyncAllWallets: DONE');
+    } catch (error, stackTrace) {
+      addError(error, stackTrace);
     }
-
-    await completer.future;
-
-    for (Wallet w in state.wallets) {
-      await walletRepository.persistWallet(w);
-    }
-    emit(state.copyWith(status: LoadStatus.success));
-    print('OnSyncAllWallets: DONE');
   }
 
   void _onSyncWallet(SyncWallet event, Emitter<WalletState> emit) async {}
@@ -204,7 +199,23 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
       emit(state.copyWith(
           status: LoadStatus.failure, error: error.error as Error));
       logger.error(error.error.toString(), stackTrace);
-      _showErrorDialog(context, error.error as Error);
+      // _showErrorDialog(context, error.error as Error);
+      super.onError(error.error, stackTrace);
+    } else if (error is JsonParseException) {
+      emit(state.copyWith(
+          status: LoadStatus.failure, error: error.error as Error));
+      logger.error('ParseException (${error.modal}): ${error.error.toString()}',
+          stackTrace);
+      // _showErrorDialog(context, error.error as Error);
+      super.onError(error.error, stackTrace);
+    } else if (error is BdkElectrumException) {
+      emit(state.copyWith(
+          status: LoadStatus
+              .failure)); // TODO: How to set error, when I get Exception or change the state to hold Exception
+      logger.error(
+          'BdkElectrumException ${error.serverUrl ?? ''}: ${error.error.toString()}',
+          stackTrace);
+      // _showErrorDialog(context, error.error as Error);
       super.onError(error.error, stackTrace);
     } else {
       logger.error(error.toString(), stackTrace);

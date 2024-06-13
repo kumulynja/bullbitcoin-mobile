@@ -8,20 +8,27 @@ import 'package:go_router/go_router.dart';
 class WalletRecoverPageCubit extends Cubit<WalletRecoverPageState> {
   final SeedRepository seedRepository;
 
-  WalletRecoverPageCubit({required this.seedRepository}) : super(const WalletRecoverPageState());
+  WalletRecoverPageCubit({required this.seedRepository})
+      : super(const WalletRecoverPageState());
 
-  void navigateToWalletTypePage(
-      BuildContext context, String mnemonic, String passphrase, String walletName, String walletType) {
+  void navigateToWalletTypePage(BuildContext context, String mnemonic,
+      String passphrase, String walletName, String walletType) {
     final baseRoute = WalletTypeSelectionPage.route;
-    final mnemonicParam = '${WalletTypeSelectionPage.routeQParamMnemonic}=$mnemonic';
-    final passphraseParam = '${WalletTypeSelectionPage.routeQParamPassphrase}=$passphrase';
-    final walletNameParam = '${WalletTypeSelectionPage.routeQParamWalletName}=$walletName';
-    final walletTypeParam = '${WalletTypeSelectionPage.routeQParamWalletType}=$walletType';
+    final mnemonicParam =
+        '${WalletTypeSelectionPage.routeQParamMnemonic}=$mnemonic';
+    final passphraseParam =
+        '${WalletTypeSelectionPage.routeQParamPassphrase}=$passphrase';
+    final walletNameParam =
+        '${WalletTypeSelectionPage.routeQParamWalletName}=$walletName';
+    final walletTypeParam =
+        '${WalletTypeSelectionPage.routeQParamWalletType}=$walletType';
 
-    final finalRoute = '$baseRoute?$mnemonicParam&$passphraseParam&$walletNameParam&$walletTypeParam';
+    final finalRoute =
+        '$baseRoute?$mnemonicParam&$passphraseParam&$walletNameParam&$walletTypeParam';
     GoRouter.of(context).push(finalRoute);
   }
 
+  // TODO: BdkException handling should happen here?
   Future<String?> validateSeedPhrase(String seedphrase) {
     return seedRepository.validateSeedPhrase(seedphrase);
   }

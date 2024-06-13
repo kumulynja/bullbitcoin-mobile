@@ -3,6 +3,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:bb_arch/_pkg/error.dart';
+import 'package:bb_arch/_pkg/misc.dart';
 import 'package:bb_arch/_pkg/tx/models/liquid_tx.dart';
 import 'package:bb_arch/_pkg/wallet/models/bitcoin_wallet.dart';
 import 'package:bb_arch/_pkg/wallet/models/wallet.dart';
@@ -44,7 +46,8 @@ class BitcoinTx extends Tx with _$BitcoinTx {
   }) = _BitcoinTx;
   BitcoinTx._();
 
-  factory BitcoinTx.fromJson(Map<String, dynamic> json) => _$BitcoinTxFromJson(json);
+  factory BitcoinTx.fromJson(Map<String, dynamic> json) =>
+      safeFromJson(json, _$BitcoinTxFromJson, 'BitcoinTx');
 
   static Future<Tx> loadFromNative(dynamic tx, BitcoinWallet wallet) async {
     if (tx is! bdk.TransactionDetails) {
@@ -105,9 +108,11 @@ class BitcoinTx extends Tx with _$BitcoinTx {
 @freezed
 @Embedded(ignore: {'copyWith'})
 class BitcoinOutPoint with _$BitcoinOutPoint {
-  const factory BitcoinOutPoint({@Default('') String txid, @Default(0) int vout}) = _BitcoinOutPoint;
+  const factory BitcoinOutPoint(
+      {@Default('') String txid, @Default(0) int vout}) = _BitcoinOutPoint;
   // BitcoinOutPoint._();
-  factory BitcoinOutPoint.fromJson(Map<String, dynamic> json) => _$BitcoinOutPointFromJson(json);
+  factory BitcoinOutPoint.fromJson(Map<String, dynamic> json) =>
+      safeFromJson(json, _$BitcoinOutPointFromJson, 'BitcoinOutPoint');
 }
 
 @freezed
@@ -122,11 +127,14 @@ class BitcoinTxIn with _$BitcoinTxIn {
       List<String> previousOut = (txIn['previous_output'] as String).split(':');
 
       return BitcoinTxIn(
-        previousOutput: BitcoinOutPoint(txid: previousOut[0], vout: int.parse(previousOut[1])),
+        previousOutput: BitcoinOutPoint(
+            txid: previousOut[0], vout: int.parse(previousOut[1])),
         scriptSig: txIn['script_sig'],
         scriptSigStr: scriptSigStr.toString(),
         sequence: txIn['sequence'],
-        witness: (txIn['witness'] as Iterable<dynamic>).map((e) => e.toString()).toList(), //
+        witness: (txIn['witness'] as Iterable<dynamic>)
+            .map((e) => e.toString())
+            .toList(), //
       );
     } catch (e) {
       print('Error: $e');
@@ -147,13 +155,15 @@ class BitcoinTxIn with _$BitcoinTxIn {
       @Default([]) List<String> witness}) = _BitcoinTxIn;
   BitcoinTxIn._();
 
-  factory BitcoinTxIn.fromJson(Map<String, dynamic> json) => _$BitcoinTxInFromJson(json);
+  factory BitcoinTxIn.fromJson(Map<String, dynamic> json) =>
+      safeFromJson(json, _$BitcoinTxInFromJson, 'BitcoinTxIn');
 }
 
 @freezed
 @Embedded(ignore: {'copyWith'})
 class BitcoinTxOut with _$BitcoinTxOut {
-  static Future<BitcoinTxOut> fromNative(dynamic txOut, NetworkType network) async {
+  static Future<BitcoinTxOut> fromNative(
+      dynamic txOut, NetworkType network) async {
     try {
       final scriptPubKey = await bdk.Script.create(
         hexDecoder.convert(txOut['script_pubkey']!) as Uint8List,
@@ -165,16 +175,21 @@ class BitcoinTxOut with _$BitcoinTxOut {
       );
 
       return BitcoinTxOut(
-          value: txOut['value'] ?? 0, scriptPubKey: txOut['script_pubkey'], address: addressStruct.toString());
+          value: txOut['value'] ?? 0,
+          scriptPubKey: txOut['script_pubkey'],
+          address: addressStruct.toString());
     } catch (e) {
       print('Error: $e');
       return BitcoinTxOut(value: 0, scriptPubKey: '', address: '');
     }
   }
 
-  factory BitcoinTxOut({@Default(0) int value, @Default('') String scriptPubKey, @Default('') String address}) =
-      _BitcoinTxOut;
+  factory BitcoinTxOut(
+      {@Default(0) int value,
+      @Default('') String scriptPubKey,
+      @Default('') String address}) = _BitcoinTxOut;
   BitcoinTxOut._();
 
-  factory BitcoinTxOut.fromJson(Map<String, dynamic> json) => _$BitcoinTxOutFromJson(json);
+  factory BitcoinTxOut.fromJson(Map<String, dynamic> json) =>
+      safeFromJson(json, _$BitcoinTxOutFromJson, 'BitcoinTxOut');
 }

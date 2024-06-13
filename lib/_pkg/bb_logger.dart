@@ -7,13 +7,18 @@ class BBLogger {
   late Logger _logger;
 
   init() async {
-    const bool isProduction = true; // bool.fromEnvironment('dart.vm.product');
+    const bool isProduction = false; // bool.fromEnvironment('dart.vm.product');
     if (isProduction) {
       await _initLogFile();
     }
     _logger = Logger(
       printer: HybridPrinter(
-          PrettyPrinter(printEmojis: false, colors: !isProduction),
+          PrettyPrinter(
+            printEmojis: false,
+            colors: !isProduction,
+            methodCount: 8,
+            stackTraceBeginIndex: 0,
+          ),
           info: SimplePrinter(colors: !isProduction)),
       output: isProduction ? FileOutput(_logFile) : ConsoleOutput(),
     );
@@ -35,13 +40,10 @@ class BBLogger {
 
   void log(String message) {
     _logger.i(message);
-    // print(message);
   }
 
   void error(String message, StackTrace stackTrace) {
     _logger.e(message, stackTrace: stackTrace);
-    print(message);
-    print(stackTrace);
   }
 
   Future<List<File>> listLogFiles() async {

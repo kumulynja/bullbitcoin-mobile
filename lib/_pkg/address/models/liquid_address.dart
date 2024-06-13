@@ -1,4 +1,6 @@
 import 'package:bb_arch/_pkg/address/models/address.dart';
+import 'package:bb_arch/_pkg/error.dart';
+import 'package:bb_arch/_pkg/misc.dart';
 import 'package:bb_arch/_pkg/tx/models/liquid_tx.dart';
 import 'package:bb_arch/_pkg/tx/models/tx.dart';
 import 'package:bb_arch/_pkg/wallet/models/liquid_wallet.dart';
@@ -31,7 +33,8 @@ class LiquidAddress extends Address with _$LiquidAddress {
   }) = _LiquidAddress;
   LiquidAddress._();
 
-  factory LiquidAddress.fromJson(Map<String, dynamic> json) => _$LiquidAddressFromJson(json);
+  factory LiquidAddress.fromJson(Map<String, dynamic> json) =>
+      safeFromJson(json, _$LiquidAddressFromJson, 'LiquidAddress');
 
   static Future<LiquidAddress> getLastUnused(LiquidWallet wallet) async {
     final lastUnused = await wallet.lwkWallet!.lastUnusedAddress();
@@ -46,7 +49,8 @@ class LiquidAddress extends Address with _$LiquidAddress {
         walletId: wallet.id);
   }
 
-  static Future<Address> loadFromNative(dynamic addr, LiquidWallet wallet) async {
+  static Future<Address> loadFromNative(
+      dynamic addr, LiquidWallet wallet) async {
     if (addr is! lwk.Address) {
       throw TypeError();
     }
@@ -62,8 +66,13 @@ class LiquidAddress extends Address with _$LiquidAddress {
   }
 
   // TODO: Update this, once lwk-dart is updated with required changes
-  static Address processAddress(List<Tx> txs, Address lastUnused, List<Address> oldAddresses, Wallet wallet,
-      AddressKind kind, LiquidAddress finalBitcoinAddr) {
+  static Address processAddress(
+      List<Tx> txs,
+      Address lastUnused,
+      List<Address> oldAddresses,
+      Wallet wallet,
+      AddressKind kind,
+      LiquidAddress finalBitcoinAddr) {
     final Set<LiquidTx> txsPaidToThisAddress = {};
 
     /*

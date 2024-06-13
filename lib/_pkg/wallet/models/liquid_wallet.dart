@@ -1,6 +1,8 @@
 // ignore_for_file: avoid_print, invalid_annotation_target
 
 import 'package:bb_arch/_pkg/address/models/address.dart';
+import 'package:bb_arch/_pkg/error.dart';
+import 'package:bb_arch/_pkg/misc.dart';
 import 'package:bb_arch/_pkg/tx/models/tx.dart';
 import 'package:bb_arch/_pkg/wallet/models/bitcoin_wallet.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -26,15 +28,24 @@ class LiquidWallet extends Wallet with _$LiquidWallet {
     DateTime? lastBackupTested,
     DateTime? lastSync,
     @Default(ImportTypes.words12) ImportTypes importType,
-    @JsonKey(includeFromJson: false, includeToJson: false) lwk.Wallet? lwkWallet,
+    @JsonKey(includeFromJson: false, includeToJson: false)
+    lwk.Wallet? lwkWallet,
   }) = _LiquidWallet;
   LiquidWallet._();
 
-  factory LiquidWallet.fromJson(Map<String, dynamic> json) => _$LiquidWalletFromJson(json);
+  factory LiquidWallet.fromJson(Map<String, dynamic> json) =>
+      safeFromJson(json, _$LiquidWalletFromJson, 'LiquidWallet');
 
-  static Future<Wallet> setupNewWallet(String mnemonicStr, NetworkType network, {String name = 'Liquid wallet'}) async {
+  static Future<Wallet> setupNewWallet(String mnemonicStr, NetworkType network,
+      {String name = 'Liquid wallet'}) async {
     return LiquidWallet(
-        id: name, name: name, balance: 0, txCount: 0, type: WalletType.Liquid, network: network, seedFingerprint: '');
+        id: name,
+        name: name,
+        balance: 0,
+        txCount: 0,
+        type: WalletType.Liquid,
+        network: network,
+        seedFingerprint: '');
   }
 
   @override

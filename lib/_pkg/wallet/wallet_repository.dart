@@ -50,8 +50,8 @@ class WalletRepository {
       return ws;
     } on IsarError catch (e, stackTrace) {
       throw Error.throwWithStackTrace(DatabaseException(e), stackTrace);
-    } on ParseError catch (e, stackTrace) {
-      throw Error.throwWithStackTrace(ParseException(e), stackTrace);
+    } on JsonParseException {
+      rethrow;
     } catch (e, stackTrace) {
       throw Error.throwWithStackTrace(WalletLoadException(e), stackTrace);
     }
@@ -76,5 +76,25 @@ class WalletRepository {
     }
     List<Wallet> ws = [];
     return (ws, null);
+  }
+
+  Future<Wallet> loadNativeSdk(Wallet w, Seed seed) async {
+    try {
+      Wallet newWallet = w;
+      if (w is BitcoinWallet) {
+        if (w.bdkWallet == null) {
+          newWallet = await BitcoinWalletHelper.loadNativeSdk(w, seed);
+        }
+      } else if (w is LiquidWallet) {
+        if (w.lwkWallet == null) {
+          newWallet = await LiquidWalletHelper.loadNativeSdk(w, seed);
+        }
+      }
+      return newWallet;
+    } on BdkElectrumException {
+      rethrow;
+    } catch (e, stackTrace) {
+      throw Error.throwWithStackTrace(Exception(e), stackTrace);
+    }
   }
 }

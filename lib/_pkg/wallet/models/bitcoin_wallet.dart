@@ -1,6 +1,8 @@
 // ignore_for_file: avoid_print, invalid_annotation_target
 
 import 'package:bb_arch/_pkg/address/models/address.dart';
+import 'package:bb_arch/_pkg/error.dart';
+import 'package:bb_arch/_pkg/misc.dart';
 import 'package:bb_arch/_pkg/tx/models/tx.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:bdk_flutter/bdk_flutter.dart' as bdk;
@@ -19,22 +21,36 @@ class BitcoinWallet extends Wallet with _$BitcoinWallet {
     required WalletType type,
     required NetworkType network,
     required String seedFingerprint,
+    // required bool breaker, // TODO: Added for Parse testing
     @Default(BitcoinScriptType.bip84) BitcoinScriptType scriptType,
     @Default(false) bool backupTested,
     DateTime? lastBackupTested,
     DateTime? lastSync,
     @Default(ImportTypes.words12) ImportTypes importType,
-    @JsonKey(includeFromJson: false, includeToJson: false) bdk.Blockchain? bdkBlockchain,
-    @JsonKey(includeFromJson: false, includeToJson: false) bdk.Wallet? bdkWallet,
-    @JsonKey(includeFromJson: false, includeToJson: false) bdk.Wallet? bdkSigningWallet,
+    @JsonKey(includeFromJson: false, includeToJson: false)
+    bdk.Blockchain? bdkBlockchain,
+    @JsonKey(includeFromJson: false, includeToJson: false)
+    bdk.Wallet? bdkWallet,
+    @JsonKey(includeFromJson: false, includeToJson: false)
+    bdk.Wallet? bdkSigningWallet,
   }) = _BitcoinWallet;
   BitcoinWallet._();
 
-  factory BitcoinWallet.fromJson(Map<String, dynamic> json) => _$BitcoinWalletFromJson(json);
+  factory BitcoinWallet.fromJson(Map<String, dynamic> json) =>
+      safeFromJson(json, _$BitcoinWalletFromJson, 'BitcoinWallet');
 
-  static Future<Wallet> setupNewWallet(String mnemonicStr, NetworkType network, {String name = 'Wallet'}) async {
+  static Future<Wallet> setupNewWallet(String mnemonicStr, NetworkType network,
+      {String name = 'Wallet'}) async {
     return BitcoinWallet(
-        id: name, name: name, balance: 0, txCount: 0, type: WalletType.Bitcoin, network: network, seedFingerprint: '');
+      id: name,
+      name: name,
+      balance: 0,
+      txCount: 0,
+      type: WalletType.Bitcoin,
+      network: network,
+      // breaker: true,
+      seedFingerprint: '',
+    );
   }
 
   @override
@@ -56,9 +72,11 @@ class BitcoinWallet extends Wallet with _$BitcoinWallet {
     bdk.AddressInfo? bdkAddress;
 
     if (kind == AddressKind.deposit) {
-      bdkAddress = await bdkWallet?.getAddress(addressIndex: bdk.AddressIndex.peek(index: index));
+      bdkAddress = await bdkWallet?.getAddress(
+          addressIndex: bdk.AddressIndex.peek(index: index));
     } else {
-      bdkAddress = await bdkWallet?.getInternalAddress(addressIndex: bdk.AddressIndex.peek(index: index));
+      bdkAddress = await bdkWallet?.getInternalAddress(
+          addressIndex: bdk.AddressIndex.peek(index: index));
     }
     return Address.loadFromNative(bdkAddress, this, kind);
   }

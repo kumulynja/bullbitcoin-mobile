@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_print, invalid_annotation_target
 
+import 'package:bb_arch/_pkg/error.dart';
+import 'package:bb_arch/_pkg/misc.dart';
 import 'package:bb_arch/_pkg/tx/models/bitcoin_tx.dart';
 import 'package:bb_arch/_pkg/wallet/models/liquid_wallet.dart';
 import 'package:bb_arch/_pkg/wallet/models/wallet.dart';
@@ -39,20 +41,26 @@ class LiquidTx extends Tx with _$LiquidTx {
   }) = _LiquidTx;
   LiquidTx._();
 
-  factory LiquidTx.fromJson(Map<String, dynamic> json) => _$LiquidTxFromJson(json);
+  factory LiquidTx.fromJson(Map<String, dynamic> json) =>
+      safeFromJson(json, _$LiquidTxFromJson, 'LiquidTx');
 
   static Future<Tx> loadFromNative(dynamic tx, LiquidWallet wallet) async {
     if (tx is! lwk.Tx) {
       throw TypeError();
     }
 
-    String assetIdToPick = wallet.network == NetworkType.Mainnet ? lwk.lBtcAssetId : lwk.lTestAssetId;
+    String assetIdToPick = wallet.network == NetworkType.Mainnet
+        ? lwk.lBtcAssetId
+        : lwk.lTestAssetId;
 
     lwk.Tx t = tx;
     //t.inputs[0].
     //t.outputs[0].
     final balances = t.balances;
-    int finalBalance = balances.where((b) => b.assetId == assetIdToPick).map((e) => e.value).first;
+    int finalBalance = balances
+        .where((b) => b.assetId == assetIdToPick)
+        .map((e) => e.value)
+        .first;
 
     List<LiquidTxIn> inputs = [];
     for (int i = 0; i < t.inputs.length; i++) {
@@ -89,9 +97,11 @@ class LiquidTx extends Tx with _$LiquidTx {
 @freezed
 @Embedded(ignore: {'copyWith'})
 class LiquidOutPoint with _$LiquidOutPoint {
-  const factory LiquidOutPoint({@Default('') String txid, @Default(0) int vout}) = _LiquidOutPoint;
+  const factory LiquidOutPoint(
+      {@Default('') String txid, @Default(0) int vout}) = _LiquidOutPoint;
   // LiquidOutPoint._();
-  factory LiquidOutPoint.fromJson(Map<String, dynamic> json) => _$LiquidOutPointFromJson(json);
+  factory LiquidOutPoint.fromJson(Map<String, dynamic> json) =>
+      safeFromJson(json, _$LiquidOutPointFromJson, 'LiquidOutPoint');
 }
 
 // TODO: Incomplete: Need update in lwk-dart
@@ -101,12 +111,15 @@ class LiquidTxIn with _$LiquidTxIn {
   static Future<LiquidTxIn> fromNative(lwk.TxOut txIn) async {
     try {
       return LiquidTxIn(
-        previousOutput: LiquidOutPoint(txid: txIn.outpoint.txid, vout: txIn.outpoint.vout),
+        previousOutput:
+            LiquidOutPoint(txid: txIn.outpoint.txid, vout: txIn.outpoint.vout),
         scriptSig: txIn.scriptPubkey,
       );
     } catch (e) {
       print('Error: $e');
-      return LiquidTxIn(previousOutput: const LiquidOutPoint(txid: '', vout: 0), scriptSig: '');
+      return LiquidTxIn(
+          previousOutput: const LiquidOutPoint(txid: '', vout: 0),
+          scriptSig: '');
     }
   }
 
@@ -116,25 +129,33 @@ class LiquidTxIn with _$LiquidTxIn {
   }) = _LiquidTxIn;
   LiquidTxIn._();
 
-  factory LiquidTxIn.fromJson(Map<String, dynamic> json) => _$LiquidTxInFromJson(json);
+  factory LiquidTxIn.fromJson(Map<String, dynamic> json) =>
+      safeFromJson(json, _$LiquidTxInFromJson, 'LiquidTxIn');
 }
 
 // TODO: Incomplete: Need update in lwk-dart
 @freezed
 @Embedded(ignore: {'copyWith'})
 class LiquidTxOut with _$LiquidTxOut {
-  static Future<LiquidTxOut> fromNative(lwk.TxOut txOut, NetworkType network) async {
+  static Future<LiquidTxOut> fromNative(
+      lwk.TxOut txOut, NetworkType network) async {
     try {
-      return LiquidTxOut(value: txOut.unblinded.value, scriptPubKey: txOut.scriptPubkey, address: txOut.scriptPubkey);
+      return LiquidTxOut(
+          value: txOut.unblinded.value,
+          scriptPubKey: txOut.scriptPubkey,
+          address: txOut.scriptPubkey);
     } catch (e) {
       print('Error: $e');
       return LiquidTxOut(value: 0, scriptPubKey: '', address: '');
     }
   }
 
-  factory LiquidTxOut({@Default(0) int value, @Default('') String scriptPubKey, @Default('') String address}) =
-      _LiquidTxOut;
+  factory LiquidTxOut(
+      {@Default(0) int value,
+      @Default('') String scriptPubKey,
+      @Default('') String address}) = _LiquidTxOut;
   LiquidTxOut._();
 
-  factory LiquidTxOut.fromJson(Map<String, dynamic> json) => _$LiquidTxOutFromJson(json);
+  factory LiquidTxOut.fromJson(Map<String, dynamic> json) =>
+      safeFromJson(json, _$LiquidTxOutFromJson, 'LiquidTxOut');
 }

@@ -1,4 +1,6 @@
 import 'package:bb_arch/_pkg/address/models/address.dart';
+import 'package:bb_arch/_pkg/error.dart';
+import 'package:bb_arch/_pkg/misc.dart';
 import 'package:bb_arch/_pkg/tx/models/bitcoin_tx.dart';
 import 'package:bb_arch/_pkg/tx/models/tx.dart';
 import 'package:bb_arch/_pkg/wallet/models/bitcoin_wallet.dart';
@@ -29,9 +31,11 @@ class BitcoinAddress extends Address with _$BitcoinAddress {
   }) = _BitcoinAddress;
   BitcoinAddress._();
 
-  factory BitcoinAddress.fromJson(Map<String, dynamic> json) => _$BitcoinAddressFromJson(json);
+  factory BitcoinAddress.fromJson(Map<String, dynamic> json) =>
+      safeFromJson(json, _$BitcoinAddressFromJson, 'BitcoinAddress');
 
-  static Future<BitcoinAddress> getLastUnused(BitcoinWallet wallet, AddressKind kind) async {
+  static Future<BitcoinAddress> getLastUnused(
+      BitcoinWallet wallet, AddressKind kind) async {
     bdk.AddressInfo lastUnused;
 
     if (kind == AddressKind.deposit) {
@@ -53,7 +57,8 @@ class BitcoinAddress extends Address with _$BitcoinAddress {
         walletId: wallet.id);
   }
 
-  static Future<Address> loadFromNative(dynamic addr, BitcoinWallet wallet, AddressKind kind) async {
+  static Future<Address> loadFromNative(
+      dynamic addr, BitcoinWallet wallet, AddressKind kind) async {
     if (addr is! bdk.AddressInfo) {
       throw TypeError();
     }
@@ -68,8 +73,13 @@ class BitcoinAddress extends Address with _$BitcoinAddress {
   }
 
   // TODO: Think of optimizing this function. Got 4 nested loops: 3 inside the function, 1 outside
-  static Address processAddress(List<Tx> txs, Address lastUnused, List<Address> oldAddresses, Wallet wallet,
-      AddressKind kind, BitcoinAddress finalBitcoinAddr) {
+  static Address processAddress(
+      List<Tx> txs,
+      Address lastUnused,
+      List<Address> oldAddresses,
+      Wallet wallet,
+      AddressKind kind,
+      BitcoinAddress finalBitcoinAddr) {
     final Set<BitcoinTx> txsPaidToThisAddress = {};
 
     // Loop to check receive txs to this address
@@ -104,18 +114,21 @@ class BitcoinAddress extends Address with _$BitcoinAddress {
           final paidTx = txsPaidToThisAddress.elementAt(k);
 
           if (paidTx.id == txin.previousOutput.txid &&
-              paidTx.outputs[txin.previousOutput.vout].address == finalBitcoinAddr.address) {
+              paidTx.outputs[txin.previousOutput.vout].address ==
+                  finalBitcoinAddr.address) {
             // Single txn spending from multiple UTXOs should be counted only once.
             if (txnCounted) {
               finalBitcoinAddr = finalBitcoinAddr.copyWith(
                 status: AddressStatus.used,
-                balance: finalBitcoinAddr.balance - paidTx.outputs[txin.previousOutput.vout].value,
+                balance: finalBitcoinAddr.balance -
+                    paidTx.outputs[txin.previousOutput.vout].value,
               );
             } else {
               finalBitcoinAddr = finalBitcoinAddr.copyWith(
                 status: AddressStatus.used,
                 txCount: finalBitcoinAddr.txCount + 1,
-                balance: finalBitcoinAddr.balance - paidTx.outputs[txin.previousOutput.vout].value,
+                balance: finalBitcoinAddr.balance -
+                    paidTx.outputs[txin.previousOutput.vout].value,
                 sendTxIds: [...finalBitcoinAddr.sendTxIds, btx.id],
               );
               txnCounted = true;

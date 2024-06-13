@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_print, invalid_annotation_target
 
+import 'package:bb_arch/_pkg/error.dart';
+import 'package:bb_arch/_pkg/misc.dart';
 import 'package:bb_arch/_pkg/wallet/models/bitcoin_wallet.dart';
 import 'package:bb_arch/_pkg/wallet/models/wallet.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -20,8 +22,10 @@ class Seed with _$Seed {
     required String mnemonic,
     required String passphrase,
     @Index() required String fingerprint,
-    @Enumerated(EnumType.ordinal) required WalletType walletType, // TODO: Needed here?
-    @Enumerated(EnumType.ordinal) required NetworkType network, // TODO: Needed here?
+    @Enumerated(EnumType.ordinal)
+    required WalletType walletType, // TODO: Needed here?
+    @Enumerated(EnumType.ordinal)
+    required NetworkType network, // TODO: Needed here?
   }) = _Seed;
   const Seed._();
 
@@ -30,7 +34,8 @@ class Seed with _$Seed {
   @Index()
   String get id => '${fingerprint}_${walletType.name}_${network.name}';
 
-  factory Seed.fromJson(Map<String, dynamic> json) => _$SeedFromJson(json);
+  factory Seed.fromJson(Map<String, dynamic> json) =>
+      safeFromJson(json, _$SeedFromJson, 'Seed');
 
   Future<(String?, dynamic)> getLwkFingerprint() async {
     // lwk.Wallet.

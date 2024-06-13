@@ -38,9 +38,10 @@ class DatabaseException implements Exception {
 //   const IsarException(Object error) : super(error);
 // }
 
-class ParseException implements Exception {
-  const ParseException(this.error);
+class JsonParseException implements Exception {
+  const JsonParseException(this.error, {this.modal});
   final Object error;
+  final String? modal;
 }
 
 abstract class WalletException implements Exception {
@@ -50,4 +51,14 @@ abstract class WalletException implements Exception {
 
 class WalletLoadException extends WalletException {
   const WalletLoadException(super.error);
+}
+
+abstract class BdkException implements Exception {
+  const BdkException(this.error);
+  final Object error;
+}
+
+class BdkElectrumException extends BdkException {
+  const BdkElectrumException(super.error, {this.serverUrl});
+  final String? serverUrl;
 }

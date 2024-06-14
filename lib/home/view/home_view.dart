@@ -1,12 +1,9 @@
 import 'package:bb_arch/_pkg/bb_logger.dart';
 import 'package:bb_arch/_pkg/misc.dart';
-import 'package:bb_arch/_pkg/tx/models/tx.dart';
-import 'package:bb_arch/_pkg/wallet/models/wallet.dart';
 import 'package:bb_arch/_ui/bb_page.dart';
 import 'package:bb_arch/settings/view/settings_page.dart';
 import 'package:bb_arch/tx/bloc/tx_bloc.dart';
 import 'package:bb_arch/tx/widgets/tx_list.dart';
-import 'package:bb_arch/wallet/bloc/wallet_bloc.dart';
 import 'package:bb_arch/wallet/bloc/walletlist_bloc.dart';
 import 'package:bb_arch/wallet/widgets/wallets_list.dart';
 import 'package:flutter/material.dart';
@@ -18,15 +15,18 @@ class HomeScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final logger = RepositoryProvider.of<BBLogger>(context);
     final loadStatus =
         context.select((WalletListBloc cubit) => cubit.state.status);
-    final walletBlocs =
-        context.select((WalletListBloc cubit) => cubit.state.walletBlocs);
-    final txsStatus = context.select((TxBloc cubit) => cubit.state.status);
-    final txs = context.select((TxBloc cubit) => cubit.state.txs);
+    // final txsStatus = context.select((TxBloc cubit) => cubit.state.status);
 
-    logger.log('HomeView :: build : $loadStatus');
+    /*
+    final finalStatus =
+        loadStatus == LoadStatus.success && txsStatus == LoadStatus.success
+            ? LoadStatus.success
+            : LoadStatus.loading;
+            */
+
+    BBLogger().logBuild('HomeScaffold :: build : $loadStatus');
 
     return BBScaffold(
       title: 'Bull Bitcoin',
@@ -64,12 +64,8 @@ class HomeScaffold extends StatelessWidget {
         ],
       ),
       child: loadStatus == LoadStatus.success
-          ? HomeView(
-              walletBlocs: walletBlocs,
-              txsStatus: txsStatus,
-              txs: txs,
-            )
-          : Text('Loading...'),
+          ? const HomeView()
+          : const Text('Loading...'),
     );
   }
 }
@@ -77,22 +73,19 @@ class HomeScaffold extends StatelessWidget {
 class HomeView extends StatelessWidget {
   const HomeView({
     super.key,
-    required this.walletBlocs,
-    required this.txsStatus,
-    required this.txs,
   });
-
-  final List<WalletBloc> walletBlocs;
-  final LoadStatus txsStatus;
-  final List<Tx> txs;
 
   @override
   Widget build(BuildContext context) {
+    final txs = context.select((TxBloc cubit) => cubit.state.txs);
+    final txsStatus = context.select((TxBloc cubit) => cubit.state.status);
+    BBLogger().logBuild('HomeView :: build');
+
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: WalletList(walletBlocs: walletBlocs),
+        const Padding(
+          padding: EdgeInsets.all(8.0),
+          child: WalletList(),
         ),
         Container(
           color: Colors.grey,
@@ -103,7 +96,7 @@ class HomeView extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: txsStatus == LoadStatus.loading
                 ? const CircularProgressIndicator()
-                : TxList(
+                : TxListWidget(
                     txs: txs,
                   ),
           ),

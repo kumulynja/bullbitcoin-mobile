@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:bb_arch/_pkg/bb_logger.dart';
 import 'package:bb_arch/_pkg/error.dart';
 import 'package:bb_arch/_pkg/misc.dart';
 import 'package:bb_arch/_pkg/tx/models/liquid_tx.dart';
@@ -97,7 +98,6 @@ class BitcoinTx extends Tx with _$BitcoinTx {
         walletId: wallet.id,
       );
     } catch (e) {
-      print(e);
       rethrow;
     }
   }

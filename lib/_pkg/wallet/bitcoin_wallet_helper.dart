@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:bb_arch/_pkg/bb_logger.dart';
 import 'package:bb_arch/_pkg/constants.dart';
 import 'package:bb_arch/_pkg/error.dart';
 import 'package:bb_arch/_pkg/seed/models/seed.dart';
@@ -56,7 +57,7 @@ class BitcoinWalletHelper {
       bdk.Network network,
       bdk.KeychainKind keychainKind,
       String sourceFingerprint) async {
-    print('deriving descriptor: $path');
+    BBLogger().log('deriving descriptor: $path');
     final xpriv =
         await rootXprv.derive(await bdk.DerivationPath.create(path: path));
     final xpub = await xpriv.asPublic();
@@ -138,7 +139,7 @@ class BitcoinWalletHelper {
       throw ("Seed is null");
     }
 
-    print(
+    BBLogger().log(
         'initializing wallet with bip path: $scriptType / ${scriptType.path} / ${scriptType.name}');
 
     final network = seed.network;
@@ -196,7 +197,7 @@ class BitcoinWalletHelper {
 
   static Future<BitcoinWallet> loadNativeSdk(BitcoinWallet w, Seed seed) async {
     try {
-      print('Loading native sdk for bitcoin wallet');
+      BBLogger().log('Loading native sdk for bitcoin wallet');
 
       if (w.importType == ImportTypes.words12) {
         BitcoinWallet loadedWallet =
@@ -224,7 +225,7 @@ class BitcoinWalletHelper {
   }
 
   static Future<Wallet> syncWallet(BitcoinWallet w) async {
-    print('Syncing via bdk');
+    BBLogger().log('Syncing via bdk');
 
     if (w.bdkWallet == null) {
       throw ('bdk not initialized');
@@ -234,7 +235,7 @@ class BitcoinWalletHelper {
 
     final bal = await w.bdkWallet?.getBalance();
     final balance = bal?.confirmed ?? 0;
-    print('balance is $balance');
+    BBLogger().log('balance is $balance');
 
     final txs = await w.bdkWallet?.listTransactions(false);
 

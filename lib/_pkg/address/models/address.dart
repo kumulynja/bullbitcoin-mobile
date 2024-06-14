@@ -96,7 +96,8 @@ class Address {
     throw UnimplementedError('Unsupported Address subclass');
   }
 
-  static Future<Address> loadFromNative(dynamic addr, Wallet w, AddressKind kind) async {
+  static Future<Address> loadFromNative(
+      dynamic addr, Wallet w, AddressKind kind) async {
     if (w.type == WalletType.Bitcoin) {
       return BitcoinAddress.loadFromNative(addr, w as BitcoinWallet, kind);
     } else if (w.type == WalletType.Liquid) {
@@ -105,13 +106,13 @@ class Address {
     throw UnimplementedError('Unsupported Tx subclass');
   }
 
-  static Future<List<Address>> syncAddresses(
-      List<Tx> txs, Address lastUnused, List<Address> oldAddresses, Wallet wallet, AddressKind kind) async {
+  static Future<List<Address>> syncAddresses(List<Tx> txs, Address lastUnused,
+      List<Address> oldAddresses, Wallet wallet, AddressKind kind) async {
     List<Address> addresses = [];
 
     for (var i = 0; i <= lastUnused.index; i++) {
       final addr = await wallet.getAddress(i, kind);
-      print(addr.address);
+      // print(addr.address);
       // TODO: How to make contains work with manually implementing == operator? in Address
       // bool exists = oldAddresses.contains(addr);
       // Address finalAddr = exists ? oldAddresses.firstWhere((element) => element.address == addr.address) : addr;
@@ -119,12 +120,12 @@ class Address {
 
       // Pick from Txs
       if (wallet.type == WalletType.Bitcoin) {
-        Address finalBitcoinAddr =
-            BitcoinAddress.processAddress(txs, lastUnused, oldAddresses, wallet, kind, addr as BitcoinAddress);
+        Address finalBitcoinAddr = BitcoinAddress.processAddress(txs,
+            lastUnused, oldAddresses, wallet, kind, addr as BitcoinAddress);
         addresses.add(finalBitcoinAddr);
       } else if (wallet.type == WalletType.Liquid) {
-        Address finalBitcoinAddr =
-            LiquidAddress.processAddress(txs, lastUnused, oldAddresses, wallet, kind, addr as LiquidAddress);
+        Address finalBitcoinAddr = LiquidAddress.processAddress(
+            txs, lastUnused, oldAddresses, wallet, kind, addr as LiquidAddress);
         addresses.add(finalBitcoinAddr);
       }
     }

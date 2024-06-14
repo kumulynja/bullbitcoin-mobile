@@ -21,7 +21,6 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
   final TxRepository txRepository;
   final AddressRepository addressRepository;
   final SeedRepository seedRepository;
-  final BBLogger logger;
   Timer? _loadWalletsTimer;
 
   WalletBloc({
@@ -29,7 +28,6 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
     required this.seedRepository,
     required this.txRepository,
     required this.addressRepository,
-    required this.logger,
     required wallet,
   }) : super(WalletState.initial()) {
     on<LoadWallet>(_onLoadWallet);
@@ -41,7 +39,7 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
       add(SyncWallet());
     });
 
-    logger.log('WalletBloc :: Init');
+    BBLogger().logBloc('WalletBloc ${wallet.id} :: Init');
 
     add(LoadWallet(wallet: wallet));
   }
@@ -58,7 +56,7 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
 
   void _onSyncWallet(SyncWallet event, Emitter<WalletState> emit) async {
     try {
-      logger.log('WalletBloc :: SyncWallet');
+      BBLogger().logBloc('WalletBloc ${state.wallet?.id} :: SyncWallet');
       emit(state.copyWith(status: LoadStatus.loading));
       await Future.delayed(const Duration(seconds: 1));
 
@@ -71,14 +69,16 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
 
       final syncedWallet = await Wallet.syncWallet(loadedWallet);
 
-      print('Sync :: processTxs :: w.id');
+      BBLogger().logBloc(
+          'WalletBloc ${state.wallet?.id} :: SyncWallet : process Txs');
       final (txs, err) = await txRepository.syncTxs(syncedWallet);
       if (err != null) {
         addError(err);
       }
       await txRepository.persistTxs(syncedWallet, txs!);
 
-      print('Sync :: processAddress :: w.id');
+      BBLogger().logBloc(
+          'WalletBloc ${state.wallet?.id} :: SyncWallet : process Addresses');
       // TODO: Pass old address
       final (depositAddresses, depositErr) = await addressRepository
           .syncAddresses(txs, [], AddressKind.deposit, syncedWallet);
@@ -98,14 +98,14 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
       await walletRepository.persistWallet(syncedWallet);
 
       emit(state.copyWith(status: LoadStatus.success, wallet: syncedWallet));
-      print('OnSyncAllWallets: DONE');
+      BBLogger().logBloc('WalletBloc ${state.wallet?.id} :: SyncWallet : DONE');
     } catch (error, stackTrace) {
       addError(error, stackTrace);
     }
   }
 
   void _onPersistWallet(PersistWallet event, Emitter<WalletState> emit) async {
-    logger.log('WalletBloc :: PersistWallet');
+    BBLogger().logBloc('WalletBloc ${state.wallet?.id} :: PersistWallet');
     emit(state.copyWith(status: LoadStatus.loading));
     // await Future.delayed(const Duration(milliseconds: 10000));
     await walletRepository.persistWallet(event.wallet);
@@ -117,13 +117,13 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
   //   if (error is WalletLoadException) {
   //     emit(state.copyWith(
   //         status: LoadStatus.failure, error: error.error as Error));
-  //     logger.error(error.error.toString(), stackTrace);
+  //     BBLogger().error(error.error.toString(), stackTrace);
   //     // _showErrorDialog(context, error.error as Error);
   //     super.onError(error.error, stackTrace);
   //   } else if (error is JsonParseException) {
   //     emit(state.copyWith(
   //         status: LoadStatus.failure, error: error.error as Error));
-  //     logger.error('ParseException (${error.modal}): ${error.error.toString()}',
+  //     BBLogger().error('ParseException (${error.modal}): ${error.error.toString()}',
   //         stackTrace);
   //     // _showErrorDialog(context, error.error as Error);
   //     super.onError(error.error, stackTrace);
@@ -131,29 +131,14 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
   //     emit(state.copyWith(
   //         status: LoadStatus
   //             .failure)); // TODO: How to set error, when I get Exception or change the state to hold Exception
-  //     logger.error(
+  //     BBLogger().error(
   //         'BdkElectrumException ${error.serverUrl ?? ''}: ${error.error.toString()}',
   //         stackTrace);
   //     // _showErrorDialog(context, error.error as Error);
   //     super.onError(error.error, stackTrace);
   //   } else {
-  //     logger.error(error.toString(), stackTrace);
+  //     BBLogger().error(error.toString(), stackTrace);
   //     super.onError(error, stackTrace);
   //   }
   // }
-
-  // void _showErrorDialog(BuildContext context, Error error) {
-  // showDialog(
-  //   context: context,
-  //   builder: (context) => AlertDialog(
-  //     title: const Text("Error"),
-  //     content: Text(error.toString()),
-  //     actions: <Widget>[
-  //       ElevatedButton(
-  //         child: const Text("OK"),
-  //         onPressed: () => Navigator.of(context).pop(),
-  //       ),
-  //     ],
-  //   ),
-  // );
 }

@@ -21,7 +21,6 @@ class AddressListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final addressRepository = context.read<AddressRepository>();
     final txRepository = context.read<TxRepository>();
-    final logger = context.read<BBLogger>();
     final selectedWallet = context.select((WalletListBloc cubit) => cubit
         .state.walletBlocs
         .firstWhere((bloc) => bloc.state.wallet?.id == walletId)
@@ -32,7 +31,7 @@ class AddressListPage extends StatelessWidget {
     return MultiBlocProvider(providers: [
       BlocProvider(create: (_) => AddressCubit()),
       BlocProvider(
-          create: (_) => TxBloc(txRepository: txRepository, logger: logger)
+          create: (_) => TxBloc(txRepository: txRepository)
             ..add(LoadTxs(wallet: selectedWallet!))),
       BlocProvider(
           create: (_) => AddressBloc(addrRepository: addressRepository)

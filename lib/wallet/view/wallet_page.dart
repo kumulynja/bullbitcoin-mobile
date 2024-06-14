@@ -23,14 +23,12 @@ class WalletPage extends StatelessWidget {
         .firstWhere((bloc) => bloc.state.wallet?.id == id)
         .state
         .wallet);
-    ;
     final txRepository = context.read<TxRepository>();
-    final logger = context.read<BBLogger>();
 
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-            create: (_) => TxBloc(txRepository: txRepository, logger: logger)
+            create: (_) => TxBloc(txRepository: txRepository)
               ..add(LoadTxs(wallet: wallet!))),
         BlocProvider(create: (_) => WalletPageCubit()),
       ],

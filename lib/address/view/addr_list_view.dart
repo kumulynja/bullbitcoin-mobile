@@ -3,6 +3,7 @@
 import 'package:bb_arch/_pkg/address/models/address.dart';
 import 'package:bb_arch/_pkg/address/models/bitcoin_address.dart';
 import 'package:bb_arch/_pkg/address/models/liquid_address.dart';
+import 'package:bb_arch/_pkg/bb_logger.dart';
 import 'package:bb_arch/_pkg/misc.dart';
 import 'package:bb_arch/_pkg/wallet/models/wallet.dart';
 import 'package:bb_arch/_ui/bb_page.dart';
@@ -49,11 +50,12 @@ class AddressListScaffold extends StatelessWidget {
       loadStatus = LoadStatus.loading;
     }
 
-    print('AddressListScaffold: $loadStatus $addressLoadStatus $txLoadStatus');
+    BBLogger().logBuild(
+        'AddressListScaffold :: build : $loadStatus $addressLoadStatus $txLoadStatus');
 
     return BlocBuilder<TxBloc, TxState>(
       builder: (context, state) {
-        print('AddressListScaffold: txCount: ${state.txs.length}');
+        BBLogger().log('AddressListScaffold: txCount: ${state.txs.length}');
         return BBScaffold(
             title: 'Address list',
             loadStatus: loadStatus,
@@ -92,19 +94,20 @@ class _AddressListView extends State<AddressListView> {
 
   @override
   Widget build(BuildContext context) {
-    print('selectedKind: $selectedKind');
+    BBLogger()
+        .logBuild('AddressListView :: build : selectedKind: $selectedKind');
 
     // TODO: Optimize: This switch takes time for loading.
     Widget listView;
     if (widget.wallet.type == WalletType.Bitcoin) {
       if (selectedKind == AddressKind.deposit) {
-        print('loading with deposit addr');
+        BBLogger().log('loading with deposit addr');
         bitcoinDepositAddressListView ??= BitcoinAddressList(
             walletId: widget.wallet.id,
             addresses: List<BitcoinAddress>.from(widget.depositAddresses));
         listView = bitcoinDepositAddressListView!;
       } else if (selectedKind == AddressKind.change) {
-        print('loading with change addr');
+        BBLogger().log('loading with change addr');
         bitcoinChangeAddressListView ??= BitcoinAddressList(
             walletId: widget.wallet.id,
             addresses: List<BitcoinAddress>.from(widget.changeAddresses));
@@ -130,7 +133,7 @@ class _AddressListView extends State<AddressListView> {
               selectedKind: selectedKind,
               onChange: (Set<AddressKind> newValue) {
                 setState(() {
-                  print('Changing to ${newValue.first}');
+                  BBLogger().log('Changing to ${newValue.first}');
                   selectedKind = newValue.first;
                 });
               },

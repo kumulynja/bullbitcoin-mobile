@@ -94,12 +94,12 @@ class WalletTypeSelectionView extends StatelessWidget {
         final syncStatus = syncStatuses[index];
         return BlocProvider(
           create: (context) => WalletBloc(
-              wallet: w,
-              walletRepository: walletListBloc.walletRepository,
-              txRepository: walletListBloc.txRepository,
-              seedRepository: walletListBloc.seedRepository,
-              addressRepository: walletListBloc.addressRepository,
-              logger: walletListBloc.logger),
+            wallet: w,
+            walletRepository: walletListBloc.walletRepository,
+            txRepository: walletListBloc.txRepository,
+            seedRepository: walletListBloc.seedRepository,
+            addressRepository: walletListBloc.addressRepository,
+          ),
           child: Builder(builder: (context) {
             return ListTile(
               title: Text(

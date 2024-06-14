@@ -58,11 +58,6 @@ class Wallet {
       return (this as LiquidWallet).toJson();
     }
 
-    // print(scriptType);
-    // print(scriptType?.path);
-    // print(scriptType?.name);
-    // print(scriptType?.toString());
-    // print(scriptType?.toString().split('.').last);
     return {
       'isarId': isarId,
       'id': id,

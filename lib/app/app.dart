@@ -12,15 +12,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class App extends StatelessWidget {
-  const App(
-      {super.key,
-      required this.storage,
-      required this.secureStorage,
-      required this.seedRepository,
-      required this.walletRepository,
-      required this.txRepository,
-      required this.addressRepository,
-      required this.logger});
+  const App({
+    super.key,
+    required this.storage,
+    required this.secureStorage,
+    required this.seedRepository,
+    required this.walletRepository,
+    required this.txRepository,
+    required this.addressRepository,
+  });
 
   final HiveStorage storage;
   final SecureStorage secureStorage;
@@ -28,7 +28,6 @@ class App extends StatelessWidget {
   final WalletRepository walletRepository;
   final TxRepository txRepository;
   final AddressRepository addressRepository;
-  final BBLogger logger;
 
   @override
   Widget build(BuildContext context) {
@@ -38,19 +37,18 @@ class App extends StatelessWidget {
         RepositoryProvider.value(value: walletRepository),
         RepositoryProvider.value(value: txRepository),
         RepositoryProvider.value(value: addressRepository),
-        RepositoryProvider.value(value: logger)
       ],
       child: MultiBlocProvider(providers: [
         BlocProvider(
             create: (_) => WalletListBloc(
-                walletRepository: walletRepository,
-                seedRepository: seedRepository,
-                txRepository: txRepository,
-                addressRepository: addressRepository,
-                context: context,
-                logger: logger)
-              ..add(LoadAllWallets())
-              ..add(SyncAllWallets())),
+                  walletRepository: walletRepository,
+                  seedRepository: seedRepository,
+                  txRepository: txRepository,
+                  addressRepository: addressRepository,
+                  context: context,
+                )
+                  ..add(LoadAllWallets())
+                  ..add(SyncAllWallets())),
         BlocProvider(
             create: (_) => WalletSensitiveBloc(
                 walletRepository: walletRepository,

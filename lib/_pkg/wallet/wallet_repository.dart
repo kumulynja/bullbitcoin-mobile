@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'package:bb_arch/_pkg/bb_logger.dart';
 import 'package:bb_arch/_pkg/error.dart';
 import 'package:bb_arch/_pkg/seed/models/seed.dart';
 import 'package:bb_arch/_pkg/storage/hive.dart';
@@ -19,7 +20,7 @@ class WalletRepository {
   Isar? isar;
 
   Future<void> initOnAppStart() async {
-    print('Init on app start');
+    BBLogger().log('Init on app start');
     try {
       final (_, err) = await storage.getValue('appInitDone');
       if (err?.message == 'No Key') {

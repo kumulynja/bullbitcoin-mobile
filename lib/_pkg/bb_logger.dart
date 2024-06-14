@@ -2,7 +2,15 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:logger/logger.dart';
 
+/// This is a singleton
+/// Ref: https://stackoverflow.com/a/12649574/390150
 class BBLogger {
+  static final BBLogger _singleton = BBLogger._internal();
+  factory BBLogger() {
+    return _singleton;
+  }
+  BBLogger._internal();
+
   late File _logFile;
   late Logger _logger;
 
@@ -36,6 +44,14 @@ class BBLogger {
     if (!await _logFile.exists()) {
       await _logFile.create();
     }
+  }
+
+  void logBuild(String message) {
+    log('[render] $message');
+  }
+
+  void logBloc(String message) {
+    log('[bloc] $message');
   }
 
   void log(String message) {

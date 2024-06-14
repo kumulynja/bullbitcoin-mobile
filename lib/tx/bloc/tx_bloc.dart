@@ -14,10 +14,8 @@ part 'tx_event.dart';
 
 class TxBloc extends Bloc<TxEvent, TxState> {
   final TxRepository txRepository;
-  final BBLogger logger;
 
-  TxBloc({required this.txRepository, required this.logger})
-      : super(const TxState()) {
+  TxBloc({required this.txRepository}) : super(const TxState()) {
     on<FetchLatestTxsAcrossWallets>(_onFetchLatestTxsAcrossWallets);
     on<LoadTxs>(_onLoadTxs);
     // on<SyncTxs>(_onSyncTxs);
@@ -29,7 +27,9 @@ class TxBloc extends Bloc<TxEvent, TxState> {
       FetchLatestTxsAcrossWallets event, Emitter<TxState> emit) async {
     emit(state.copyWith(status: LoadStatus.loading));
 
-    logger.log('TxBloc :: FetchLatestTxsAcrossWallets : ${event.limit}');
+    BBLogger()
+        .logBloc('TxBloc :: FetchLatestTxsAcrossWallets : ${event.limit}');
+    await Future.delayed(const Duration(seconds: 15));
 
     final (txs, err) =
         await txRepository.fetchLatestTxsAcrossWallets(event.limit);
@@ -44,7 +44,7 @@ class TxBloc extends Bloc<TxEvent, TxState> {
   void _onLoadTxs(LoadTxs event, Emitter<TxState> emit) async {
     emit(state.copyWith(status: LoadStatus.loading));
 
-    logger.log('TxBloc :: LoadTxs : ${event.wallet.name}');
+    BBLogger().logBloc('TxBloc :: LoadTxs : ${event.wallet.name}');
 
     final (txs, err) = await txRepository.listTxs(event.wallet);
     if (err != null) {
@@ -72,14 +72,14 @@ class TxBloc extends Bloc<TxEvent, TxState> {
   */
 
   void _onSelectTx(SelectTx event, Emitter<TxState> emit) async {
-    logger.log('TxBloc :: SelectTx : ${event.tx.id}');
+    BBLogger().logBloc('TxBloc :: SelectTx : ${event.tx.id}');
     emit(state.copyWith(selectedTx: event.tx));
   }
 
   void _onLoadTx(LoadTx event, Emitter<TxState> emit) async {
     emit(state.copyWith(status: LoadStatus.loading));
 
-    logger.log('TxBloc :: LoadTx : ${event.txid}');
+    BBLogger().logBloc('TxBloc :: LoadTx : ${event.txid}');
     // await Future.delayed(const Duration(seconds: 1));
 
     final tx = await txRepository.loadTx(event.walletId, event.txid);

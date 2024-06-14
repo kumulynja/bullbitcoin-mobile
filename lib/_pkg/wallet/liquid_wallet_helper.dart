@@ -1,3 +1,4 @@
+import 'package:bb_arch/_pkg/bb_logger.dart';
 import 'package:bb_arch/_pkg/constants.dart';
 import 'package:bb_arch/_pkg/seed/models/seed.dart';
 import 'package:bb_arch/_pkg/wallet/models/bitcoin_wallet.dart';
@@ -31,13 +32,13 @@ class LiquidWalletHelper {
   }
 
   static Future<LiquidWallet> loadNativeSdk(LiquidWallet w, Seed seed) async {
-    print('Loading native sdk for liquid wallet');
+    BBLogger().log('Loading native sdk for liquid wallet');
 
     final appDocDir = await getApplicationDocumentsDirectory();
     final String dbDir = '${appDocDir.path}/db';
 
-    final lwk.Descriptor descriptor =
-        await lwk.Descriptor.create(network: seed.network.getLwkType, mnemonic: seed.mnemonic);
+    final lwk.Descriptor descriptor = await lwk.Descriptor.create(
+        network: seed.network.getLwkType, mnemonic: seed.mnemonic);
 
     final wallet = await lwk.Wallet.create(
       network: seed.network.getLwkType,
@@ -49,7 +50,7 @@ class LiquidWalletHelper {
   }
 
   static Future<Wallet> syncWallet(LiquidWallet w) async {
-    print('Syncing via lwk');
+    BBLogger().log('Syncing via lwk');
 
     try {
       if (w.lwkWallet == null) {
@@ -58,14 +59,22 @@ class LiquidWalletHelper {
 
       await w.lwkWallet?.sync(liquidElectrumUrl);
 
-      String assetIdToPick = w.network == NetworkType.Mainnet ? lwk.lBtcAssetId : lwk.lTestAssetId;
+      String assetIdToPick =
+          w.network == NetworkType.Mainnet ? lwk.lBtcAssetId : lwk.lTestAssetId;
 
       final balances = await w.lwkWallet?.balance();
-      int finalBalance = balances?.where((b) => b.assetId == assetIdToPick).map((e) => e.value).first ?? 0;
+      int finalBalance = balances
+              ?.where((b) => b.assetId == assetIdToPick)
+              .map((e) => e.value)
+              .first ??
+          0;
 
       final txs = await w.lwkWallet?.txs();
 
-      return w.copyWith(balance: finalBalance, txCount: txs?.length ?? 0, lastSync: DateTime.now());
+      return w.copyWith(
+          balance: finalBalance,
+          txCount: txs?.length ?? 0,
+          lastSync: DateTime.now());
     } catch (e) {
       print('Error syncing wallet: $e');
       return w;

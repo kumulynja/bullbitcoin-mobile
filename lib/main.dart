@@ -54,21 +54,20 @@ void main() async {
     walletRepository: walletRepository,
     txRepository: txRepository,
     addressRepository: addressRepository,
-    logger: logger,
   ));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp(
-      {super.key,
-      required this.isar,
-      required this.storage,
-      required this.secureStorage,
-      required this.seedRepository,
-      required this.walletRepository,
-      required this.txRepository,
-      required this.addressRepository,
-      required this.logger});
+  const MyApp({
+    super.key,
+    required this.isar,
+    required this.storage,
+    required this.secureStorage,
+    required this.seedRepository,
+    required this.walletRepository,
+    required this.txRepository,
+    required this.addressRepository,
+  });
 
   final Isar isar;
   final HiveStorage storage;
@@ -77,7 +76,6 @@ class MyApp extends StatelessWidget {
   final WalletRepository walletRepository;
   final TxRepository txRepository;
   final AddressRepository addressRepository;
-  final BBLogger logger;
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +86,6 @@ class MyApp extends StatelessWidget {
       walletRepository: walletRepository,
       txRepository: txRepository,
       addressRepository: addressRepository,
-      logger: logger,
     );
   }
 }

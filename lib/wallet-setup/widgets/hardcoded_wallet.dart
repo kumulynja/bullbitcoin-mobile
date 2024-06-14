@@ -1,3 +1,4 @@
+import 'package:bb_arch/_pkg/bb_logger.dart';
 import 'package:bb_arch/_pkg/wallet/models/wallet.dart';
 import 'package:bb_arch/wallet-setup/cubit/wallet_recover_page_cubit.dart';
 import 'package:flutter/material.dart';
@@ -25,10 +26,9 @@ class HardcodedWallet extends StatelessWidget {
         onPressed: () async {
           // WARNING: Having bloc/cubit access inside Widgets is strictly not allowed.
           // This is done here, as this is dev only widget.
-          context
-              .read<WalletRecoverPageCubit>()
-              .navigateToWalletTypePage(context, mnemonic, passphrase, walletName, walletType.name);
-          print(walletDisplayName);
+          context.read<WalletRecoverPageCubit>().navigateToWalletTypePage(
+              context, mnemonic, passphrase, walletName, walletType.name);
+          BBLogger().log(walletDisplayName);
         },
         child: Text(walletDisplayName));
   }

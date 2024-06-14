@@ -77,7 +77,7 @@ class WalletView extends StatelessWidget {
       children: [
         WalletHeader(wallet: wallet, txs: txs),
         Expanded(
-          child: TxList(txs: txs),
+          child: TxListWidget(txs: txs),
         ),
       ],
     );

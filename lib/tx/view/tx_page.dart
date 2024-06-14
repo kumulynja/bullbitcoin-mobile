@@ -22,13 +22,12 @@ class TxPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final txRepository = context.read<TxRepository>();
     final addressRepository = context.read<AddressRepository>();
-    final logger = context.read<BBLogger>();
 
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => TxPageCubit()),
         BlocProvider(
-            create: (_) => TxBloc(txRepository: txRepository, logger: logger)
+            create: (_) => TxBloc(txRepository: txRepository)
               ..add(LoadTx(walletId: walletId, txid: id))),
         BlocProvider(
             create: (_) => AddressBloc(addrRepository: addressRepository)

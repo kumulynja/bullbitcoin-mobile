@@ -16,7 +16,8 @@ class TxRepository {
 
   Future<(List<Tx>?, dynamic)> fetchLatestTxsAcrossWallets(int limit) async {
     try {
-      final txs = await isar.txs.where().sortByTimestampDesc().limit(limit).findAll();
+      final txs =
+          await isar.txs.where().sortByTimestampDesc().limit(limit).findAll();
 
       // TODO: Find better way
       final ts = txs.map((t) {
@@ -35,7 +36,11 @@ class TxRepository {
 
   Future<(List<Tx>?, dynamic)> listTxs(Wallet wallet) async {
     try {
-      final txs = await isar.txs.where().walletIdEqualTo(wallet.id).sortByTimestampDesc().findAll();
+      final txs = await isar.txs
+          .where()
+          .walletIdEqualTo(wallet.id)
+          .sortByTimestampDesc()
+          .findAll();
 
       // TODO: Find better way
       final ts = txs.map((t) {
@@ -79,10 +84,14 @@ class TxRepository {
   }
 
   Future<Tx> loadTx(String walletid, String txid) async {
-    final txs = await isar.txs.where().idEqualTo(txid).filter().walletIdEqualTo(walletid).findAll();
+    final txs = await isar.txs
+        .where()
+        .idEqualTo(txid)
+        .filter()
+        .walletIdEqualTo(walletid)
+        .findAll();
     final tx = txs.first;
     if (tx.type == TxType.Bitcoin) {
-      // print(jsonEncode(tx.toJson()));
       return BitcoinTx.fromJson(tx.toJson());
     } else if (tx.type == TxType.Liquid) {
       return LiquidTx.fromJson(tx.toJson());
@@ -97,5 +106,13 @@ class TxRepository {
     // List<Map<String, dynamic>> txsJson = txs.map((tx) => tx.toJson()).toList();
     // String encoded = jsonEncode(txsJson);
     // await storage.saveValue(key: 'tx.${wallet.id}', value: encoded);
+  }
+
+  Future<void> deleteAllTxsInWallet(String walletId) async {
+    await isar.writeTxn(() async {
+      final count =
+          await isar.txs.filter().walletIdEqualTo(walletId).deleteAll();
+      print('Objects deleted: $count');
+    });
   }
 }

@@ -1,6 +1,7 @@
 import 'package:bb_arch/_pkg/misc.dart';
 import 'package:bb_arch/_pkg/tx/models/tx.dart';
 import 'package:bb_arch/_pkg/wallet/models/wallet.dart';
+import 'package:bb_arch/_ui/atoms/bb_button.dart';
 import 'package:bb_arch/_ui/bb_page.dart';
 import 'package:bb_arch/tx/bloc/tx_bloc.dart';
 import 'package:bb_arch/tx/widgets/tx_list.dart';
@@ -8,6 +9,7 @@ import 'package:bb_arch/wallet/bloc/walletlist_bloc.dart';
 import 'package:bb_arch/wallet/widgets/wallet_heading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class WalletScaffold extends StatelessWidget {
   const WalletScaffold({super.key, required this.id});
@@ -76,6 +78,16 @@ class WalletView extends StatelessWidget {
     return Column(
       children: [
         WalletHeader(wallet: wallet, txs: txs),
+        BBButton(
+          label: 'Delete',
+          onSubmit: (p0) async {
+            GoRouter.of(context).pop();
+            context.read<WalletListBloc>().add(DeleteWalletWithDelay(
+                walletId: wallet.id,
+                seedFingerprint: wallet.seedFingerprint,
+                delay: const Duration(milliseconds: 2000)));
+          },
+        ),
         Expanded(
           child: TxListWidget(txs: txs),
         ),

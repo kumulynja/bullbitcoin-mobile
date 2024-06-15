@@ -34,6 +34,7 @@ class WalletListBloc extends Bloc<WalletListEvent, WalletListState> {
     on<LoadAllWallets>(_onLoadAllWallets);
     on<SyncAllWallets>(_onSyncAllWallets);
     on<SelectWallet>(_onSelectWallet);
+    on<DeleteWalletWithDelay>(_onDeleteWalletWithDelay);
 
     BBLogger().logBloc('WalletListBloc :: Init');
   }
@@ -84,5 +85,30 @@ class WalletListBloc extends Bloc<WalletListEvent, WalletListState> {
   void _onSelectWallet(
       SelectWallet event, Emitter<WalletListState> emit) async {
     emit(state.copyWith(selectedWallet: event.wallet));
+  }
+
+  void _onDeleteWalletWithDelay(
+      DeleteWalletWithDelay event, Emitter<WalletListState> emit) async {
+    try {
+      emit(state.copyWith(status: LoadStatus.loading));
+
+      await Future.delayed(event.delay);
+
+      await txRepository.deleteAllTxsInWallet(event.walletId);
+      await addressRepository.deleteAllAddressInWallet(event.walletId);
+      await walletRepository.deleteWallet(event.walletId);
+      await seedRepository.removeWalletForSeed(
+          event.walletId, event.seedFingerprint);
+
+      final walletBlocs = [...state.walletBlocs];
+      walletBlocs
+          .removeWhere((element) => element.state.wallet?.id == event.walletId);
+
+      emit(
+          state.copyWith(walletBlocs: walletBlocs, status: LoadStatus.success));
+    } catch (error, stackTrace) {
+      emit(state.copyWith(status: LoadStatus.failure));
+      addError(error, stackTrace);
+    }
   }
 }

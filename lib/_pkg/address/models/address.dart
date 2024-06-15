@@ -112,7 +112,6 @@ class Address {
 
     for (var i = 0; i <= lastUnused.index; i++) {
       final addr = await wallet.getAddress(i, kind);
-      // print(addr.address);
       // TODO: How to make contains work with manually implementing == operator? in Address
       // bool exists = oldAddresses.contains(addr);
       // Address finalAddr = exists ? oldAddresses.firstWhere((element) => element.address == addr.address) : addr;

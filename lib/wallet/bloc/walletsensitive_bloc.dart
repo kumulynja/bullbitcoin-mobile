@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:bb_arch/_pkg/bb_logger.dart';
 import 'package:bb_arch/_pkg/misc.dart';
 import 'package:bb_arch/_pkg/seed/models/seed.dart';
 import 'package:bb_arch/_pkg/seed/seed_repository.dart';
@@ -48,11 +49,21 @@ class WalletSensitiveBloc
 
   void _onDeriveWalletFromStoredSeed(DeriveWalletFromStoredSeed event,
       Emitter<WalletSensitiveState> emit) async {
-    emit(state.copyWith(status: LoadStatus.loading, derivedWallets: []));
+    BBLogger()
+        .logBloc('WalletSensitiveBloc :: DeriveWallets (${event.walletName})');
+
+    emit(state.copyWith(
+        status: LoadStatus.loading,
+        derivedWallets: [],
+        walletName: event.walletName));
 
     List<Wallet> nameUpdatedWallets = [];
-    final (wallets, err) = await walletRepository.deriveWalletsFromSeed(
+    final (wallets, errDerive) = await walletRepository.deriveWalletsFromSeed(
         event.seed, event.walletType, event.networkType);
+
+    BBLogger().logBloc(
+        'WalletSensitiveBloc :: DeriveWallets (${event.walletName}) : derived wallets');
+
     if (wallets != null) {
       for (int i = 0; i < wallets.length; i++) {
         Wallet w = wallets[i];
@@ -65,10 +76,15 @@ class WalletSensitiveBloc
         }
       }
     }
-    if (err != null) {
-      emit(state.copyWith(status: LoadStatus.failure, error: err));
+
+    BBLogger().logBloc(
+        'WalletSensitiveBloc :: DeriveWallets (${event.walletName}) : name updated');
+
+    if (errDerive != null) {
+      emit(state.copyWith(status: LoadStatus.failure, error: errDerive));
       return;
     }
+
     // sync logic goes here
     emit(state.copyWith(
         derivedWallets: nameUpdatedWallets,
@@ -96,18 +112,28 @@ class WalletSensitiveBloc
           LoadStatus.success,
           ...state.syncDerivedWalletStatus.sublist(i + 1),
         ]));
-        print('Future at index $i completed with result: $result');
-      }).catchError((error) {
+        BBLogger().logBloc(
+            'WalletSensitiveBloc :: DeriveWallets (${event.walletName}) : sync complete $i');
+      }).catchError((error, stackTrace) {
         if (++syncedCount == syncedFutures.length) {
           completer.complete();
         }
-        print('Future at index $i completed with error: $error');
+        BBLogger().error(
+            'WalletSensitiveBloc :: DeriveWallets (${event.walletName}) : sync complete $i',
+            stackTrace);
       });
     }
 
     await completer.future;
-    // await walletRepository.persistWallets(state.wallets);
     // await Future.delayed(const Duration(seconds: 5));
     emit(state.copyWith(status: LoadStatus.success));
+  }
+
+  @override
+  Future<void> close() {
+    // TODO: Cancel sync() function from here.
+    // Right now, it keeps running, even after the bloc that initiated it is closed.
+    BBLogger().logBloc('WalletSensitiveBloc (${state.walletName}) :: close()');
+    return super.close();
   }
 }

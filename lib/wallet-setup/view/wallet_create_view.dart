@@ -5,12 +5,9 @@ import 'package:bb_arch/_pkg/seed/models/seed.dart';
 import 'package:bb_arch/_pkg/wallet/models/wallet.dart';
 import 'package:bb_arch/_ui/bb_page.dart';
 import 'package:bb_arch/router.dart';
-import 'package:bb_arch/wallet-setup/cubit/wallet_recover_page_cubit.dart';
-import 'package:bb_arch/wallet-setup/view/wallet_type_selection_page.dart';
 import 'package:bb_arch/wallet/bloc/walletsensitive_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
 class WalletCreateScaffold extends StatelessWidget {
   const WalletCreateScaffold({super.key});
@@ -24,6 +21,7 @@ class WalletCreateScaffold extends StatelessWidget {
     final walletName = context.select((WalletSensitiveBloc cubit) =>
         cubit.state.seed?.mnemonic.split(' ').getRange(0, 2).join('-') ??
         'wallet-name');
+
     return BBScaffold(
         title: 'Wallet Create',
         loadStatus: status,
@@ -118,18 +116,6 @@ class WalletCreateViewState extends State<WalletCreateView> {
                     widget.seed.passphrase,
                     widget.walletName,
                     _selectedAsset.name);
-
-                // final (seedFingerprint, _) = await widget.seed
-                //     .getBdkFingerprint(NetworkType.Testnet); // TODO:
-                // final newSeed =
-                //     widget.seed.copyWith(fingerprint: seedFingerprint ?? '');
-                // context.read<WalletSensitiveBloc>().add(
-                //     DeriveWalletFromStoredSeed(
-                //         seed: newSeed,
-                //         walletName: widget.walletName,
-                //         walletType: _selectedAsset,
-                //         networkType: NetworkType.Testnet)); // TODO:
-                // GoRouter.of(context).push(WalletTypeSelectionPage.route);
               },
               child: const Text('Create wallet')),
         ],

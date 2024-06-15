@@ -39,16 +39,41 @@ class SeedRepository {
     }
   }
 
-  Future<dynamic> deleteSeed(Seed seed) async {
+  Future<dynamic> removeWalletForSeed(
+      String walletId, String seedFingerprint) async {
     try {
-      final err = await storage.deleteValue('seed.${seed.fingerprint}');
-      if (err != null) {
-        return err;
-      } else {
-        return null;
+      Seed? existingSeed = await isar.seeds
+          .where()
+          .fingerprintEqualTo(seedFingerprint)
+          .findFirst();
+
+      if (existingSeed == null) {
+        throw 'Seed not found with fingerprint: $seedFingerprint';
       }
-    } catch (e) {
-      return e;
+
+      final walletIds = [...existingSeed.walletIDs];
+      walletIds.removeWhere((id) => id == walletId);
+
+      if (walletIds.isEmpty) {
+        await isar.writeTxn(() async {
+          await isar.seeds.deleteByIndex("id", [existingSeed!.id]);
+        });
+      } else {
+        existingSeed = existingSeed.copyWith(walletIDs: walletIds);
+
+        await isar.writeTxn(() async {
+          await isar.seeds.putByIndex("id", existingSeed!);
+        });
+      }
+
+      // final err = await storage.deleteValue('seed.${seedFingerprint}');
+      //if (err != null) {
+      //  return err;
+      //} else {
+      //  return null;
+      //}
+    } catch (e, stackTrace) {
+      throw Error.throwWithStackTrace(SeedException(e), stackTrace);
     }
   }
 

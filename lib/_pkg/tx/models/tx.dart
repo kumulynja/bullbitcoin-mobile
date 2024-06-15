@@ -80,9 +80,6 @@ class Tx {
         // TODO: Better way to do this?
         // Without this decode / encode gimmick, e.toJson() returns Map<String, dynamic>,
         // where `previousOutput` is of type BitcoinOutPoint rather than Map<String, dynamic>
-        // print('input');
-        // print(e.toJson());
-        // print(jsonEncode(e.toJson()));
         return jsonDecode(jsonEncode(e.toJson()));
       }).toList(),
       'outputs': outputs?.map((e) => e.toJson()).toList(),

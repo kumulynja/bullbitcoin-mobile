@@ -43,6 +43,10 @@ class WalletLoadException<T> extends WalletException<T> {
   const WalletLoadException(super.error, {super.message});
 }
 
+class WalletDeleteException<T> extends WalletException<T> {
+  const WalletDeleteException(super.error, {super.message});
+}
+
 abstract class BdkException<T> implements BBException<T> {
   const BdkException(this.error, {this.message});
   final T error;

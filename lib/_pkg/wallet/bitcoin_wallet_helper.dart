@@ -11,7 +11,7 @@ import 'package:crypto/crypto.dart';
 import 'package:path_provider/path_provider.dart';
 
 class BitcoinWalletHelper {
-  static bdk.Blockchain? blockchain;
+  // static bdk.Blockchain? blockchain;
 
   static Future<bdk.Blockchain> getBdkBlockchain(
       {int stopGap = btcElectrumStopGap,
@@ -19,7 +19,7 @@ class BitcoinWalletHelper {
       int retry = btcElectrumRetry,
       String electrumUrl = btcElectrumUrl,
       bool validateDomain = btcElectrumValidateDomain}) async {
-    blockchain ??= await bdk.Blockchain.create(
+    bdk.Blockchain blockchain = await bdk.Blockchain.create(
         config: bdk.BlockchainConfig.electrum(
             config: bdk.ElectrumConfig(
                 stopGap: stopGap,
@@ -27,7 +27,7 @@ class BitcoinWalletHelper {
                 retry: retry,
                 url: electrumUrl,
                 validateDomain: validateDomain)));
-    return blockchain!;
+    return blockchain;
   }
 
   static bdk.DatabaseConfig walletDbConfig(String path) {
@@ -57,7 +57,7 @@ class BitcoinWalletHelper {
       bdk.Network network,
       bdk.KeychainKind keychainKind,
       String sourceFingerprint) async {
-    BBLogger().log('deriving descriptor: $path');
+    // BBLogger().log('deriving descriptor: $path');
     final xpriv =
         await rootXprv.derive(await bdk.DerivationPath.create(path: path));
     final xpub = await xpriv.asPublic();
@@ -111,13 +111,10 @@ class BitcoinWalletHelper {
     const electrumUrl = btcElectrumUrl;
     try {
       final appDocDir = await getApplicationDocumentsDirectory();
-      final bdkBlockchain =
-          await BitcoinWalletHelper.getBdkBlockchain(electrumUrl: electrumUrl);
 
       final walletFutures = scriptType.map((path) => initializeWallet(
           seed: seed,
           network: network,
-          blockchain: bdkBlockchain,
           scriptType: path,
           appDocDirPath: appDocDir.path));
 
@@ -135,15 +132,14 @@ class BitcoinWalletHelper {
   static Future<BitcoinWallet> initializeWallet(
       {required Seed seed,
       required NetworkType network,
-      bdk.Blockchain? blockchain,
       BitcoinScriptType scriptType = BitcoinScriptType.bip84,
       String appDocDirPath = ''}) async {
-    if (blockchain == null) {
-      throw ("Blockchain is null");
-    }
+    // BBLogger().log(
+    //'initializing wallet with bip path: $scriptType / ${scriptType.path} / ${scriptType.name}');
 
-    BBLogger().log(
-        'initializing wallet with bip path: $scriptType / ${scriptType.path} / ${scriptType.name}');
+    const electrumUrl = btcElectrumUrl;
+    final blockchain =
+        await BitcoinWalletHelper.getBdkBlockchain(electrumUrl: electrumUrl);
 
     final (sourceFingerprint, _) = await seed.getBdkFingerprint(network);
     final bdkMnemonic = await bdk.Mnemonic.fromString(seed.mnemonic);

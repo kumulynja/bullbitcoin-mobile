@@ -1,5 +1,9 @@
+import 'package:bb_arch/_pkg/seed/seed_repository.dart';
+import 'package:bb_arch/_pkg/wallet/wallet_repository.dart';
 import 'package:bb_arch/wallet-setup/view/wallet_create_view.dart';
+import 'package:bb_arch/wallet/bloc/walletsensitive_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class WalletCreatePage extends StatelessWidget {
   const WalletCreatePage({super.key});
@@ -8,13 +12,18 @@ class WalletCreatePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const WalletCreateScaffold();
-    // return MultiBlocProvider(
-    //   providers: [
-    //     BlocProvider(create: (_) => WalletPageCubit()),
-    //     // BlocProvider(create: (_) => AddrBloc(addrRepository: addressRepository)),
-    //   ],
-    //   child: const WalletView(),
-    // );
+    final walletRepository = RepositoryProvider.of<WalletRepository>(context);
+    final seedRepository = RepositoryProvider.of<SeedRepository>(context);
+
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+            create: (_) => WalletSensitiveBloc(
+                walletRepository: walletRepository,
+                seedRepository: seedRepository)
+              ..add(CreateNewSeed())),
+      ],
+      child: const WalletCreateScaffold(),
+    );
   }
 }

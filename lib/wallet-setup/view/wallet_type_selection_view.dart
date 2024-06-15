@@ -90,9 +90,6 @@ class WalletTypeSelectionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('WalletTypeSelectionView');
-    print(wallets.length);
-
     final walletListBloc = context.read<WalletListBloc>();
 
     return ListView.builder(

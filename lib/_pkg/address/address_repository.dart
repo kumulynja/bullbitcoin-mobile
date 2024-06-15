@@ -16,13 +16,15 @@ class AddressRepository {
 
   Future<(List<Address>?, dynamic)> listAddresses(String walletId) async {
     try {
-      final addrs = await isar.address.where().walletIdEqualTo(walletId).sortByIndex().findAll();
+      final addrs = await isar.address
+          .where()
+          .walletIdEqualTo(walletId)
+          .sortByIndex()
+          .findAll();
       int index = 0;
       // TODO: Find better way
       final ads = addrs.map((t) {
-        print(index++);
         if (t.type == AddressType.Bitcoin) {
-          print(jsonEncode(t.toJson()));
           return BitcoinAddress.fromJson(t.toJson());
         } else if (t.type == AddressType.Liquid) {
           return LiquidAddress.fromJson(t.toJson());
@@ -40,12 +42,13 @@ class AddressRepository {
 
   // TODO: Potential optimization: Do this sync/merge only if txlist.length, lastUnused, wallet balance differ from what's there in storage.
   // Otherwise, skip this operation and go with previous calculation that is stored in storage.
-  Future<(List<Address>?, dynamic)> syncAddresses(
-      List<Tx> txs, List<Address> oldAddresses, AddressKind kind, Wallet wallet) async {
+  Future<(List<Address>?, dynamic)> syncAddresses(List<Tx> txs,
+      List<Address> oldAddresses, AddressKind kind, Wallet wallet) async {
     try {
       final lastUnused = await Address.getLastUnused(wallet, kind);
 
-      List<Address> addresses = await Address.syncAddresses(txs, lastUnused, oldAddresses, wallet, kind);
+      List<Address> addresses = await Address.syncAddresses(
+          txs, lastUnused, oldAddresses, wallet, kind);
 
       return (addresses, null);
     } catch (e) {
@@ -63,14 +66,26 @@ class AddressRepository {
   }
 
   Future<Address> loadAddress(String walletid, String address) async {
-    final addresses = await isar.address.where().addressEqualTo(address).filter().walletIdEqualTo(walletid).findAll();
+    final addresses = await isar.address
+        .where()
+        .addressEqualTo(address)
+        .filter()
+        .walletIdEqualTo(walletid)
+        .findAll();
     final addr = addresses.first;
     if (addr.type == TxType.Bitcoin) {
-      print(jsonEncode(addr.toJson()));
       return BitcoinAddress.fromJson(addr.toJson());
     } else if (addr.type == TxType.Liquid) {
       return LiquidAddress.fromJson(addr.toJson());
     }
     return addr;
+  }
+
+  Future<void> deleteAllAddressInWallet(String walletId) async {
+    await isar.writeTxn(() async {
+      final count =
+          await isar.address.filter().walletIdEqualTo(walletId).deleteAll();
+      print('Objects deleted: $count');
+    });
   }
 }

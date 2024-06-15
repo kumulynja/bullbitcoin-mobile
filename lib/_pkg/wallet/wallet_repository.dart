@@ -24,7 +24,6 @@ class WalletRepository {
     try {
       final (_, err) = await storage.getValue('appInitDone');
       if (err?.message == 'No Key') {
-        await setupWallets();
         await storage.saveValue(key: 'appInitDone', value: 'yes');
       }
     } catch (e) {
@@ -64,8 +63,6 @@ class WalletRepository {
     });
   }
 
-  Future<void> setupWallets() async {}
-
   Future<(List<Wallet>?, dynamic)> deriveWalletsFromSeed(
       Seed seed, WalletType walletType, NetworkType networkType) async {
     if (walletType == WalletType.Bitcoin) {
@@ -99,6 +96,21 @@ class WalletRepository {
       rethrow;
     } catch (e, stackTrace) {
       throw Error.throwWithStackTrace(Exception(e), stackTrace);
+    }
+  }
+
+  Future<void> deleteWallet(String walletId) async {
+    try {
+      await isar?.writeTxn(() async {
+        final success = await isar?.wallets.deleteByIndex("id", [walletId]);
+        if (success == null || success == false) {
+          throw 'Wallet not found with id: $walletId';
+        }
+      });
+    } on IsarError catch (e, stackTrace) {
+      throw Error.throwWithStackTrace(DatabaseException(e), stackTrace);
+    } catch (e, stackTrace) {
+      throw Error.throwWithStackTrace(WalletDeleteException(e), stackTrace);
     }
   }
 }

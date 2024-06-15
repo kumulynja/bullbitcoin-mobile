@@ -21,7 +21,9 @@ class WalletList extends StatelessWidget {
       itemBuilder: (context, index) {
         final walletBloc = walletBlocs[index];
         return BlocProvider(
-            create: (context) => walletBloc, child: const WalletCard());
+            key: Key(walletBloc.state.wallet?.id ?? index.toString()),
+            create: (context) => walletBloc,
+            child: const WalletCard());
       },
       itemCount: walletBlocs.length,
     );

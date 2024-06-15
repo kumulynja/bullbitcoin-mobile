@@ -75,17 +75,6 @@ class Wallet {
     };
   }
 
-  static Future<Wallet> setupNewWallet(
-      WalletType type, String mnemonicStr, NetworkType network,
-      {String name = 'Wallet'}) async {
-    if (type == WalletType.Bitcoin) {
-      return BitcoinWallet.setupNewWallet(mnemonicStr, network, name: name);
-    } else if (type == WalletType.Liquid) {
-      return LiquidWallet.setupNewWallet(mnemonicStr, network, name: name);
-    }
-    throw UnimplementedError('Unsupported Wallet subclass');
-  }
-
   static Future<Wallet> loadNativeSdk(Wallet w, Seed seed) async {
     if (w.type == WalletType.Bitcoin) {
       return BitcoinWalletHelper.loadNativeSdk(w as BitcoinWallet, seed);

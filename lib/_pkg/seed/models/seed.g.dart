@@ -32,22 +32,15 @@ const SeedSchema = CollectionSchema(
       name: r'mnemonic',
       type: IsarType.string,
     ),
-    r'network': PropertySchema(
-      id: 3,
-      name: r'network',
-      type: IsarType.byte,
-      enumMap: _SeednetworkEnumValueMap,
-    ),
     r'passphrase': PropertySchema(
-      id: 4,
+      id: 3,
       name: r'passphrase',
       type: IsarType.string,
     ),
-    r'walletType': PropertySchema(
-      id: 5,
-      name: r'walletType',
-      type: IsarType.byte,
-      enumMap: _SeedwalletTypeEnumValueMap,
+    r'walletIDs': PropertySchema(
+      id: 4,
+      name: r'walletIDs',
+      type: IsarType.stringList,
     )
   },
   estimateSize: _seedEstimateSize,
@@ -101,6 +94,13 @@ int _seedEstimateSize(
   bytesCount += 3 + object.id.length * 3;
   bytesCount += 3 + object.mnemonic.length * 3;
   bytesCount += 3 + object.passphrase.length * 3;
+  bytesCount += 3 + object.walletIDs.length * 3;
+  {
+    for (var i = 0; i < object.walletIDs.length; i++) {
+      final value = object.walletIDs[i];
+      bytesCount += value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -113,9 +113,8 @@ void _seedSerialize(
   writer.writeString(offsets[0], object.fingerprint);
   writer.writeString(offsets[1], object.id);
   writer.writeString(offsets[2], object.mnemonic);
-  writer.writeByte(offsets[3], object.network.index);
-  writer.writeString(offsets[4], object.passphrase);
-  writer.writeByte(offsets[5], object.walletType.index);
+  writer.writeString(offsets[3], object.passphrase);
+  writer.writeStringList(offsets[4], object.walletIDs);
 }
 
 Seed _seedDeserialize(
@@ -127,12 +126,8 @@ Seed _seedDeserialize(
   final object = Seed(
     fingerprint: reader.readString(offsets[0]),
     mnemonic: reader.readString(offsets[2]),
-    network: _SeednetworkValueEnumMap[reader.readByteOrNull(offsets[3])] ??
-        NetworkType.Mainnet,
-    passphrase: reader.readString(offsets[4]),
-    walletType:
-        _SeedwalletTypeValueEnumMap[reader.readByteOrNull(offsets[5])] ??
-            WalletType.Bitcoin,
+    passphrase: reader.readString(offsets[3]),
+    walletIDs: reader.readStringList(offsets[4]) ?? [],
   );
   return object;
 }
@@ -151,40 +146,13 @@ P _seedDeserializeProp<P>(
     case 2:
       return (reader.readString(offset)) as P;
     case 3:
-      return (_SeednetworkValueEnumMap[reader.readByteOrNull(offset)] ??
-          NetworkType.Mainnet) as P;
-    case 4:
       return (reader.readString(offset)) as P;
-    case 5:
-      return (_SeedwalletTypeValueEnumMap[reader.readByteOrNull(offset)] ??
-          WalletType.Bitcoin) as P;
+    case 4:
+      return (reader.readStringList(offset) ?? []) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
-
-const _SeednetworkEnumValueMap = {
-  'Mainnet': 0,
-  'Testnet': 1,
-  'Signet': 2,
-};
-const _SeednetworkValueEnumMap = {
-  0: NetworkType.Mainnet,
-  1: NetworkType.Testnet,
-  2: NetworkType.Signet,
-};
-const _SeedwalletTypeEnumValueMap = {
-  'Bitcoin': 0,
-  'Liquid': 1,
-  'Lightning': 2,
-  'Usdt': 3,
-};
-const _SeedwalletTypeValueEnumMap = {
-  0: WalletType.Bitcoin,
-  1: WalletType.Liquid,
-  2: WalletType.Lightning,
-  3: WalletType.Usdt,
-};
 
 Id _seedGetId(Seed object) {
   return object.isarId;
@@ -799,59 +767,6 @@ extension SeedQueryFilter on QueryBuilder<Seed, Seed, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Seed, Seed, QAfterFilterCondition> networkEqualTo(
-      NetworkType value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'network',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Seed, Seed, QAfterFilterCondition> networkGreaterThan(
-    NetworkType value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'network',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Seed, Seed, QAfterFilterCondition> networkLessThan(
-    NetworkType value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'network',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Seed, Seed, QAfterFilterCondition> networkBetween(
-    NetworkType lower,
-    NetworkType upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'network',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
   QueryBuilder<Seed, Seed, QAfterFilterCondition> passphraseEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -982,56 +897,217 @@ extension SeedQueryFilter on QueryBuilder<Seed, Seed, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Seed, Seed, QAfterFilterCondition> walletTypeEqualTo(
-      WalletType value) {
+  QueryBuilder<Seed, Seed, QAfterFilterCondition> walletIDsElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'walletType',
+        property: r'walletIDs',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Seed, Seed, QAfterFilterCondition> walletTypeGreaterThan(
-    WalletType value, {
+  QueryBuilder<Seed, Seed, QAfterFilterCondition> walletIDsElementGreaterThan(
+    String value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'walletType',
+        property: r'walletIDs',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Seed, Seed, QAfterFilterCondition> walletTypeLessThan(
-    WalletType value, {
+  QueryBuilder<Seed, Seed, QAfterFilterCondition> walletIDsElementLessThan(
+    String value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'walletType',
+        property: r'walletIDs',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Seed, Seed, QAfterFilterCondition> walletTypeBetween(
-    WalletType lower,
-    WalletType upper, {
+  QueryBuilder<Seed, Seed, QAfterFilterCondition> walletIDsElementBetween(
+    String lower,
+    String upper, {
     bool includeLower = true,
     bool includeUpper = true,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'walletType',
+        property: r'walletIDs',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
       ));
+    });
+  }
+
+  QueryBuilder<Seed, Seed, QAfterFilterCondition> walletIDsElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'walletIDs',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Seed, Seed, QAfterFilterCondition> walletIDsElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'walletIDs',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Seed, Seed, QAfterFilterCondition> walletIDsElementContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'walletIDs',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Seed, Seed, QAfterFilterCondition> walletIDsElementMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'walletIDs',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Seed, Seed, QAfterFilterCondition> walletIDsElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'walletIDs',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Seed, Seed, QAfterFilterCondition> walletIDsElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'walletIDs',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Seed, Seed, QAfterFilterCondition> walletIDsLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'walletIDs',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Seed, Seed, QAfterFilterCondition> walletIDsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'walletIDs',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Seed, Seed, QAfterFilterCondition> walletIDsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'walletIDs',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Seed, Seed, QAfterFilterCondition> walletIDsLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'walletIDs',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<Seed, Seed, QAfterFilterCondition> walletIDsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'walletIDs',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Seed, Seed, QAfterFilterCondition> walletIDsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'walletIDs',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
     });
   }
 }
@@ -1077,18 +1153,6 @@ extension SeedQuerySortBy on QueryBuilder<Seed, Seed, QSortBy> {
     });
   }
 
-  QueryBuilder<Seed, Seed, QAfterSortBy> sortByNetwork() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'network', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Seed, Seed, QAfterSortBy> sortByNetworkDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'network', Sort.desc);
-    });
-  }
-
   QueryBuilder<Seed, Seed, QAfterSortBy> sortByPassphrase() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'passphrase', Sort.asc);
@@ -1098,18 +1162,6 @@ extension SeedQuerySortBy on QueryBuilder<Seed, Seed, QSortBy> {
   QueryBuilder<Seed, Seed, QAfterSortBy> sortByPassphraseDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'passphrase', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Seed, Seed, QAfterSortBy> sortByWalletType() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'walletType', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Seed, Seed, QAfterSortBy> sortByWalletTypeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'walletType', Sort.desc);
     });
   }
 }
@@ -1163,18 +1215,6 @@ extension SeedQuerySortThenBy on QueryBuilder<Seed, Seed, QSortThenBy> {
     });
   }
 
-  QueryBuilder<Seed, Seed, QAfterSortBy> thenByNetwork() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'network', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Seed, Seed, QAfterSortBy> thenByNetworkDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'network', Sort.desc);
-    });
-  }
-
   QueryBuilder<Seed, Seed, QAfterSortBy> thenByPassphrase() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'passphrase', Sort.asc);
@@ -1184,18 +1224,6 @@ extension SeedQuerySortThenBy on QueryBuilder<Seed, Seed, QSortThenBy> {
   QueryBuilder<Seed, Seed, QAfterSortBy> thenByPassphraseDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'passphrase', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Seed, Seed, QAfterSortBy> thenByWalletType() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'walletType', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Seed, Seed, QAfterSortBy> thenByWalletTypeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'walletType', Sort.desc);
     });
   }
 }
@@ -1222,12 +1250,6 @@ extension SeedQueryWhereDistinct on QueryBuilder<Seed, Seed, QDistinct> {
     });
   }
 
-  QueryBuilder<Seed, Seed, QDistinct> distinctByNetwork() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'network');
-    });
-  }
-
   QueryBuilder<Seed, Seed, QDistinct> distinctByPassphrase(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1235,9 +1257,9 @@ extension SeedQueryWhereDistinct on QueryBuilder<Seed, Seed, QDistinct> {
     });
   }
 
-  QueryBuilder<Seed, Seed, QDistinct> distinctByWalletType() {
+  QueryBuilder<Seed, Seed, QDistinct> distinctByWalletIDs() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'walletType');
+      return query.addDistinctBy(r'walletIDs');
     });
   }
 }
@@ -1267,21 +1289,15 @@ extension SeedQueryProperty on QueryBuilder<Seed, Seed, QQueryProperty> {
     });
   }
 
-  QueryBuilder<Seed, NetworkType, QQueryOperations> networkProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'network');
-    });
-  }
-
   QueryBuilder<Seed, String, QQueryOperations> passphraseProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'passphrase');
     });
   }
 
-  QueryBuilder<Seed, WalletType, QQueryOperations> walletTypeProperty() {
+  QueryBuilder<Seed, List<String>, QQueryOperations> walletIDsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'walletType');
+      return query.addPropertyName(r'walletIDs');
     });
   }
 }
@@ -1294,8 +1310,10 @@ _$SeedImpl _$$SeedImplFromJson(Map<String, dynamic> json) => _$SeedImpl(
       mnemonic: json['mnemonic'] as String,
       passphrase: json['passphrase'] as String,
       fingerprint: json['fingerprint'] as String,
-      walletType: $enumDecode(_$WalletTypeEnumMap, json['walletType']),
-      network: $enumDecode(_$NetworkTypeEnumMap, json['network']),
+      walletIDs: (json['walletIDs'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$$SeedImplToJson(_$SeedImpl instance) =>
@@ -1303,19 +1321,5 @@ Map<String, dynamic> _$$SeedImplToJson(_$SeedImpl instance) =>
       'mnemonic': instance.mnemonic,
       'passphrase': instance.passphrase,
       'fingerprint': instance.fingerprint,
-      'walletType': _$WalletTypeEnumMap[instance.walletType]!,
-      'network': _$NetworkTypeEnumMap[instance.network]!,
+      'walletIDs': instance.walletIDs,
     };
-
-const _$WalletTypeEnumMap = {
-  WalletType.Bitcoin: 'Bitcoin',
-  WalletType.Liquid: 'Liquid',
-  WalletType.Lightning: 'Lightning',
-  WalletType.Usdt: 'Usdt',
-};
-
-const _$NetworkTypeEnumMap = {
-  NetworkType.Mainnet: 'Mainnet',
-  NetworkType.Testnet: 'Testnet',
-  NetworkType.Signet: 'Signet',
-};

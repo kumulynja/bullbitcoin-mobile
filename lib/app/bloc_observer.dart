@@ -1,5 +1,6 @@
 import 'package:bb_arch/_pkg/bb_logger.dart';
 import 'package:bb_arch/_pkg/error.dart';
+import 'package:bb_arch/_pkg/seed/models/seed.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SimpleBlocObserver extends BlocObserver {
@@ -16,6 +17,9 @@ class SimpleBlocObserver extends BlocObserver {
   @override
   void onError(BlocBase bloc, Object error, StackTrace stackTrace) {
     if (error is WalletLoadException) {
+      logger.error(
+          '${bloc.runtimeType}: ${error.error.toString()}', stackTrace);
+    } else if (error is SeedException) {
       logger.error(
           '${bloc.runtimeType}: ${error.error.toString()}', stackTrace);
     } else if (error is JsonParseException) {

@@ -66,12 +66,15 @@ class WalletRepository {
 
   Future<void> setupWallets() async {}
 
-  Future<(List<Wallet>?, dynamic)> deriveWalletsFromSeed(Seed seed) async {
-    if (seed.walletType == WalletType.Bitcoin) {
-      final ws = await BitcoinWalletHelper.initializeAllWallets(seed);
+  Future<(List<Wallet>?, dynamic)> deriveWalletsFromSeed(
+      Seed seed, WalletType walletType, NetworkType networkType) async {
+    if (walletType == WalletType.Bitcoin) {
+      final ws =
+          await BitcoinWalletHelper.initializeAllWallets(seed, networkType);
       return (ws, null);
-    } else if (seed.walletType == WalletType.Liquid) {
-      final ws = await LiquidWalletHelper.initializeAllWallets(seed,
+    } else if (walletType == WalletType.Liquid) {
+      final ws = await LiquidWalletHelper.initializeAllWallets(
+          seed, networkType,
           scriptType: [BitcoinScriptType.bip84]);
       return (ws, null);
     }

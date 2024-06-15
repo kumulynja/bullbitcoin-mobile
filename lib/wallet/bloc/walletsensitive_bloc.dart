@@ -14,35 +14,45 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'walletsensitive_event.dart';
 
-class WalletSensitiveBloc extends Bloc<WalletSensitiveEvent, WalletSensitiveState> {
+class WalletSensitiveBloc
+    extends Bloc<WalletSensitiveEvent, WalletSensitiveState> {
   final WalletRepository walletRepository;
   final SeedRepository seedRepository;
 
-  WalletSensitiveBloc({required this.walletRepository, required this.seedRepository})
+  WalletSensitiveBloc(
+      {required this.walletRepository, required this.seedRepository})
       : super(WalletSensitiveState.initial()) {
     on<CreateNewSeed>(_onCreateNewSeed);
     on<DeriveWalletFromStoredSeed>(_onDeriveWalletFromStoredSeed);
-    on<PersistSeed>(_onPersistSeed);
+    on<PersistSeedForWalletId>(_onPersistSeedForWalletId);
   }
 
-  void _onCreateNewSeed(CreateNewSeed event, Emitter<WalletSensitiveState> emit) async {
-    final (seed, seedErr) = await seedRepository.newSeed(WalletType.Bitcoin, NetworkType.Testnet);
-    if (seedErr != null) {
-      emit(state.copyWith(error: seedErr.toString()));
-      return;
+  void _onCreateNewSeed(
+      CreateNewSeed event, Emitter<WalletSensitiveState> emit) async {
+    try {
+      emit(state.copyWith(status: LoadStatus.loading));
+      final seed = await seedRepository.newSeed(
+          event.walletType ?? WalletType.Bitcoin,
+          event.networkType ?? NetworkType.Testnet);
+      emit(state.copyWith(seed: seed, status: LoadStatus.success));
+    } catch (error, stackTrace) {
+      emit(state.copyWith(status: LoadStatus.failure));
+      addError(error, stackTrace);
     }
-    emit(state.copyWith(seed: seed));
   }
 
-  void _onPersistSeed(PersistSeed event, Emitter<WalletSensitiveState> emit) async {
-    await seedRepository.persistSeed(event.seed);
+  void _onPersistSeedForWalletId(
+      PersistSeedForWalletId event, Emitter<WalletSensitiveState> emit) async {
+    await seedRepository.persistSeedforWalletId(event.seed, event.walletId);
   }
 
-  void _onDeriveWalletFromStoredSeed(DeriveWalletFromStoredSeed event, Emitter<WalletSensitiveState> emit) async {
+  void _onDeriveWalletFromStoredSeed(DeriveWalletFromStoredSeed event,
+      Emitter<WalletSensitiveState> emit) async {
     emit(state.copyWith(status: LoadStatus.loading, derivedWallets: []));
 
     List<Wallet> nameUpdatedWallets = [];
-    final (wallets, err) = await walletRepository.deriveWalletsFromSeed(event.seed);
+    final (wallets, err) = await walletRepository.deriveWalletsFromSeed(
+        event.seed, event.walletType, event.networkType);
     if (wallets != null) {
       for (int i = 0; i < wallets.length; i++) {
         Wallet w = wallets[i];
@@ -56,16 +66,18 @@ class WalletSensitiveBloc extends Bloc<WalletSensitiveEvent, WalletSensitiveStat
       }
     }
     if (err != null) {
-      emit(state.copyWith(status: LoadStatus.failure, error: err.toString()));
+      emit(state.copyWith(status: LoadStatus.failure, error: err));
       return;
     }
     // sync logic goes here
     emit(state.copyWith(
         derivedWallets: nameUpdatedWallets,
-        syncDerivedWalletStatus: nameUpdatedWallets.map((e) => LoadStatus.loading).toList()));
+        syncDerivedWalletStatus:
+            nameUpdatedWallets.map((e) => LoadStatus.loading).toList()));
     // seedRepository.clearSeed();
 
-    List<Future<Wallet>> syncedFutures = state.derivedWallets.map((w) => Wallet.syncWallet(w)).toList();
+    List<Future<Wallet>> syncedFutures =
+        state.derivedWallets.map((w) => Wallet.syncWallet(w)).toList();
 
     var completer = Completer();
 

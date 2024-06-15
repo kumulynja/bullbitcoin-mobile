@@ -1,3 +1,4 @@
+import 'package:bb_arch/_pkg/error.dart';
 import 'package:bb_arch/_pkg/misc.dart';
 import 'package:bb_arch/_pkg/seed/models/seed.dart';
 import 'package:bb_arch/_pkg/wallet/models/wallet.dart';
@@ -13,8 +14,9 @@ class WalletSensitiveState with _$WalletSensitiveState {
     @Default([]) List<LoadStatus> syncDerivedWalletStatus,
     @Default([]) List<Wallet> derivedWallets,
     @Default('') String walletName,
-    @Default('') String error,
+    @Default(null) BBException? error,
   }) = _WalletSensitiveState;
 
-  factory WalletSensitiveState.initial() => const WalletSensitiveState(derivedWallets: []);
+  factory WalletSensitiveState.initial() =>
+      const WalletSensitiveState(derivedWallets: []);
 }

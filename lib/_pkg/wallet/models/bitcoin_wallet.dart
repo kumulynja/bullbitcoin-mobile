@@ -39,20 +39,6 @@ class BitcoinWallet extends Wallet with _$BitcoinWallet {
   factory BitcoinWallet.fromJson(Map<String, dynamic> json) =>
       safeFromJson(json, _$BitcoinWalletFromJson, 'BitcoinWallet');
 
-  static Future<Wallet> setupNewWallet(String mnemonicStr, NetworkType network,
-      {String name = 'Wallet'}) async {
-    return BitcoinWallet(
-      id: name,
-      name: name,
-      balance: 0,
-      txCount: 0,
-      type: WalletType.Bitcoin,
-      network: network,
-      // breaker: true,
-      seedFingerprint: '',
-    );
-  }
-
   @override
   Future<(Iterable<Tx>?, dynamic)> getTxs(Wallet wallet) async {
     if (bdkWallet == null) {

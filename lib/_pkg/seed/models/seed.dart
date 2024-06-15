@@ -22,17 +22,14 @@ class Seed with _$Seed {
     required String mnemonic,
     required String passphrase,
     @Index() required String fingerprint,
-    @Enumerated(EnumType.ordinal)
-    required WalletType walletType, // TODO: Needed here?
-    @Enumerated(EnumType.ordinal)
-    required NetworkType network, // TODO: Needed here?
+    @Default([]) List<String> walletIDs,
   }) = _Seed;
   const Seed._();
 
   Id get isarId => Isar.autoIncrement;
 
   @Index()
-  String get id => '${fingerprint}_${walletType.name}_${network.name}';
+  String get id => fingerprint;
 
   factory Seed.fromJson(Map<String, dynamic> json) =>
       safeFromJson(json, _$SeedFromJson, 'Seed');
@@ -43,7 +40,7 @@ class Seed with _$Seed {
   }
 
   // TODO: Is this the right place to have this?
-  Future<(String?, dynamic)> getBdkFingerprint() async {
+  Future<(String?, dynamic)> getBdkFingerprint(NetworkType network) async {
     try {
       final mn = await bdk.Mnemonic.fromString(mnemonic);
       final descriptorSecretKey = await bdk.DescriptorSecretKey.create(
@@ -76,16 +73,3 @@ String fingerPrintFromXKeyDesc(
   final fingerPrint = xkey.substring(startIndex + 1, fingerPrintEndIndex);
   return fingerPrint;
 }
-
-/*
-@freezed
-class Passphrase with _$Passphrase {
-  const factory Passphrase({
-    @Default('') String passphrase,
-    required String sourceFingerprint,
-  }) = _Passphrase;
-  const Passphrase._();
-
-  factory Passphrase.fromJson(Map<String, dynamic> json) => _$PassphraseFromJson(json);
-}
-*/

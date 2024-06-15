@@ -22,7 +22,7 @@ mixin _$WalletSensitiveState {
       throw _privateConstructorUsedError;
   List<Wallet> get derivedWallets => throw _privateConstructorUsedError;
   String get walletName => throw _privateConstructorUsedError;
-  String get error => throw _privateConstructorUsedError;
+  BBException<dynamic>? get error => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $WalletSensitiveStateCopyWith<WalletSensitiveState> get copyWith =>
@@ -41,7 +41,7 @@ abstract class $WalletSensitiveStateCopyWith<$Res> {
       List<LoadStatus> syncDerivedWalletStatus,
       List<Wallet> derivedWallets,
       String walletName,
-      String error});
+      BBException<dynamic>? error});
 
   $SeedCopyWith<$Res>? get seed;
 }
@@ -65,7 +65,7 @@ class _$WalletSensitiveStateCopyWithImpl<$Res,
     Object? syncDerivedWalletStatus = null,
     Object? derivedWallets = null,
     Object? walletName = null,
-    Object? error = null,
+    Object? error = freezed,
   }) {
     return _then(_value.copyWith(
       seed: freezed == seed
@@ -88,10 +88,10 @@ class _$WalletSensitiveStateCopyWithImpl<$Res,
           ? _value.walletName
           : walletName // ignore: cast_nullable_to_non_nullable
               as String,
-      error: null == error
+      error: freezed == error
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
-              as String,
+              as BBException<dynamic>?,
     ) as $Val);
   }
 
@@ -122,7 +122,7 @@ abstract class _$$WalletSensitiveStateImplCopyWith<$Res>
       List<LoadStatus> syncDerivedWalletStatus,
       List<Wallet> derivedWallets,
       String walletName,
-      String error});
+      BBException<dynamic>? error});
 
   @override
   $SeedCopyWith<$Res>? get seed;
@@ -144,7 +144,7 @@ class __$$WalletSensitiveStateImplCopyWithImpl<$Res>
     Object? syncDerivedWalletStatus = null,
     Object? derivedWallets = null,
     Object? walletName = null,
-    Object? error = null,
+    Object? error = freezed,
   }) {
     return _then(_$WalletSensitiveStateImpl(
       seed: freezed == seed
@@ -167,10 +167,10 @@ class __$$WalletSensitiveStateImplCopyWithImpl<$Res>
           ? _value.walletName
           : walletName // ignore: cast_nullable_to_non_nullable
               as String,
-      error: null == error
+      error: freezed == error
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
-              as String,
+              as BBException<dynamic>?,
     ));
   }
 }
@@ -184,7 +184,7 @@ class _$WalletSensitiveStateImpl implements _WalletSensitiveState {
       final List<LoadStatus> syncDerivedWalletStatus = const [],
       final List<Wallet> derivedWallets = const [],
       this.walletName = '',
-      this.error = ''})
+      this.error = null})
       : _syncDerivedWalletStatus = syncDerivedWalletStatus,
         _derivedWallets = derivedWallets;
 
@@ -217,7 +217,7 @@ class _$WalletSensitiveStateImpl implements _WalletSensitiveState {
   final String walletName;
   @override
   @JsonKey()
-  final String error;
+  final BBException<dynamic>? error;
 
   @override
   String toString() {
@@ -266,7 +266,7 @@ abstract class _WalletSensitiveState implements WalletSensitiveState {
       final List<LoadStatus> syncDerivedWalletStatus,
       final List<Wallet> derivedWallets,
       final String walletName,
-      final String error}) = _$WalletSensitiveStateImpl;
+      final BBException<dynamic>? error}) = _$WalletSensitiveStateImpl;
 
   @override
   Seed? get seed;
@@ -279,7 +279,7 @@ abstract class _WalletSensitiveState implements WalletSensitiveState {
   @override
   String get walletName;
   @override
-  String get error;
+  BBException<dynamic>? get error;
   @override
   @JsonKey(ignore: true)
   _$$WalletSensitiveStateImplCopyWith<_$WalletSensitiveStateImpl>

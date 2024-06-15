@@ -125,3 +125,20 @@ final GoRouter router = GoRouter(
         },
       ),
     ]);
+
+void navigateToWalletTypePage(BuildContext context, String mnemonic,
+    String passphrase, String walletName, String walletType) {
+  final baseRoute = WalletTypeSelectionPage.route;
+  final mnemonicParam =
+      '${WalletTypeSelectionPage.routeQParamMnemonic}=$mnemonic';
+  final passphraseParam =
+      '${WalletTypeSelectionPage.routeQParamPassphrase}=$passphrase';
+  final walletNameParam =
+      '${WalletTypeSelectionPage.routeQParamWalletName}=$walletName';
+  final walletTypeParam =
+      '${WalletTypeSelectionPage.routeQParamWalletType}=$walletType';
+
+  final finalRoute =
+      '$baseRoute?$mnemonicParam&$passphraseParam&$walletNameParam&$walletTypeParam';
+  GoRouter.of(context).push(finalRoute);
+}

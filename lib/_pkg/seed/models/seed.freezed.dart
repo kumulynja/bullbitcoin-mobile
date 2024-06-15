@@ -24,11 +24,7 @@ mixin _$Seed {
   String get passphrase => throw _privateConstructorUsedError;
   @Index()
   String get fingerprint => throw _privateConstructorUsedError;
-  @Enumerated(EnumType.ordinal)
-  WalletType get walletType =>
-      throw _privateConstructorUsedError; // TODO: Needed here?
-  @Enumerated(EnumType.ordinal)
-  NetworkType get network => throw _privateConstructorUsedError;
+  List<String> get walletIDs => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -44,8 +40,7 @@ abstract class $SeedCopyWith<$Res> {
       {String mnemonic,
       String passphrase,
       @Index() String fingerprint,
-      @Enumerated(EnumType.ordinal) WalletType walletType,
-      @Enumerated(EnumType.ordinal) NetworkType network});
+      List<String> walletIDs});
 }
 
 /// @nodoc
@@ -64,8 +59,7 @@ class _$SeedCopyWithImpl<$Res, $Val extends Seed>
     Object? mnemonic = null,
     Object? passphrase = null,
     Object? fingerprint = null,
-    Object? walletType = null,
-    Object? network = null,
+    Object? walletIDs = null,
   }) {
     return _then(_value.copyWith(
       mnemonic: null == mnemonic
@@ -80,14 +74,10 @@ class _$SeedCopyWithImpl<$Res, $Val extends Seed>
           ? _value.fingerprint
           : fingerprint // ignore: cast_nullable_to_non_nullable
               as String,
-      walletType: null == walletType
-          ? _value.walletType
-          : walletType // ignore: cast_nullable_to_non_nullable
-              as WalletType,
-      network: null == network
-          ? _value.network
-          : network // ignore: cast_nullable_to_non_nullable
-              as NetworkType,
+      walletIDs: null == walletIDs
+          ? _value.walletIDs
+          : walletIDs // ignore: cast_nullable_to_non_nullable
+              as List<String>,
     ) as $Val);
   }
 }
@@ -103,8 +93,7 @@ abstract class _$$SeedImplCopyWith<$Res> implements $SeedCopyWith<$Res> {
       {String mnemonic,
       String passphrase,
       @Index() String fingerprint,
-      @Enumerated(EnumType.ordinal) WalletType walletType,
-      @Enumerated(EnumType.ordinal) NetworkType network});
+      List<String> walletIDs});
 }
 
 /// @nodoc
@@ -120,8 +109,7 @@ class __$$SeedImplCopyWithImpl<$Res>
     Object? mnemonic = null,
     Object? passphrase = null,
     Object? fingerprint = null,
-    Object? walletType = null,
-    Object? network = null,
+    Object? walletIDs = null,
   }) {
     return _then(_$SeedImpl(
       mnemonic: null == mnemonic
@@ -136,14 +124,10 @@ class __$$SeedImplCopyWithImpl<$Res>
           ? _value.fingerprint
           : fingerprint // ignore: cast_nullable_to_non_nullable
               as String,
-      walletType: null == walletType
-          ? _value.walletType
-          : walletType // ignore: cast_nullable_to_non_nullable
-              as WalletType,
-      network: null == network
-          ? _value.network
-          : network // ignore: cast_nullable_to_non_nullable
-              as NetworkType,
+      walletIDs: null == walletIDs
+          ? _value._walletIDs
+          : walletIDs // ignore: cast_nullable_to_non_nullable
+              as List<String>,
     ));
   }
 }
@@ -155,9 +139,9 @@ class _$SeedImpl extends _Seed {
       {required this.mnemonic,
       required this.passphrase,
       @Index() required this.fingerprint,
-      @Enumerated(EnumType.ordinal) required this.walletType,
-      @Enumerated(EnumType.ordinal) required this.network})
-      : super._();
+      final List<String> walletIDs = const []})
+      : _walletIDs = walletIDs,
+        super._();
 
   factory _$SeedImpl.fromJson(Map<String, dynamic> json) =>
       _$$SeedImplFromJson(json);
@@ -169,17 +153,18 @@ class _$SeedImpl extends _Seed {
   @override
   @Index()
   final String fingerprint;
+  final List<String> _walletIDs;
   @override
-  @Enumerated(EnumType.ordinal)
-  final WalletType walletType;
-// TODO: Needed here?
-  @override
-  @Enumerated(EnumType.ordinal)
-  final NetworkType network;
+  @JsonKey()
+  List<String> get walletIDs {
+    if (_walletIDs is EqualUnmodifiableListView) return _walletIDs;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_walletIDs);
+  }
 
   @override
   String toString() {
-    return 'Seed(mnemonic: $mnemonic, passphrase: $passphrase, fingerprint: $fingerprint, walletType: $walletType, network: $network)';
+    return 'Seed(mnemonic: $mnemonic, passphrase: $passphrase, fingerprint: $fingerprint, walletIDs: $walletIDs)';
   }
 
   @override
@@ -193,15 +178,14 @@ class _$SeedImpl extends _Seed {
                 other.passphrase == passphrase) &&
             (identical(other.fingerprint, fingerprint) ||
                 other.fingerprint == fingerprint) &&
-            (identical(other.walletType, walletType) ||
-                other.walletType == walletType) &&
-            (identical(other.network, network) || other.network == network));
+            const DeepCollectionEquality()
+                .equals(other._walletIDs, _walletIDs));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(
-      runtimeType, mnemonic, passphrase, fingerprint, walletType, network);
+  int get hashCode => Object.hash(runtimeType, mnemonic, passphrase,
+      fingerprint, const DeepCollectionEquality().hash(_walletIDs));
 
   @JsonKey(ignore: true)
   @override
@@ -219,12 +203,10 @@ class _$SeedImpl extends _Seed {
 
 abstract class _Seed extends Seed {
   const factory _Seed(
-          {required final String mnemonic,
-          required final String passphrase,
-          @Index() required final String fingerprint,
-          @Enumerated(EnumType.ordinal) required final WalletType walletType,
-          @Enumerated(EnumType.ordinal) required final NetworkType network}) =
-      _$SeedImpl;
+      {required final String mnemonic,
+      required final String passphrase,
+      @Index() required final String fingerprint,
+      final List<String> walletIDs}) = _$SeedImpl;
   const _Seed._() : super._();
 
   factory _Seed.fromJson(Map<String, dynamic> json) = _$SeedImpl.fromJson;
@@ -237,11 +219,7 @@ abstract class _Seed extends Seed {
   @Index()
   String get fingerprint;
   @override
-  @Enumerated(EnumType.ordinal)
-  WalletType get walletType;
-  @override // TODO: Needed here?
-  @Enumerated(EnumType.ordinal)
-  NetworkType get network;
+  List<String> get walletIDs;
   @override
   @JsonKey(ignore: true)
   _$$SeedImplCopyWith<_$SeedImpl> get copyWith =>

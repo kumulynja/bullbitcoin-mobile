@@ -1,5 +1,4 @@
 import 'package:bb_arch/_pkg/address/models/address.dart';
-import 'package:bb_arch/_pkg/error.dart';
 import 'package:bb_arch/_pkg/misc.dart';
 import 'package:bb_arch/_pkg/tx/models/bitcoin_tx.dart';
 import 'package:bb_arch/_pkg/tx/models/tx.dart';

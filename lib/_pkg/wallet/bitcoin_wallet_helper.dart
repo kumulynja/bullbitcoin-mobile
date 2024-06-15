@@ -100,7 +100,8 @@ class BitcoinWalletHelper {
         descriptor: await descriptor.asString(), network: network);
   }
 
-  static Future<List<BitcoinWallet>> initializeAllWallets(Seed seed,
+  static Future<List<BitcoinWallet>> initializeAllWallets(
+      Seed seed, NetworkType network,
       {List<BitcoinScriptType> scriptType = const [
         BitcoinScriptType.bip44,
         BitcoinScriptType.bip49,
@@ -115,6 +116,7 @@ class BitcoinWalletHelper {
 
       final walletFutures = scriptType.map((path) => initializeWallet(
           seed: seed,
+          network: network,
           blockchain: bdkBlockchain,
           scriptType: path,
           appDocDirPath: appDocDir.path));
@@ -131,22 +133,22 @@ class BitcoinWalletHelper {
   }
 
   static Future<BitcoinWallet> initializeWallet(
-      {Seed? seed,
+      {required Seed seed,
+      required NetworkType network,
       bdk.Blockchain? blockchain,
       BitcoinScriptType scriptType = BitcoinScriptType.bip84,
       String appDocDirPath = ''}) async {
-    if (seed == null || blockchain == null) {
-      throw ("Seed is null");
+    if (blockchain == null) {
+      throw ("Blockchain is null");
     }
 
     BBLogger().log(
         'initializing wallet with bip path: $scriptType / ${scriptType.path} / ${scriptType.name}');
 
-    final network = seed.network;
-    final (sourceFingerprint, _) = await seed.getBdkFingerprint();
+    final (sourceFingerprint, _) = await seed.getBdkFingerprint(network);
     final bdkMnemonic = await bdk.Mnemonic.fromString(seed.mnemonic);
     final rootXprv = await bdk.DescriptorSecretKey.create(
-      network: seed.network.getBdkType,
+      network: network.getBdkType,
       mnemonic: bdkMnemonic,
       password: seed.passphrase,
     );
@@ -180,7 +182,7 @@ class BitcoinWalletHelper {
         databaseConfig: dbConfig);
 
     BitcoinWallet wallet = BitcoinWallet(
-      id: walletHashId,
+      id: '${walletHashId}_bitcoin_${network.name}',
       name: '',
       balance: 0,
       txCount: 0,
@@ -201,7 +203,7 @@ class BitcoinWalletHelper {
 
       if (w.importType == ImportTypes.words12) {
         BitcoinWallet loadedWallet =
-            (await BitcoinWalletHelper.initializeAllWallets(seed,
+            (await BitcoinWalletHelper.initializeAllWallets(seed, w.network,
                     scriptType: [w.scriptType]))
                 .first;
         return w.copyWith(

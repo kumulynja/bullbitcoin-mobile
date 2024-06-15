@@ -31,11 +31,10 @@ class WalletTypeSelectionPage extends StatelessWidget {
     final seedRepository = RepositoryProvider.of<SeedRepository>(context);
 
     Seed seed = Seed(
-        mnemonic: mnemonic,
-        passphrase: passphrase,
-        fingerprint: '',
-        walletType: WalletTypeExtension.fromString(walletType),
-        network: NetworkType.Testnet);
+      mnemonic: mnemonic,
+      passphrase: passphrase,
+      fingerprint: '',
+    );
 
     // TODO: How to handle errors here
     // return FutureBuilder<(String?, dynamic)>(
@@ -62,6 +61,7 @@ class WalletTypeSelectionPage extends StatelessWidget {
     return WalletTypeSelectionScaffold(
       seed: seed,
       walletName: walletName,
+      walletType: WalletTypeExtension.fromString(walletType),
     );
   }
 }

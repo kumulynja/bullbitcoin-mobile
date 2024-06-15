@@ -60,10 +60,9 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
       emit(state.copyWith(status: LoadStatus.loading));
       await Future.delayed(const Duration(seconds: 1));
 
-      final (seed, _) =
-          await seedRepository.loadSeed(state.wallet!.seedFingerprint);
+      final seed = await seedRepository.loadSeed(state.wallet!.seedFingerprint);
       final loadedWallet =
-          await walletRepository.loadNativeSdk(state.wallet!, seed!);
+          await walletRepository.loadNativeSdk(state.wallet!, seed);
 
       emit(state.copyWith(wallet: loadedWallet));
 

@@ -8,27 +8,34 @@ import 'package:lwk_dart/lwk_dart.dart' as lwk;
 import 'package:path_provider/path_provider.dart';
 
 class LiquidWalletHelper {
-  static Future<List<LiquidWallet>> initializeAllWallets(Seed seed,
+  static Future<List<LiquidWallet>> initializeAllWallets(
+      Seed seed, NetworkType network,
       {List<BitcoinScriptType> scriptType = const [
         BitcoinScriptType.bip44,
         BitcoinScriptType.bip49,
         BitcoinScriptType.bip84,
         BitcoinScriptType.bip86,
       ]}) async {
-    LiquidWallet wallet = LiquidWallet(
-        id: seed.fingerprint,
-        name: '',
-        balance: 0,
-        txCount: 0,
-        type: WalletType.Liquid,
-        network: seed.network,
-        importType: ImportTypes.words12,
-        seedFingerprint: seed.fingerprint,
-        scriptType: scriptType.first);
+    final wallets = scriptType
+        .map((path) => LiquidWallet(
+            id: '${seed.fingerprint}_${path.name}_liquid_${network.name}',
+            name: '',
+            balance: 0,
+            txCount: 0,
+            type: WalletType.Liquid,
+            network: network,
+            importType: ImportTypes.words12,
+            seedFingerprint: seed.fingerprint,
+            scriptType: path))
+        .toList();
 
-    final loadedWallet = await loadNativeSdk(wallet, seed);
+    final List<LiquidWallet> loadedWallets = [];
+    for (int i = 0; i < wallets.length; i++) {
+      final loadedWallet = await loadNativeSdk(wallets[i], seed);
+      loadedWallets.add(loadedWallet);
+    }
 
-    return [loadedWallet];
+    return loadedWallets;
   }
 
   static Future<LiquidWallet> loadNativeSdk(LiquidWallet w, Seed seed) async {
@@ -38,10 +45,10 @@ class LiquidWalletHelper {
     final String dbDir = '${appDocDir.path}/db';
 
     final lwk.Descriptor descriptor = await lwk.Descriptor.create(
-        network: seed.network.getLwkType, mnemonic: seed.mnemonic);
+        network: w.network.getLwkType, mnemonic: seed.mnemonic);
 
     final wallet = await lwk.Wallet.create(
-      network: seed.network.getLwkType,
+      network: w.network.getLwkType,
       dbPath: dbDir,
       descriptor: descriptor.descriptor,
     );

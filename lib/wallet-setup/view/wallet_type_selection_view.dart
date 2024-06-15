@@ -19,10 +19,14 @@ import 'package:go_router/go_router.dart';
 // TODO: This is messy. Cleanup
 class WalletTypeSelectionScaffold extends StatelessWidget {
   const WalletTypeSelectionScaffold(
-      {super.key, required this.seed, required this.walletName});
+      {super.key,
+      required this.seed,
+      required this.walletName,
+      required this.walletType});
 
   final Seed seed;
   final String walletName;
+  final WalletType walletType;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +34,7 @@ class WalletTypeSelectionScaffold extends StatelessWidget {
     final seedRepository = RepositoryProvider.of<SeedRepository>(context);
 
     return FutureBuilder<(String?, dynamic)>(
-        future: seed.getBdkFingerprint(),
+        future: seed.getBdkFingerprint(NetworkType.Testnet), // TODO:
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data?.$2 == null) {
             final newSeed = seed.copyWith(fingerprint: snapshot.data?.$1 ?? '');
@@ -41,7 +45,10 @@ class WalletTypeSelectionScaffold extends StatelessWidget {
                         walletRepository: walletRepository,
                         seedRepository: seedRepository)
                       ..add(DeriveWalletFromStoredSeed(
-                          seed: newSeed, walletName: walletName))),
+                          seed: newSeed,
+                          walletName: walletName,
+                          walletType: walletType,
+                          networkType: NetworkType.Testnet))),
               ],
               child: BlocBuilder<WalletSensitiveBloc, WalletSensitiveState>(
                   builder: (context, status) {
@@ -114,9 +121,13 @@ class WalletTypeSelectionView extends StatelessWidget {
                 child: const Text('Import'),
                 onPressed: () async {
                   print('Import $index wallet type');
-                  context
-                      .read<WalletSensitiveBloc>()
-                      .add(PersistSeed(seed: seed));
+                  context.read<WalletSensitiveBloc>().add(
+                      PersistSeedForWalletId(
+                          seed: seed, walletId: wallets[index].id));
+
+                  // TODO:
+                  // WalletSensitiveBloc: stop syncing
+
                   if (w is BitcoinWallet) {
                     BitcoinWallet w = wallets[index] as BitcoinWallet;
                     context.read<WalletBloc>().add(PersistWallet(

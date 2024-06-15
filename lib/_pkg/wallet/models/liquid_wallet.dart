@@ -36,18 +36,6 @@ class LiquidWallet extends Wallet with _$LiquidWallet {
   factory LiquidWallet.fromJson(Map<String, dynamic> json) =>
       safeFromJson(json, _$LiquidWalletFromJson, 'LiquidWallet');
 
-  static Future<Wallet> setupNewWallet(String mnemonicStr, NetworkType network,
-      {String name = 'Liquid wallet'}) async {
-    return LiquidWallet(
-        id: name,
-        name: name,
-        balance: 0,
-        txCount: 0,
-        type: WalletType.Liquid,
-        network: network,
-        seedFingerprint: '');
-  }
-
   @override
   Future<(Iterable<Tx>?, dynamic)> getTxs(Wallet wallet) async {
     if (lwkWallet == null) {

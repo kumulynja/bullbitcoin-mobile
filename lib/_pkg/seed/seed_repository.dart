@@ -1,3 +1,4 @@
+import 'package:bb_arch/_pkg/error.dart';
 import 'package:bb_arch/_pkg/seed/models/seed.dart';
 import 'package:bb_arch/_pkg/storage/hive.dart';
 import 'package:bb_arch/_pkg/wallet/models/wallet.dart';
@@ -12,33 +13,29 @@ class SeedRepository {
 
   late Seed? seed;
 
-  Future<(Seed?, dynamic)> loadSeed(String fingerprint) async {
+  Future<Seed> loadSeed(String fingerprint) async {
     try {
       final seed =
-          await isar.seeds.where().fingerprintEqualTo(fingerprint).findAll();
-      //final (seedsStr, _) = await storage.getValue('seed.$fingerprint');
-      //Seed seed = Seed.fromJson(jsonDecode(seedsStr!));
-      return (seed.first, null);
-    } catch (e) {
-      return (null, e);
+          await isar.seeds.where().fingerprintEqualTo(fingerprint).findFirst();
+      if (seed == null) {
+        throw 'Seed not found with fingerprint: $fingerprint';
+      }
+      return seed;
+    } catch (e, stackTrace) {
+      throw Error.throwWithStackTrace(SeedException(e), stackTrace);
     }
   }
 
-  Future<(Seed?, dynamic)> newSeed(
-      WalletType walletType, NetworkType network) async {
+  Future<Seed> newSeed(WalletType walletType, NetworkType network) async {
     try {
       final mn = await bdk.Mnemonic.create(bdk.WordCount.Words12);
-      return (
-        Seed(
-            mnemonic: mn.asString(),
-            passphrase: '',
-            fingerprint: '',
-            walletType: walletType,
-            network: network),
-        null
+      return Seed(
+        mnemonic: mn.asString(),
+        passphrase: '',
+        fingerprint: '',
       );
-    } catch (e) {
-      return (null, e);
+    } catch (e, stackTrace) {
+      throw Error.throwWithStackTrace(SeedException(e), stackTrace);
     }
   }
 
@@ -55,10 +52,21 @@ class SeedRepository {
     }
   }
 
-  Future<dynamic> persistSeed(Seed seed) async {
+  Future<dynamic> persistSeedforWalletId(Seed seed, String walletId) async {
     try {
+      Seed existingSeed = (await isar.seeds
+              .where()
+              .fingerprintEqualTo(seed.fingerprint)
+              .findFirst()) ??
+          seed;
+
+      if (!existingSeed.walletIDs.contains(walletId)) {
+        existingSeed = existingSeed
+            .copyWith(walletIDs: [...existingSeed.walletIDs, walletId]);
+      }
+
       await isar.writeTxn(() async {
-        await isar.seeds.putByIndex("id", seed);
+        await isar.seeds.putByIndex("id", existingSeed);
       });
       //final err = await storage.saveValue(key: 'seed.${seed.fingerprint}', value: jsonEncode(seed.toJson()));
       // return err;

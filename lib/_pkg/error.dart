@@ -10,23 +10,6 @@ sealed class ErrorState<T> {
       {this.dbError, this.parseError, this.httpError, this.networkError});
 }
 
-class DBError<T> extends ErrorState<T> {
-  DBError(Exception? dbError) : super(dbError: dbError);
-}
-
-class ParseError<T> extends ErrorState<T> {
-  ParseError(Exception? parseError) : super(parseError: parseError);
-}
-
-class HttpError<T> extends ErrorState<T> {
-  HttpError(HttpException? httpError) : super(httpError: httpError);
-}
-
-class NetworkError<T> extends ErrorState<T> {
-  NetworkError(NetworkException? networkError)
-      : super(networkError: networkError);
-}
-
 enum NetworkException { noInternet, timeout, unknown }
 
 enum HttpException { notFound, badRequest, unauthorized, unknown }
@@ -69,4 +52,10 @@ abstract class BdkException<T> implements BBException<T> {
 class BdkElectrumException<T> extends BdkException<T> {
   const BdkElectrumException(super.error, {super.message, this.serverUrl});
   final String? serverUrl;
+}
+
+class SeedException<T> implements BBException<T> {
+  const SeedException(this.error, {this.message});
+  final T error;
+  final String? message;
 }

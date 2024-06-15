@@ -3,7 +3,8 @@ import 'package:bb_arch/_ui/atoms/bb_button.dart';
 import 'package:flutter/material.dart';
 
 class WalletRecoverForm extends StatefulWidget {
-  const WalletRecoverForm({super.key, required this.onSubmit, this.asyncValidateSeedPhrase});
+  const WalletRecoverForm(
+      {super.key, required this.onSubmit, this.asyncValidateSeedPhrase});
 
   final Function({
     required String seedPhrase,
@@ -35,14 +36,11 @@ class WalletRecoverFormState extends State<WalletRecoverForm> {
       _seedPhraseError = '';
     });
 
-    if (_formKey.currentState!.validate() && _syncValidateSeedPhrase(_seedPhraseController.text)) {
-      // print('Seed phrase: ${_seedPhraseController.text}');
-      // print('Passphrase: ${_passphraseController.text}');
-      // print('Wallet name: ${_walletNameController.text}');
-      // print('Asset name: $_selectedAsset');
-
+    if (_formKey.currentState!.validate() &&
+        _syncValidateSeedPhrase(_seedPhraseController.text)) {
       if (widget.asyncValidateSeedPhrase != null) {
-        final errMsg = await widget.asyncValidateSeedPhrase!(_seedPhraseController.text);
+        final errMsg =
+            await widget.asyncValidateSeedPhrase!(_seedPhraseController.text);
         if (errMsg != null) {
           setState(() {
             _seedPhraseError = errMsg;

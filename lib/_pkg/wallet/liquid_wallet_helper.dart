@@ -44,13 +44,13 @@ class LiquidWalletHelper {
     final appDocDir = await getApplicationDocumentsDirectory();
     final String dbDir = '${appDocDir.path}/db';
 
-    final lwk.Descriptor descriptor = await lwk.Descriptor.create(
+    final lwk.Descriptor descriptor = await lwk.Descriptor.newConfidential(
         network: w.network.getLwkType, mnemonic: seed.mnemonic);
 
-    final wallet = await lwk.Wallet.create(
+    final wallet = await lwk.Wallet.init(
       network: w.network.getLwkType,
-      dbPath: dbDir,
-      descriptor: descriptor.descriptor,
+      dbpath: dbDir,
+      descriptor: descriptor,
     );
 
     return w.copyWith(lwkWallet: wallet);
@@ -64,12 +64,12 @@ class LiquidWalletHelper {
         throw ('lwk not initialized');
       }
 
-      await w.lwkWallet?.sync(liquidElectrumUrl);
+      await w.lwkWallet?.sync(electrumUrl: liquidElectrumUrl);
 
       String assetIdToPick =
           w.network == NetworkType.Mainnet ? lwk.lBtcAssetId : lwk.lTestAssetId;
 
-      final balances = await w.lwkWallet?.balance();
+      final balances = await w.lwkWallet?.balances();
       int finalBalance = balances
               ?.where((b) => b.assetId == assetIdToPick)
               .map((e) => e.value)

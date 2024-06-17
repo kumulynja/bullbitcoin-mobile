@@ -134,6 +134,22 @@ class Address {
     });
     return addresses;
   }
+
+  // TODO: Is this the right place to do this?
+  /// Converts
+  ///   List<Address, Address, Address, Address>
+  /// to
+  ///   List<BitcoinAddress, LiquidAddress, BitcoinAddress, LiquidAddress>
+  static List<Address> mapBaseToChild(List<Address> addresses) {
+    return addresses.map((addr) {
+      if (addr.type == AddressType.Bitcoin) {
+        return BitcoinAddress.fromJson(addr.toJson());
+      } else if (addr.type == AddressType.Liquid) {
+        return LiquidAddress.fromJson(addr.toJson());
+      }
+      return addr;
+    }).toList();
+  }
 }
 
 enum AddressKind {

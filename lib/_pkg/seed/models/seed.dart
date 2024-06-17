@@ -52,7 +52,7 @@ class Seed with _$Seed {
       final externalDescriptor = await bdk.Descriptor.newBip84(
         secretKey: descriptorSecretKey,
         network: network.getBdkType,
-        keychain: bdk.KeychainKind.External,
+        keychain: bdk.KeychainKind.externalChain,
       );
       final edesc = await externalDescriptor.asString();
       final fgnr = fingerPrintFromXKeyDesc(edesc);

@@ -36,7 +36,7 @@ class LiquidAddress extends Address with _$LiquidAddress {
       safeFromJson(json, _$LiquidAddressFromJson, 'LiquidAddress');
 
   static Future<LiquidAddress> getLastUnused(LiquidWallet wallet) async {
-    final lastUnused = await wallet.lwkWallet!.lastUnusedAddress();
+    final lastUnused = await wallet.lwkWallet!.addressLastUnused();
 
     return LiquidAddress(
         address: lastUnused.confidential,

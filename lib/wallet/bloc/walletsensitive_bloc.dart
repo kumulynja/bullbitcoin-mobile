@@ -49,22 +49,22 @@ class WalletSensitiveBloc
 
   void _onDeriveWalletFromStoredSeed(DeriveWalletFromStoredSeed event,
       Emitter<WalletSensitiveState> emit) async {
-    BBLogger()
-        .logBloc('WalletSensitiveBloc :: DeriveWallets (${event.walletName})');
+    try {
+      BBLogger().logBloc(
+          'WalletSensitiveBloc :: DeriveWallets (${event.walletName})');
 
-    emit(state.copyWith(
-        status: LoadStatus.loading,
-        derivedWallets: [],
-        walletName: event.walletName));
+      emit(state.copyWith(
+          status: LoadStatus.loading,
+          derivedWallets: [],
+          walletName: event.walletName));
 
-    List<Wallet> nameUpdatedWallets = [];
-    final (wallets, errDerive) = await walletRepository.deriveWalletsFromSeed(
-        event.seed, event.walletType, event.networkType);
+      List<Wallet> nameUpdatedWallets = [];
+      final wallets = await walletRepository.deriveWalletsFromSeed(
+          event.seed, event.walletType, event.networkType);
 
-    BBLogger().logBloc(
-        'WalletSensitiveBloc :: DeriveWallets (${event.walletName}) : derived wallets');
+      BBLogger().logBloc(
+          'WalletSensitiveBloc :: DeriveWallets (${event.walletName}) : derived wallets');
 
-    if (wallets != null) {
       for (int i = 0; i < wallets.length; i++) {
         Wallet w = wallets[i];
         if (w is BitcoinWallet) {
@@ -75,58 +75,56 @@ class WalletSensitiveBloc
           nameUpdatedWallets.add(oldWallet.copyWith(name: event.walletName));
         }
       }
+
+      BBLogger().logBloc(
+          'WalletSensitiveBloc :: DeriveWallets (${event.walletName}) : name updated');
+
+      // sync logic goes here
+      emit(state.copyWith(
+          derivedWallets: nameUpdatedWallets,
+          syncDerivedWalletStatus:
+              nameUpdatedWallets.map((e) => LoadStatus.loading).toList()));
+      // seedRepository.clearSeed();
+
+      List<Future<Wallet>> syncedFutures =
+          state.derivedWallets.map((w) => Wallet.syncWallet(w)).toList();
+
+      var completer = Completer();
+
+      int syncedCount = 0;
+      for (int i = 0; i < syncedFutures.length; i++) {
+        syncedFutures[i].then((Wallet result) {
+          if (++syncedCount == syncedFutures.length) {
+            completer.complete();
+          }
+          emit(state.copyWith(derivedWallets: [
+            ...state.derivedWallets.sublist(0, i),
+            result,
+            ...state.derivedWallets.sublist(i + 1),
+          ], syncDerivedWalletStatus: [
+            ...state.syncDerivedWalletStatus.sublist(0, i),
+            LoadStatus.success,
+            ...state.syncDerivedWalletStatus.sublist(i + 1),
+          ]));
+          BBLogger().logBloc(
+              'WalletSensitiveBloc :: DeriveWallets (${event.walletName}) : sync complete $i');
+        }).catchError((error, stackTrace) {
+          if (++syncedCount == syncedFutures.length) {
+            completer.complete();
+          }
+          BBLogger().error(
+              'WalletSensitiveBloc :: DeriveWallets (${event.walletName}) : sync complete $i',
+              stackTrace);
+        });
+      }
+
+      await completer.future;
+      // await Future.delayed(const Duration(seconds: 5));
+      emit(state.copyWith(status: LoadStatus.success));
+    } catch (error, stackTrace) {
+      emit(state.copyWith(status: LoadStatus.failure));
+      addError(error, stackTrace);
     }
-
-    BBLogger().logBloc(
-        'WalletSensitiveBloc :: DeriveWallets (${event.walletName}) : name updated');
-
-    if (errDerive != null) {
-      emit(state.copyWith(status: LoadStatus.failure, error: errDerive));
-      return;
-    }
-
-    // sync logic goes here
-    emit(state.copyWith(
-        derivedWallets: nameUpdatedWallets,
-        syncDerivedWalletStatus:
-            nameUpdatedWallets.map((e) => LoadStatus.loading).toList()));
-    // seedRepository.clearSeed();
-
-    List<Future<Wallet>> syncedFutures =
-        state.derivedWallets.map((w) => Wallet.syncWallet(w)).toList();
-
-    var completer = Completer();
-
-    int syncedCount = 0;
-    for (int i = 0; i < syncedFutures.length; i++) {
-      syncedFutures[i].then((Wallet result) {
-        if (++syncedCount == syncedFutures.length) {
-          completer.complete();
-        }
-        emit(state.copyWith(derivedWallets: [
-          ...state.derivedWallets.sublist(0, i),
-          result,
-          ...state.derivedWallets.sublist(i + 1),
-        ], syncDerivedWalletStatus: [
-          ...state.syncDerivedWalletStatus.sublist(0, i),
-          LoadStatus.success,
-          ...state.syncDerivedWalletStatus.sublist(i + 1),
-        ]));
-        BBLogger().logBloc(
-            'WalletSensitiveBloc :: DeriveWallets (${event.walletName}) : sync complete $i');
-      }).catchError((error, stackTrace) {
-        if (++syncedCount == syncedFutures.length) {
-          completer.complete();
-        }
-        BBLogger().error(
-            'WalletSensitiveBloc :: DeriveWallets (${event.walletName}) : sync complete $i',
-            stackTrace);
-      });
-    }
-
-    await completer.future;
-    // await Future.delayed(const Duration(seconds: 5));
-    emit(state.copyWith(status: LoadStatus.success));
   }
 
   @override

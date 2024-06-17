@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:bb_arch/_pkg/address/models/address.dart';
 import 'package:bb_arch/_pkg/storage/hive.dart';
 import 'package:bb_arch/_pkg/tx/models/bitcoin_tx.dart';
 import 'package:bb_arch/_pkg/tx/models/liquid_tx.dart';
@@ -14,27 +15,28 @@ class TxRepository {
   Isar isar;
   HiveStorage storage;
 
-  Future<(List<Tx>?, dynamic)> fetchLatestTxsAcrossWallets(int limit) async {
+  Future<List<Tx>> fetchLatestTxsAcrossWallets(int limit) async {
     try {
       final txs =
           await isar.txs.where().sortByTimestampDesc().limit(limit).findAll();
+      return Tx.mapBaseToChild(txs);
 
       // TODO: Find better way
-      final ts = txs.map((t) {
-        if (t.type == TxType.Bitcoin) {
-          return BitcoinTx.fromJson(t.toJson());
-        } else if (t.type == TxType.Liquid) {
-          return LiquidTx.fromJson(t.toJson());
-        }
-        return t;
-      }).toList();
-      return (ts, null);
+      // final ts = txs.map((t) {
+      //   if (t.type == TxType.Bitcoin) {
+      //     return BitcoinTx.fromJson(t.toJson());
+      //   } else if (t.type == TxType.Liquid) {
+      //     return LiquidTx.fromJson(t.toJson());
+      //   }
+      //   return t;
+      // }).toList();
+      // return ts;
     } catch (e) {
-      return (null, e);
+      rethrow;
     }
   }
 
-  Future<(List<Tx>?, dynamic)> listTxs(Wallet wallet) async {
+  Future<List<Tx>> listTxs(Wallet wallet) async {
     try {
       final txs = await isar.txs
           .where()
@@ -42,44 +44,45 @@ class TxRepository {
           .sortByTimestampDesc()
           .findAll();
 
+      return Tx.mapBaseToChild(txs);
+
       // TODO: Find better way
-      final ts = txs.map((t) {
-        if (t.type == TxType.Bitcoin) {
-          return BitcoinTx.fromJson(t.toJson());
-        } else if (t.type == TxType.Liquid) {
-          return LiquidTx.fromJson(t.toJson());
-        }
-        return t;
-      }).toList();
+      // final ts = txs.map((t) {
+      //   if (t.type == TxType.Bitcoin) {
+      //     return BitcoinTx.fromJson(t.toJson());
+      //   } else if (t.type == TxType.Liquid) {
+      //     return LiquidTx.fromJson(t.toJson());
+      //   }
+      //   return t;
+      // }).toList();
+
       // final (txStr, _) = await storage.getValue('tx.${wallet.id}');
       // List<dynamic> txsJson = jsonDecode(txStr!);
       // final txs = txsJson.map((txJson) => Tx.fromJson(txJson)).toList();
-      return (ts, null);
+      // return (ts, null);
     } catch (e) {
-      return (null, e);
+      rethrow;
     }
   }
 
   // TODO: Pass List<Tx> as another parameter, which has list of Txs to be merged with
-  Future<(List<Tx>?, dynamic)> syncTxs(Wallet wallet) async {
+  Future<List<Tx>> syncTxs(Wallet wallet) async {
     try {
       // TODO: Ideally wallet.getTxs should be split as fetchTxs and processTxs
       // So first time a tx is fetched from bdk (Not existing in local storage), or unconfirmed txs, it is processed.
       // which means, first time tx is fetched or for unconfirmed txs, it's inputs, outputs and other fields are processed.
       // Then, next time, when the same tx is fetched, it's ignored and local Tx version is used.
 
-      final (updatedTxs, err) = await wallet.getTxs(wallet);
-      if (err != null) {
-        return (null, err);
-      }
-      final sortedTxs = updatedTxs?.toList();
-      sortedTxs?.sort(
+      final storedTxs = await listTxs(wallet);
+      final updatedTxs = await wallet.getTxs(wallet);
+      final sortedTxs = updatedTxs.toList();
+      sortedTxs.sort(
         (a, b) => b.timestamp - a.timestamp,
       );
 
-      return (sortedTxs ?? [], null);
+      return sortedTxs;
     } catch (e) {
-      return (null, e);
+      rethrow;
     }
   }
 

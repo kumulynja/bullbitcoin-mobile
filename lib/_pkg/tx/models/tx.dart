@@ -112,6 +112,22 @@ class Tx {
     }
     throw UnimplementedError('Unsupported Tx subclass');
   }
+
+  // TODO: Is this the right place to do this?
+  /// Converts
+  ///   List<Tx, Tx, Tx, Tx>
+  /// to
+  ///   List<BitcoinTx, LiquidTx, BitcoinTx, LiquidTx>
+  static List<Tx> mapBaseToChild(List<Tx> txs) {
+    return txs.map((t) {
+      if (t.type == TxType.Bitcoin) {
+        return BitcoinTx.fromJson(t.toJson());
+      } else if (t.type == TxType.Liquid) {
+        return LiquidTx.fromJson(t.toJson());
+      }
+      return t;
+    }).toList();
+  }
 }
 
 enum TxType { Bitcoin, Liquid, Lightning, Usdt }

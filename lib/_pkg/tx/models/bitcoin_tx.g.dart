@@ -293,20 +293,15 @@ const BitcoinTxInSchema = Schema(
     r'scriptSig': PropertySchema(
       id: 1,
       name: r'scriptSig',
-      type: IsarType.string,
-    ),
-    r'scriptSigStr': PropertySchema(
-      id: 2,
-      name: r'scriptSigStr',
-      type: IsarType.string,
+      type: IsarType.longList,
     ),
     r'sequence': PropertySchema(
-      id: 3,
+      id: 2,
       name: r'sequence',
       type: IsarType.long,
     ),
     r'witness': PropertySchema(
-      id: 4,
+      id: 3,
       name: r'witness',
       type: IsarType.stringList,
     )
@@ -326,8 +321,7 @@ int _bitcoinTxInEstimateSize(
   bytesCount += 3 +
       BitcoinOutPointSchema.estimateSize(
           object.previousOutput, allOffsets[BitcoinOutPoint]!, allOffsets);
-  bytesCount += 3 + object.scriptSig.length * 3;
-  bytesCount += 3 + object.scriptSigStr.length * 3;
+  bytesCount += 3 + object.scriptSig.length * 8;
   bytesCount += 3 + object.witness.length * 3;
   {
     for (var i = 0; i < object.witness.length; i++) {
@@ -350,10 +344,9 @@ void _bitcoinTxInSerialize(
     BitcoinOutPointSchema.serialize,
     object.previousOutput,
   );
-  writer.writeString(offsets[1], object.scriptSig);
-  writer.writeString(offsets[2], object.scriptSigStr);
-  writer.writeLong(offsets[3], object.sequence);
-  writer.writeStringList(offsets[4], object.witness);
+  writer.writeLongList(offsets[1], object.scriptSig);
+  writer.writeLong(offsets[2], object.sequence);
+  writer.writeStringList(offsets[3], object.witness);
 }
 
 BitcoinTxIn _bitcoinTxInDeserialize(
@@ -369,10 +362,9 @@ BitcoinTxIn _bitcoinTxInDeserialize(
           allOffsets,
         ) ??
         BitcoinOutPoint(),
-    scriptSig: reader.readString(offsets[1]),
-    scriptSigStr: reader.readString(offsets[2]),
-    sequence: reader.readLong(offsets[3]),
-    witness: reader.readStringList(offsets[4]) ?? [],
+    scriptSig: reader.readLongList(offsets[1]) ?? [],
+    sequence: reader.readLong(offsets[2]),
+    witness: reader.readStringList(offsets[3]) ?? [],
   );
   return object;
 }
@@ -392,12 +384,10 @@ P _bitcoinTxInDeserializeProp<P>(
           ) ??
           BitcoinOutPoint()) as P;
     case 1:
-      return (reader.readString(offset)) as P;
+      return (reader.readLongList(offset) ?? []) as P;
     case 2:
-      return (reader.readString(offset)) as P;
-    case 3:
       return (reader.readLong(offset)) as P;
-    case 4:
+    case 3:
       return (reader.readStringList(offset) ?? []) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -407,58 +397,49 @@ P _bitcoinTxInDeserializeProp<P>(
 extension BitcoinTxInQueryFilter
     on QueryBuilder<BitcoinTxIn, BitcoinTxIn, QFilterCondition> {
   QueryBuilder<BitcoinTxIn, BitcoinTxIn, QAfterFilterCondition>
-      scriptSigEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+      scriptSigElementEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'scriptSig',
         value: value,
-        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<BitcoinTxIn, BitcoinTxIn, QAfterFilterCondition>
-      scriptSigGreaterThan(
-    String value, {
+      scriptSigElementGreaterThan(
+    int value, {
     bool include = false,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
         property: r'scriptSig',
         value: value,
-        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<BitcoinTxIn, BitcoinTxIn, QAfterFilterCondition>
-      scriptSigLessThan(
-    String value, {
+      scriptSigElementLessThan(
+    int value, {
     bool include = false,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
         property: r'scriptSig',
         value: value,
-        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<BitcoinTxIn, BitcoinTxIn, QAfterFilterCondition>
-      scriptSigBetween(
-    String lower,
-    String upper, {
+      scriptSigElementBetween(
+    int lower,
+    int upper, {
     bool includeLower = true,
     bool includeUpper = true,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
@@ -467,214 +448,96 @@ extension BitcoinTxInQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<BitcoinTxIn, BitcoinTxIn, QAfterFilterCondition>
-      scriptSigStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+      scriptSigLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'scriptSig',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BitcoinTxIn, BitcoinTxIn, QAfterFilterCondition>
-      scriptSigEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'scriptSig',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BitcoinTxIn, BitcoinTxIn, QAfterFilterCondition>
-      scriptSigContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'scriptSig',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BitcoinTxIn, BitcoinTxIn, QAfterFilterCondition>
-      scriptSigMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'scriptSig',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.listLength(
+        r'scriptSig',
+        length,
+        true,
+        length,
+        true,
+      );
     });
   }
 
   QueryBuilder<BitcoinTxIn, BitcoinTxIn, QAfterFilterCondition>
       scriptSigIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'scriptSig',
-        value: '',
-      ));
+      return query.listLength(
+        r'scriptSig',
+        0,
+        true,
+        0,
+        true,
+      );
     });
   }
 
   QueryBuilder<BitcoinTxIn, BitcoinTxIn, QAfterFilterCondition>
       scriptSigIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'scriptSig',
-        value: '',
-      ));
+      return query.listLength(
+        r'scriptSig',
+        0,
+        false,
+        999999,
+        true,
+      );
     });
   }
 
   QueryBuilder<BitcoinTxIn, BitcoinTxIn, QAfterFilterCondition>
-      scriptSigStrEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'scriptSigStr',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BitcoinTxIn, BitcoinTxIn, QAfterFilterCondition>
-      scriptSigStrGreaterThan(
-    String value, {
+      scriptSigLengthLessThan(
+    int length, {
     bool include = false,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'scriptSigStr',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.listLength(
+        r'scriptSig',
+        0,
+        true,
+        length,
+        include,
+      );
     });
   }
 
   QueryBuilder<BitcoinTxIn, BitcoinTxIn, QAfterFilterCondition>
-      scriptSigStrLessThan(
-    String value, {
+      scriptSigLengthGreaterThan(
+    int length, {
     bool include = false,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'scriptSigStr',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.listLength(
+        r'scriptSig',
+        length,
+        include,
+        999999,
+        true,
+      );
     });
   }
 
   QueryBuilder<BitcoinTxIn, BitcoinTxIn, QAfterFilterCondition>
-      scriptSigStrBetween(
-    String lower,
-    String upper, {
+      scriptSigLengthBetween(
+    int lower,
+    int upper, {
     bool includeLower = true,
     bool includeUpper = true,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'scriptSigStr',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BitcoinTxIn, BitcoinTxIn, QAfterFilterCondition>
-      scriptSigStrStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'scriptSigStr',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BitcoinTxIn, BitcoinTxIn, QAfterFilterCondition>
-      scriptSigStrEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'scriptSigStr',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BitcoinTxIn, BitcoinTxIn, QAfterFilterCondition>
-      scriptSigStrContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'scriptSigStr',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BitcoinTxIn, BitcoinTxIn, QAfterFilterCondition>
-      scriptSigStrMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'scriptSigStr',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BitcoinTxIn, BitcoinTxIn, QAfterFilterCondition>
-      scriptSigStrIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'scriptSigStr',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<BitcoinTxIn, BitcoinTxIn, QAfterFilterCondition>
-      scriptSigStrIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'scriptSigStr',
-        value: '',
-      ));
+      return query.listLength(
+        r'scriptSig',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
     });
   }
 
@@ -984,7 +847,7 @@ const BitcoinTxOutSchema = Schema(
     r'scriptPubKey': PropertySchema(
       id: 1,
       name: r'scriptPubKey',
-      type: IsarType.string,
+      type: IsarType.longList,
     ),
     r'value': PropertySchema(
       id: 2,
@@ -1005,7 +868,7 @@ int _bitcoinTxOutEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.address.length * 3;
-  bytesCount += 3 + object.scriptPubKey.length * 3;
+  bytesCount += 3 + object.scriptPubKey.length * 8;
   return bytesCount;
 }
 
@@ -1016,7 +879,7 @@ void _bitcoinTxOutSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.address);
-  writer.writeString(offsets[1], object.scriptPubKey);
+  writer.writeLongList(offsets[1], object.scriptPubKey);
   writer.writeLong(offsets[2], object.value);
 }
 
@@ -1028,7 +891,7 @@ BitcoinTxOut _bitcoinTxOutDeserialize(
 ) {
   final object = BitcoinTxOut(
     address: reader.readString(offsets[0]),
-    scriptPubKey: reader.readString(offsets[1]),
+    scriptPubKey: reader.readLongList(offsets[1]) ?? [],
     value: reader.readLong(offsets[2]),
   );
   return object;
@@ -1044,7 +907,7 @@ P _bitcoinTxOutDeserializeProp<P>(
     case 0:
       return (reader.readString(offset)) as P;
     case 1:
-      return (reader.readString(offset)) as P;
+      return (reader.readLongList(offset) ?? []) as P;
     case 2:
       return (reader.readLong(offset)) as P;
     default:
@@ -1191,58 +1054,49 @@ extension BitcoinTxOutQueryFilter
   }
 
   QueryBuilder<BitcoinTxOut, BitcoinTxOut, QAfterFilterCondition>
-      scriptPubKeyEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+      scriptPubKeyElementEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'scriptPubKey',
         value: value,
-        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<BitcoinTxOut, BitcoinTxOut, QAfterFilterCondition>
-      scriptPubKeyGreaterThan(
-    String value, {
+      scriptPubKeyElementGreaterThan(
+    int value, {
     bool include = false,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
         property: r'scriptPubKey',
         value: value,
-        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<BitcoinTxOut, BitcoinTxOut, QAfterFilterCondition>
-      scriptPubKeyLessThan(
-    String value, {
+      scriptPubKeyElementLessThan(
+    int value, {
     bool include = false,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
         property: r'scriptPubKey',
         value: value,
-        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<BitcoinTxOut, BitcoinTxOut, QAfterFilterCondition>
-      scriptPubKeyBetween(
-    String lower,
-    String upper, {
+      scriptPubKeyElementBetween(
+    int lower,
+    int upper, {
     bool includeLower = true,
     bool includeUpper = true,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
@@ -1251,78 +1105,96 @@ extension BitcoinTxOutQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<BitcoinTxOut, BitcoinTxOut, QAfterFilterCondition>
-      scriptPubKeyStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+      scriptPubKeyLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'scriptPubKey',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BitcoinTxOut, BitcoinTxOut, QAfterFilterCondition>
-      scriptPubKeyEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'scriptPubKey',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BitcoinTxOut, BitcoinTxOut, QAfterFilterCondition>
-      scriptPubKeyContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'scriptPubKey',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BitcoinTxOut, BitcoinTxOut, QAfterFilterCondition>
-      scriptPubKeyMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'scriptPubKey',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.listLength(
+        r'scriptPubKey',
+        length,
+        true,
+        length,
+        true,
+      );
     });
   }
 
   QueryBuilder<BitcoinTxOut, BitcoinTxOut, QAfterFilterCondition>
       scriptPubKeyIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'scriptPubKey',
-        value: '',
-      ));
+      return query.listLength(
+        r'scriptPubKey',
+        0,
+        true,
+        0,
+        true,
+      );
     });
   }
 
   QueryBuilder<BitcoinTxOut, BitcoinTxOut, QAfterFilterCondition>
       scriptPubKeyIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'scriptPubKey',
-        value: '',
-      ));
+      return query.listLength(
+        r'scriptPubKey',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BitcoinTxOut, BitcoinTxOut, QAfterFilterCondition>
+      scriptPubKeyLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'scriptPubKey',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<BitcoinTxOut, BitcoinTxOut, QAfterFilterCondition>
+      scriptPubKeyLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'scriptPubKey',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<BitcoinTxOut, BitcoinTxOut, QAfterFilterCondition>
+      scriptPubKeyLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'scriptPubKey',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
     });
   }
 
@@ -1477,8 +1349,10 @@ _$BitcoinTxInImpl _$$BitcoinTxInImplFromJson(Map<String, dynamic> json) =>
           ? const BitcoinOutPoint()
           : BitcoinOutPoint.fromJson(
               json['previousOutput'] as Map<String, dynamic>),
-      scriptSig: json['scriptSig'] as String? ?? '',
-      scriptSigStr: json['scriptSigStr'] as String? ?? '',
+      scriptSig: (json['scriptSig'] as List<dynamic>?)
+              ?.map((e) => e as int)
+              .toList() ??
+          const [],
       sequence: json['sequence'] as int? ?? 0,
       witness: (json['witness'] as List<dynamic>?)
               ?.map((e) => e as String)
@@ -1490,7 +1364,6 @@ Map<String, dynamic> _$$BitcoinTxInImplToJson(_$BitcoinTxInImpl instance) =>
     <String, dynamic>{
       'previousOutput': instance.previousOutput,
       'scriptSig': instance.scriptSig,
-      'scriptSigStr': instance.scriptSigStr,
       'sequence': instance.sequence,
       'witness': instance.witness,
     };
@@ -1498,7 +1371,10 @@ Map<String, dynamic> _$$BitcoinTxInImplToJson(_$BitcoinTxInImpl instance) =>
 _$BitcoinTxOutImpl _$$BitcoinTxOutImplFromJson(Map<String, dynamic> json) =>
     _$BitcoinTxOutImpl(
       value: json['value'] as int? ?? 0,
-      scriptPubKey: json['scriptPubKey'] as String? ?? '',
+      scriptPubKey: (json['scriptPubKey'] as List<dynamic>?)
+              ?.map((e) => e as int)
+              .toList() ??
+          const [],
       address: json['address'] as String? ?? '',
     );
 

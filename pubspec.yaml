@@ -24,7 +24,7 @@ dependencies:
   crypto: ^3.0.1
   logger: ^2.3.0
 
-  bdk_flutter: 0.30.0
+  bdk_flutter: ^0.31.2-dev.1
   lwk_dart: 
     git:
       url: https://github.com/SatoshiPortal/lwk-dart

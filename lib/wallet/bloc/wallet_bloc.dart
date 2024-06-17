@@ -33,6 +33,7 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
     on<LoadWallet>(_onLoadWallet);
     on<SyncWallet>(_onSyncWallet);
     on<PersistWallet>(_onPersistWallet);
+    on<BuildTx>(_onBuildTx);
 
     _loadWalletsTimer = Timer.periodic(
         const Duration(minutes: WALLET_SYNC_INTERVAL_MINS), (timer) {
@@ -70,29 +71,20 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
 
       BBLogger().logBloc(
           'WalletBloc ${state.wallet?.id} :: SyncWallet : process Txs');
-      final (txs, err) = await txRepository.syncTxs(syncedWallet);
-      if (err != null) {
-        addError(err);
-      }
-      await txRepository.persistTxs(syncedWallet, txs!);
+      final txs = await txRepository.syncTxs(syncedWallet);
+      await txRepository.persistTxs(syncedWallet, txs);
 
       BBLogger().logBloc(
           'WalletBloc ${state.wallet?.id} :: SyncWallet : process Addresses');
       // TODO: Pass old address
-      final (depositAddresses, depositErr) = await addressRepository
-          .syncAddresses(txs, [], AddressKind.deposit, syncedWallet);
-      if (depositErr != null) {
-        addError(depositErr);
-      }
-      await addressRepository.persistAddresses(syncedWallet, depositAddresses!);
+      final depositAddresses = await addressRepository.syncAddresses(
+          txs, [], AddressKind.deposit, syncedWallet);
+      await addressRepository.persistAddresses(syncedWallet, depositAddresses);
 
       // TODO: Pass old address
-      final (changeAddresses, changeErr) = await addressRepository
-          .syncAddresses(txs, [], AddressKind.change, syncedWallet);
-      if (changeErr != null) {
-        addError(changeErr);
-      }
-      await addressRepository.persistAddresses(syncedWallet, changeAddresses!);
+      final changeAddresses = await addressRepository.syncAddresses(
+          txs, [], AddressKind.change, syncedWallet);
+      await addressRepository.persistAddresses(syncedWallet, changeAddresses);
 
       await walletRepository.persistWallet(syncedWallet);
 
@@ -111,33 +103,18 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
     emit(state.copyWith(status: LoadStatus.success));
   }
 
-  // @override
-  // void onError(Object error, StackTrace stackTrace) {
-  //   if (error is WalletLoadException) {
-  //     emit(state.copyWith(
-  //         status: LoadStatus.failure, error: error.error as Error));
-  //     BBLogger().error(error.error.toString(), stackTrace);
-  //     // _showErrorDialog(context, error.error as Error);
-  //     super.onError(error.error, stackTrace);
-  //   } else if (error is JsonParseException) {
-  //     emit(state.copyWith(
-  //         status: LoadStatus.failure, error: error.error as Error));
-  //     BBLogger().error('ParseException (${error.modal}): ${error.error.toString()}',
-  //         stackTrace);
-  //     // _showErrorDialog(context, error.error as Error);
-  //     super.onError(error.error, stackTrace);
-  //   } else if (error is BdkElectrumException) {
-  //     emit(state.copyWith(
-  //         status: LoadStatus
-  //             .failure)); // TODO: How to set error, when I get Exception or change the state to hold Exception
-  //     BBLogger().error(
-  //         'BdkElectrumException ${error.serverUrl ?? ''}: ${error.error.toString()}',
-  //         stackTrace);
-  //     // _showErrorDialog(context, error.error as Error);
-  //     super.onError(error.error, stackTrace);
-  //   } else {
-  //     BBLogger().error(error.toString(), stackTrace);
-  //     super.onError(error, stackTrace);
-  //   }
-  // }
+  void _onBuildTx(BuildTx event, Emitter<WalletState> emit) async {
+    try {
+      BBLogger().logBloc('WalletBloc ${state.wallet?.id} :: BuildTx');
+      emit(state.copyWith(status: LoadStatus.loading));
+      // await state.wallet!.buildTx(event.address, event.amount);
+      final seed = await seedRepository.loadSeed(event.wallet.seedFingerprint);
+      await walletRepository.buildTx(
+          event.wallet, event.address, event.amount, seed);
+      emit(state.copyWith(status: LoadStatus.success));
+    } catch (e, stackTrace) {
+      emit(state.copyWith(status: LoadStatus.failure));
+      addError(e, stackTrace);
+    }
+  }
 }

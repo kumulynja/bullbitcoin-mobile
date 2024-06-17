@@ -112,7 +112,7 @@ class BitcoinWalletHelper {
     try {
       final appDocDir = await getApplicationDocumentsDirectory();
 
-      final walletFutures = scriptType.map((path) => initializeWallet(
+      final walletFutures = scriptType.map((path) => initializePublicWallet(
           seed: seed,
           network: network,
           scriptType: path,
@@ -129,7 +129,7 @@ class BitcoinWalletHelper {
     }
   }
 
-  static Future<BitcoinWallet> initializeWallet(
+  static Future<BitcoinWallet> initializePublicWallet(
       {required Seed seed,
       required NetworkType network,
       BitcoinScriptType scriptType = BitcoinScriptType.bip84,
@@ -149,7 +149,7 @@ class BitcoinWalletHelper {
       password: seed.passphrase,
     );
 
-    final networkPath = network.getBdkType == bdk.Network.Bitcoin ? '0h' : '1h';
+    final networkPath = network.getBdkType == bdk.Network.bitcoin ? '0h' : '1h';
     const accountPath = '0h';
     final fullPath = 'm/${scriptType.path}/$networkPath/$accountPath';
     final externalDescriptor = await BitcoinWalletHelper.deriveDescriptor(
@@ -157,14 +157,14 @@ class BitcoinWalletHelper {
         scriptType,
         rootXprv,
         network.getBdkType,
-        bdk.KeychainKind.External,
+        bdk.KeychainKind.externalChain,
         sourceFingerprint!);
     final internalDescriptor = await BitcoinWalletHelper.deriveDescriptor(
         fullPath,
         scriptType,
         rootXprv,
         network.getBdkType,
-        bdk.KeychainKind.Internal,
+        bdk.KeychainKind.internalChain,
         sourceFingerprint);
     final walletHashId = BitcoinWalletHelper.createDescriptorHashId(
             await externalDescriptor.asString())
@@ -229,13 +229,13 @@ class BitcoinWalletHelper {
       throw ('bdk not initialized');
     }
 
-    await w.bdkWallet?.sync(w.bdkBlockchain!);
+    await w.bdkWallet?.sync(blockchain: w.bdkBlockchain!);
 
     final bal = await w.bdkWallet?.getBalance();
     final balance = bal?.confirmed ?? 0;
     BBLogger().log('balance is $balance');
 
-    final txs = await w.bdkWallet?.listTransactions(false);
+    final txs = await w.bdkWallet?.listTransactions(includeRaw: false);
 
     return w.copyWith(
         balance: balance, txCount: txs?.length ?? 0, lastSync: DateTime.now());

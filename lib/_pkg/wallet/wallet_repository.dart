@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'package:bb_arch/_pkg/address/models/address.dart';
 import 'package:bb_arch/_pkg/bb_logger.dart';
 import 'package:bb_arch/_pkg/error.dart';
 import 'package:bb_arch/_pkg/seed/models/seed.dart';
@@ -36,18 +37,19 @@ class WalletRepository {
       await Future.delayed(const Duration(seconds: 2));
       // isar = null;
       final wallets = await isar!.wallets.where().findAll();
+      return Wallet.mapBaseToChild(wallets);
       // TODO: Find better way
       // This is to convert `Wallet` type returned by Isar to `BitcoinWallet` or `LiquidWallet`
       // Should this be even done here?
-      final ws = wallets!.map((w) {
-        if (w.type == WalletType.Bitcoin) {
-          return BitcoinWallet.fromJson(w.toJson());
-        } else if (w.type == WalletType.Liquid) {
-          return LiquidWallet.fromJson(w.toJson());
-        }
-        return w;
-      }).toList();
-      return ws;
+      // final ws = wallets!.map((w) {
+      //   if (w.type == WalletType.Bitcoin) {
+      //     return BitcoinWallet.fromJson(w.toJson());
+      //   } else if (w.type == WalletType.Liquid) {
+      //     return LiquidWallet.fromJson(w.toJson());
+      //   }
+      //   return w;
+      // }).toList();
+      // return ws;
     } on IsarError catch (e, stackTrace) {
       throw Error.throwWithStackTrace(DatabaseException(e), stackTrace);
     } on JsonParseException {
@@ -63,20 +65,20 @@ class WalletRepository {
     });
   }
 
-  Future<(List<Wallet>?, dynamic)> deriveWalletsFromSeed(
+  Future<List<Wallet>> deriveWalletsFromSeed(
       Seed seed, WalletType walletType, NetworkType networkType) async {
     if (walletType == WalletType.Bitcoin) {
       final ws =
           await BitcoinWalletHelper.initializeAllWallets(seed, networkType);
-      return (ws, null);
+      return ws;
     } else if (walletType == WalletType.Liquid) {
       final ws = await LiquidWalletHelper.initializeAllWallets(
           seed, networkType,
           scriptType: [BitcoinScriptType.bip84]);
-      return (ws, null);
+      return ws;
     }
     List<Wallet> ws = [];
-    return (ws, null);
+    return ws;
   }
 
   Future<Wallet> loadNativeSdk(Wallet w, Seed seed) async {
@@ -112,5 +114,10 @@ class WalletRepository {
     } catch (e, stackTrace) {
       throw Error.throwWithStackTrace(WalletDeleteException(e), stackTrace);
     }
+  }
+
+  Future<void> buildTx(
+      Wallet wallet, Address recipient, int amount, Seed seed) async {
+    await wallet.buildTx(recipient, amount, seed);
   }
 }

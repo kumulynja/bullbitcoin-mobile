@@ -1,16 +1,12 @@
 // ignore_for_file: avoid_print, invalid_annotation_target
 
-import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:bb_arch/_pkg/bb_logger.dart';
-import 'package:bb_arch/_pkg/error.dart';
 import 'package:bb_arch/_pkg/misc.dart';
 import 'package:bb_arch/_pkg/tx/models/liquid_tx.dart';
 import 'package:bb_arch/_pkg/wallet/models/bitcoin_wallet.dart';
 import 'package:bb_arch/_pkg/wallet/models/wallet.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-// import 'package:json_annotation/json_annotation.dart';
 import 'package:bdk_flutter/bdk_flutter.dart' as bdk;
 import 'package:hex/hex.dart';
 import 'package:isar/isar.dart';
@@ -57,22 +53,26 @@ class BitcoinTx extends Tx with _$BitcoinTx {
 
     try {
       bdk.TransactionDetails t = tx;
-      final sTx = jsonDecode(t.serializedTx!);
+      // final sTx = jsonDecode(t.serializedTx!);
 
       final isRbf = await t.transaction?.isExplicitlyRbf() ?? false;
       final version = await t.transaction?.version() ?? 0;
       final vsize = await t.transaction?.vsize() ?? 0;
       final weight = await t.transaction?.weight() ?? 0;
-      final locktime = await t.transaction?.lockTime() ?? 0;
+      final locktime = await t.transaction?.lockTime();
 
-      final ins = sTx['input'] as List;
+      // final serializedTx = SerializedTx.fromJson(
+      //   jsonDecode(t.transaction!.inner) as Map<String, dynamic>,
+      // );
+
+      final ins = await t.transaction?.input() ?? [];
       List<BitcoinTxIn> inputs = [];
       for (int i = 0; i < ins.length; i++) {
         final txIn = await BitcoinTxIn.fromNative(ins[i]);
         inputs.add(txIn);
       }
 
-      final outs = sTx['output'] as List;
+      final outs = await t.transaction?.output() ?? [];
       List<BitcoinTxOut> outputs = [];
       for (int i = 0; i < outs.length; i++) {
         final txOut = await BitcoinTxOut.fromNative(outs[i], wallet.network);
@@ -91,10 +91,10 @@ class BitcoinTx extends Tx with _$BitcoinTx {
         version: version,
         vsize: vsize,
         weight: weight,
-        locktime: locktime,
+        locktime: locktime?.field0 ?? 0, // TODO: Verify this
         inputs: inputs,
         outputs: outputs,
-        toAddress: outputs[0].address ?? '',
+        toAddress: '', // TODO:
         walletId: wallet.id,
       );
     } catch (e) {
@@ -118,21 +118,15 @@ class BitcoinOutPoint with _$BitcoinOutPoint {
 @freezed
 @Embedded(ignore: {'copyWith'})
 class BitcoinTxIn with _$BitcoinTxIn {
-  static Future<BitcoinTxIn> fromNative(dynamic txIn) async {
+  static Future<BitcoinTxIn> fromNative(bdk.TxIn txIn) async {
     try {
-      final scriptSigStr = await bdk.Script.create(
-        hexDecoder.convert(txIn['script_sig']!) as Uint8List,
-      );
-
-      List<String> previousOut = (txIn['previous_output'] as String).split(':');
-
+      // TODO: Validate each fields
       return BitcoinTxIn(
         previousOutput: BitcoinOutPoint(
-            txid: previousOut[0], vout: int.parse(previousOut[1])),
-        scriptSig: txIn['script_sig'],
-        scriptSigStr: scriptSigStr.toString(),
-        sequence: txIn['sequence'],
-        witness: (txIn['witness'] as Iterable<dynamic>)
+            txid: txIn.previousOutput.txid, vout: txIn.previousOutput.vout),
+        scriptSig: txIn.scriptSig.bytes,
+        sequence: txIn.sequence,
+        witness: (txIn.witness as Iterable<dynamic>)
             .map((e) => e.toString())
             .toList(), //
       );
@@ -140,8 +134,7 @@ class BitcoinTxIn with _$BitcoinTxIn {
       print('Error: $e');
       return BitcoinTxIn(
           previousOutput: const BitcoinOutPoint(txid: '', vout: 0),
-          scriptSig: '',
-          scriptSigStr: '',
+          scriptSig: Uint8List.fromList([]),
           sequence: 0,
           witness: []);
     }
@@ -149,8 +142,7 @@ class BitcoinTxIn with _$BitcoinTxIn {
 
   factory BitcoinTxIn(
       {@Default(BitcoinOutPoint()) BitcoinOutPoint previousOutput,
-      @Default('') String scriptSig,
-      @Default('') String scriptSigStr,
+      @Default([]) List<int> scriptSig,
       @Default(0) int sequence,
       @Default([]) List<String> witness}) = _BitcoinTxIn;
   BitcoinTxIn._();
@@ -163,33 +155,89 @@ class BitcoinTxIn with _$BitcoinTxIn {
 @Embedded(ignore: {'copyWith'})
 class BitcoinTxOut with _$BitcoinTxOut {
   static Future<BitcoinTxOut> fromNative(
-      dynamic txOut, NetworkType network) async {
+      bdk.TxOut txOut, NetworkType network) async {
     try {
-      final scriptPubKey = await bdk.Script.create(
-        hexDecoder.convert(txOut['script_pubkey']!) as Uint8List,
-      );
+      // final scriptPubKey = await bdk.ScriptBuf.fromHex(
+      //   txOut['script_pubkey'],
+      // );
 
       final addressStruct = await bdk.Address.fromScript(
-        scriptPubKey,
-        network.getBdkType,
+        script: bdk.ScriptBuf(bytes: txOut.scriptPubkey.bytes),
+        network: network.getBdkType,
       );
 
+      // TODO: Validate each fields
       return BitcoinTxOut(
-          value: txOut['value'] ?? 0,
-          scriptPubKey: txOut['script_pubkey'],
-          address: addressStruct.toString());
+          value: txOut.value,
+          scriptPubKey: txOut.scriptPubkey.bytes,
+          address: await addressStruct.asString());
     } catch (e) {
       print('Error: $e');
-      return BitcoinTxOut(value: 0, scriptPubKey: '', address: '');
+      return BitcoinTxOut(
+          value: 0, scriptPubKey: Uint8List.fromList([]), address: '');
     }
   }
 
   factory BitcoinTxOut(
       {@Default(0) int value,
-      @Default('') String scriptPubKey,
+      @Default([]) List<int> scriptPubKey,
       @Default('') String address}) = _BitcoinTxOut;
   BitcoinTxOut._();
 
   factory BitcoinTxOut.fromJson(Map<String, dynamic> json) =>
       safeFromJson(json, _$BitcoinTxOutFromJson, 'BitcoinTxOut');
 }
+
+/*
+class SerializedTx {
+  SerializedTx({this.version, this.lockTime, this.input, this.output});
+
+  factory SerializedTx.fromJson(Map<String, dynamic> json) {
+    return SerializedTx(
+      version: json['version'] as int?,
+      lockTime: json['lock_time'] as int?,
+      input: (json['input'] as List?)
+          ?.map((e) => BitcoinTxIn.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      output: (json['output'] as List?)
+          ?.map((e) => BitcoinTxOut.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+  int? version;
+  int? lockTime;
+  List<BitcoinTxIn>? input;
+  List<BitcoinTxOut>? output;
+}
+
+class BitcoinTxIn {
+  BitcoinTxIn(
+      {this.previousOutput, this.scriptSig, this.sequence, this.witness});
+
+  factory BitcoinTxIn.fromJson(Map<String, dynamic> json) {
+    return BitcoinTxIn(
+      previousOutput: json['previous_output'] as String?,
+      scriptSig: json['script_sig'] as String?,
+      sequence: json['sequence'] as int?,
+      witness: (json['witness'] as List?)?.map((e) => e as String).toList(),
+    );
+  }
+  String? previousOutput;
+  String? scriptSig;
+  int? sequence;
+  List<String>? witness;
+}
+
+class BitcoinTxOut {
+  BitcoinTxOut({this.value, this.scriptPubkey});
+
+  factory BitcoinTxOut.fromJson(Map<String, dynamic> json) {
+    return BitcoinTxOut(
+      value: json['value'] as int?,
+      scriptPubkey: json['script_pubkey'] as String?,
+    );
+  }
+  int? value;
+  String? scriptPubkey;
+}
+*/

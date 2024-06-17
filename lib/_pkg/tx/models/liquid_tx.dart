@@ -76,7 +76,7 @@ class LiquidTx extends Tx with _$LiquidTx {
     return LiquidTx(
       id: t.txid,
       type: TxType.Liquid,
-      timestamp: t.timestamp,
+      timestamp: t.timestamp ?? 0,
       amount: finalBalance,
       fee: t.fee,
       height: 0,
@@ -89,6 +89,8 @@ class LiquidTx extends Tx with _$LiquidTx {
       labels: [],
       toAddress: '',
       walletId: wallet.id, //
+      inputs: [],
+      outputs: [],
     );
   }
 }

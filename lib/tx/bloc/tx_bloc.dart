@@ -25,20 +25,25 @@ class TxBloc extends Bloc<TxEvent, TxState> {
 
   void _onFetchLatestTxsAcrossWallets(
       FetchLatestTxsAcrossWallets event, Emitter<TxState> emit) async {
-    emit(state.copyWith(status: LoadStatus.loading));
+    try {
+      emit(state.copyWith(status: LoadStatus.loading));
 
-    BBLogger()
-        .logBloc('TxBloc :: FetchLatestTxsAcrossWallets : ${event.limit}');
-    await Future.delayed(const Duration(seconds: 15));
+      BBLogger()
+          .logBloc('TxBloc :: FetchLatestTxsAcrossWallets : ${event.limit}');
+      await Future.delayed(const Duration(seconds: 15));
 
-    final (txs, err) =
-        await txRepository.fetchLatestTxsAcrossWallets(event.limit);
-    if (err != null) {
-      emit(state.copyWith(
-          txs: [], status: LoadStatus.failure, error: err.toString()));
-      return;
+      final txs = await txRepository.fetchLatestTxsAcrossWallets(event.limit);
+      // if (err != null) {
+      //   emit(state.copyWith(
+      //       txs: [], status: LoadStatus.failure, error: err.toString()));
+      //   return;
+      // }
+
+      emit(state.copyWith(txs: txs, status: LoadStatus.success));
+    } catch (e, stackTrace) {
+      emit(state.copyWith(status: LoadStatus.failure));
+      addError(e, stackTrace);
     }
-    emit(state.copyWith(txs: txs!, status: LoadStatus.success));
   }
 
   void _onLoadTxs(LoadTxs event, Emitter<TxState> emit) async {
@@ -46,13 +51,15 @@ class TxBloc extends Bloc<TxEvent, TxState> {
 
     BBLogger().logBloc('TxBloc :: LoadTxs : ${event.wallet.name}');
 
-    final (txs, err) = await txRepository.listTxs(event.wallet);
+    final txs = await txRepository.listTxs(event.wallet);
+    /*
     if (err != null) {
       emit(state.copyWith(
           txs: [], status: LoadStatus.failure, error: err.toString()));
       return;
     }
-    emit(state.copyWith(txs: txs!, status: LoadStatus.success));
+    */
+    emit(state.copyWith(txs: txs, status: LoadStatus.success));
   }
 
   /*

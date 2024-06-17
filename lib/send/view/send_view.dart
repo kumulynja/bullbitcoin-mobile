@@ -1,7 +1,12 @@
 // ignore_for_file: avoid_print
 
+import 'package:bb_arch/_pkg/address/models/address.dart';
+import 'package:bb_arch/_pkg/address/models/bitcoin_address.dart';
+import 'package:bb_arch/_pkg/wallet/models/wallet.dart';
 import 'package:bb_arch/_ui/bb_page.dart';
+import 'package:bb_arch/wallet/bloc/wallet_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SendScaffold extends StatelessWidget {
   const SendScaffold({super.key, required this.walletId});
@@ -25,6 +30,8 @@ class SendView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final wallet = context.read<WalletBloc>().state.wallet;
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -60,6 +67,17 @@ class SendView extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {
                   print("Send :: Send btn clicked");
+                  context.read<WalletBloc>().add(BuildTx(
+                      wallet: wallet!,
+                      address: BitcoinAddress(
+                          address: 'tb1qeteg326txsxgq2p8cma44hh0x94gt7s6nyhwsh',
+                          index: 0,
+                          kind: AddressKind.external,
+                          walletId: walletId,
+                          balance: 0,
+                          status: AddressStatus.active,
+                          type: AddressType.Bitcoin),
+                      amount: 1000));
                 },
                 child: const Text("Send"),
               ),

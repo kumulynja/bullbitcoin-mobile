@@ -123,7 +123,8 @@ class WalletTypeSelectionView extends StatelessWidget {
                           seed: seed, walletId: wallets[index].id));
 
                   // TODO:
-                  // WalletSensitiveBloc: stop syncing
+                  // WalletSensitiveBloc: Try stop syncing here,
+                  // since sync is not stopping itself on WalletSensitiveBloc close/dispose.
 
                   if (w is BitcoinWallet) {
                     BitcoinWallet w = wallets[index] as BitcoinWallet;
@@ -138,6 +139,7 @@ class WalletTypeSelectionView extends StatelessWidget {
                   }
                   // await Future.delayed(const Duration(milliseconds: 1000));
                   context.read<WalletListBloc>().add(LoadAllWallets());
+                  // TODO: Add popUntilRoute somewhere and make use of it
                   GoRouter.of(context).pop();
                   GoRouter.of(context).pop();
                   GoRouter.of(context).pop();

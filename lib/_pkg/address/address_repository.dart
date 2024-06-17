@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:bb_arch/_pkg/address/models/address.dart';
 import 'package:bb_arch/_pkg/address/models/bitcoin_address.dart';
 import 'package:bb_arch/_pkg/address/models/liquid_address.dart';
@@ -14,45 +12,45 @@ class AddressRepository {
   Isar isar;
   HiveStorage storage;
 
-  Future<(List<Address>?, dynamic)> listAddresses(String walletId) async {
+  Future<List<Address>> listAddresses(String walletId) async {
     try {
       final addrs = await isar.address
           .where()
           .walletIdEqualTo(walletId)
           .sortByIndex()
           .findAll();
-      int index = 0;
-      // TODO: Find better way
-      final ads = addrs.map((t) {
-        if (t.type == AddressType.Bitcoin) {
-          return BitcoinAddress.fromJson(t.toJson());
-        } else if (t.type == AddressType.Liquid) {
-          return LiquidAddress.fromJson(t.toJson());
-        }
-        return t;
-      }).toList();
+
+      return Address.mapBaseToChild(addrs);
+      // final ads = addrs.map((t) {
+      //   if (t.type == AddressType.Bitcoin) {
+      //     return BitcoinAddress.fromJson(t.toJson());
+      //   } else if (t.type == AddressType.Liquid) {
+      //     return LiquidAddress.fromJson(t.toJson());
+      //   }
+      //   return t;
+      // }).toList();
       // final (addrsStr, _) = await storage.getValue('address.${wallet.id}');
       // List<dynamic> addrsJson = jsonDecode(addrsStr!);
       // final addrs = addrsJson.map((adJson) => Address.fromJson(adJson)).toList();
-      return (ads, null);
+      // return (ads, null);
     } catch (e) {
-      return (null, e);
+      rethrow;
     }
   }
 
   // TODO: Potential optimization: Do this sync/merge only if txlist.length, lastUnused, wallet balance differ from what's there in storage.
   // Otherwise, skip this operation and go with previous calculation that is stored in storage.
-  Future<(List<Address>?, dynamic)> syncAddresses(List<Tx> txs,
-      List<Address> oldAddresses, AddressKind kind, Wallet wallet) async {
+  Future<List<Address>> syncAddresses(List<Tx> txs, List<Address> oldAddresses,
+      AddressKind kind, Wallet wallet) async {
     try {
       final lastUnused = await Address.getLastUnused(wallet, kind);
 
       List<Address> addresses = await Address.syncAddresses(
           txs, lastUnused, oldAddresses, wallet, kind);
 
-      return (addresses, null);
+      return addresses;
     } catch (e) {
-      return (null, e);
+      rethrow;
     }
   }
 

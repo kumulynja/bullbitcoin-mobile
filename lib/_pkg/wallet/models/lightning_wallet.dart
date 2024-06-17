@@ -2,6 +2,7 @@
 
 import 'package:bb_arch/_pkg/address/models/address.dart';
 import 'package:bb_arch/_pkg/address/models/bitcoin_address.dart';
+import 'package:bb_arch/_pkg/seed/models/seed.dart';
 import 'package:bb_arch/_pkg/tx/models/tx.dart';
 import 'package:bb_arch/_pkg/wallet/models/bitcoin_wallet.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -27,20 +28,25 @@ class LightningWallet extends Wallet with _$LightningWallet {
   }) = _LightningWallet;
   LightningWallet._();
 
-  factory LightningWallet.fromJson(Map<String, dynamic> json) => _$LightningWalletFromJson(json);
+  factory LightningWallet.fromJson(Map<String, dynamic> json) =>
+      _$LightningWalletFromJson(json);
 
   static Future<LightningWallet> loadNativeSdk(LightningWallet w) async {
     print('Loading native sdk for lightning wallet');
     return LightningWallet(
-        id: 'LN', balance: 0, type: WalletType.Lightning, network: NetworkType.Testnet, seedFingerprint: '');
+        id: 'LN',
+        balance: 0,
+        type: WalletType.Lightning,
+        network: NetworkType.Testnet,
+        seedFingerprint: '');
   }
 
   @override
-  Future<(Iterable<Tx>?, dynamic)> getTxs(Wallet wallet) async {
+  Future<Iterable<Tx>> getTxs(Wallet wallet) async {
     // final txs = await lwkWallet?.txs();
 
     Iterable<Tx> txs = [];
-    return (txs, null);
+    return txs;
   }
 
   @override
@@ -56,4 +62,7 @@ class LightningWallet extends Wallet with _$LightningWallet {
         labels: [],
         walletId: '');
   }
+
+  @override
+  Future<void> buildTx(Address address, int amount, Seed seed) async {}
 }

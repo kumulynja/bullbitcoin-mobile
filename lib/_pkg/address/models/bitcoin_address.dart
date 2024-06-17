@@ -48,7 +48,7 @@ class BitcoinAddress extends Address with _$BitcoinAddress {
     }
 
     return BitcoinAddress(
-        address: lastUnused.address,
+        address: await lastUnused.address.asString(),
         index: lastUnused.index,
         kind: kind,
         status: AddressStatus.unused,
@@ -63,7 +63,7 @@ class BitcoinAddress extends Address with _$BitcoinAddress {
     }
 
     return BitcoinAddress(
-        address: addr.address,
+        address: await addr.address.asString(),
         index: addr.index,
         kind: kind,
         status: AddressStatus.unused,

@@ -763,8 +763,7 @@ BitcoinTxIn _$BitcoinTxInFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$BitcoinTxIn {
   BitcoinOutPoint get previousOutput => throw _privateConstructorUsedError;
-  String get scriptSig => throw _privateConstructorUsedError;
-  String get scriptSigStr => throw _privateConstructorUsedError;
+  List<int> get scriptSig => throw _privateConstructorUsedError;
   int get sequence => throw _privateConstructorUsedError;
   List<String> get witness => throw _privateConstructorUsedError;
 
@@ -782,8 +781,7 @@ abstract class $BitcoinTxInCopyWith<$Res> {
   @useResult
   $Res call(
       {BitcoinOutPoint previousOutput,
-      String scriptSig,
-      String scriptSigStr,
+      List<int> scriptSig,
       int sequence,
       List<String> witness});
 
@@ -805,7 +803,6 @@ class _$BitcoinTxInCopyWithImpl<$Res, $Val extends BitcoinTxIn>
   $Res call({
     Object? previousOutput = null,
     Object? scriptSig = null,
-    Object? scriptSigStr = null,
     Object? sequence = null,
     Object? witness = null,
   }) {
@@ -817,11 +814,7 @@ class _$BitcoinTxInCopyWithImpl<$Res, $Val extends BitcoinTxIn>
       scriptSig: null == scriptSig
           ? _value.scriptSig
           : scriptSig // ignore: cast_nullable_to_non_nullable
-              as String,
-      scriptSigStr: null == scriptSigStr
-          ? _value.scriptSigStr
-          : scriptSigStr // ignore: cast_nullable_to_non_nullable
-              as String,
+              as List<int>,
       sequence: null == sequence
           ? _value.sequence
           : sequence // ignore: cast_nullable_to_non_nullable
@@ -852,8 +845,7 @@ abstract class _$$BitcoinTxInImplCopyWith<$Res>
   @useResult
   $Res call(
       {BitcoinOutPoint previousOutput,
-      String scriptSig,
-      String scriptSigStr,
+      List<int> scriptSig,
       int sequence,
       List<String> witness});
 
@@ -874,7 +866,6 @@ class __$$BitcoinTxInImplCopyWithImpl<$Res>
   $Res call({
     Object? previousOutput = null,
     Object? scriptSig = null,
-    Object? scriptSigStr = null,
     Object? sequence = null,
     Object? witness = null,
   }) {
@@ -884,13 +875,9 @@ class __$$BitcoinTxInImplCopyWithImpl<$Res>
           : previousOutput // ignore: cast_nullable_to_non_nullable
               as BitcoinOutPoint,
       scriptSig: null == scriptSig
-          ? _value.scriptSig
+          ? _value._scriptSig
           : scriptSig // ignore: cast_nullable_to_non_nullable
-              as String,
-      scriptSigStr: null == scriptSigStr
-          ? _value.scriptSigStr
-          : scriptSigStr // ignore: cast_nullable_to_non_nullable
-              as String,
+              as List<int>,
       sequence: null == sequence
           ? _value.sequence
           : sequence // ignore: cast_nullable_to_non_nullable
@@ -908,11 +895,11 @@ class __$$BitcoinTxInImplCopyWithImpl<$Res>
 class _$BitcoinTxInImpl extends _BitcoinTxIn {
   _$BitcoinTxInImpl(
       {this.previousOutput = const BitcoinOutPoint(),
-      this.scriptSig = '',
-      this.scriptSigStr = '',
+      final List<int> scriptSig = const [],
       this.sequence = 0,
       final List<String> witness = const []})
-      : _witness = witness,
+      : _scriptSig = scriptSig,
+        _witness = witness,
         super._();
 
   factory _$BitcoinTxInImpl.fromJson(Map<String, dynamic> json) =>
@@ -921,12 +908,15 @@ class _$BitcoinTxInImpl extends _BitcoinTxIn {
   @override
   @JsonKey()
   final BitcoinOutPoint previousOutput;
+  final List<int> _scriptSig;
   @override
   @JsonKey()
-  final String scriptSig;
-  @override
-  @JsonKey()
-  final String scriptSigStr;
+  List<int> get scriptSig {
+    if (_scriptSig is EqualUnmodifiableListView) return _scriptSig;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_scriptSig);
+  }
+
   @override
   @JsonKey()
   final int sequence;
@@ -941,7 +931,7 @@ class _$BitcoinTxInImpl extends _BitcoinTxIn {
 
   @override
   String toString() {
-    return 'BitcoinTxIn(previousOutput: $previousOutput, scriptSig: $scriptSig, scriptSigStr: $scriptSigStr, sequence: $sequence, witness: $witness)';
+    return 'BitcoinTxIn(previousOutput: $previousOutput, scriptSig: $scriptSig, sequence: $sequence, witness: $witness)';
   }
 
   @override
@@ -951,10 +941,8 @@ class _$BitcoinTxInImpl extends _BitcoinTxIn {
             other is _$BitcoinTxInImpl &&
             (identical(other.previousOutput, previousOutput) ||
                 other.previousOutput == previousOutput) &&
-            (identical(other.scriptSig, scriptSig) ||
-                other.scriptSig == scriptSig) &&
-            (identical(other.scriptSigStr, scriptSigStr) ||
-                other.scriptSigStr == scriptSigStr) &&
+            const DeepCollectionEquality()
+                .equals(other._scriptSig, _scriptSig) &&
             (identical(other.sequence, sequence) ||
                 other.sequence == sequence) &&
             const DeepCollectionEquality().equals(other._witness, _witness));
@@ -962,8 +950,12 @@ class _$BitcoinTxInImpl extends _BitcoinTxIn {
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, previousOutput, scriptSig,
-      scriptSigStr, sequence, const DeepCollectionEquality().hash(_witness));
+  int get hashCode => Object.hash(
+      runtimeType,
+      previousOutput,
+      const DeepCollectionEquality().hash(_scriptSig),
+      sequence,
+      const DeepCollectionEquality().hash(_witness));
 
   @JsonKey(ignore: true)
   @override
@@ -982,8 +974,7 @@ class _$BitcoinTxInImpl extends _BitcoinTxIn {
 abstract class _BitcoinTxIn extends BitcoinTxIn {
   factory _BitcoinTxIn(
       {final BitcoinOutPoint previousOutput,
-      final String scriptSig,
-      final String scriptSigStr,
+      final List<int> scriptSig,
       final int sequence,
       final List<String> witness}) = _$BitcoinTxInImpl;
   _BitcoinTxIn._() : super._();
@@ -994,9 +985,7 @@ abstract class _BitcoinTxIn extends BitcoinTxIn {
   @override
   BitcoinOutPoint get previousOutput;
   @override
-  String get scriptSig;
-  @override
-  String get scriptSigStr;
+  List<int> get scriptSig;
   @override
   int get sequence;
   @override
@@ -1014,7 +1003,7 @@ BitcoinTxOut _$BitcoinTxOutFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$BitcoinTxOut {
   int get value => throw _privateConstructorUsedError;
-  String get scriptPubKey => throw _privateConstructorUsedError;
+  List<int> get scriptPubKey => throw _privateConstructorUsedError;
   String get address => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -1029,7 +1018,7 @@ abstract class $BitcoinTxOutCopyWith<$Res> {
           BitcoinTxOut value, $Res Function(BitcoinTxOut) then) =
       _$BitcoinTxOutCopyWithImpl<$Res, BitcoinTxOut>;
   @useResult
-  $Res call({int value, String scriptPubKey, String address});
+  $Res call({int value, List<int> scriptPubKey, String address});
 }
 
 /// @nodoc
@@ -1057,7 +1046,7 @@ class _$BitcoinTxOutCopyWithImpl<$Res, $Val extends BitcoinTxOut>
       scriptPubKey: null == scriptPubKey
           ? _value.scriptPubKey
           : scriptPubKey // ignore: cast_nullable_to_non_nullable
-              as String,
+              as List<int>,
       address: null == address
           ? _value.address
           : address // ignore: cast_nullable_to_non_nullable
@@ -1074,7 +1063,7 @@ abstract class _$$BitcoinTxOutImplCopyWith<$Res>
       __$$BitcoinTxOutImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int value, String scriptPubKey, String address});
+  $Res call({int value, List<int> scriptPubKey, String address});
 }
 
 /// @nodoc
@@ -1098,9 +1087,9 @@ class __$$BitcoinTxOutImplCopyWithImpl<$Res>
           : value // ignore: cast_nullable_to_non_nullable
               as int,
       scriptPubKey: null == scriptPubKey
-          ? _value.scriptPubKey
+          ? _value._scriptPubKey
           : scriptPubKey // ignore: cast_nullable_to_non_nullable
-              as String,
+              as List<int>,
       address: null == address
           ? _value.address
           : address // ignore: cast_nullable_to_non_nullable
@@ -1113,8 +1102,11 @@ class __$$BitcoinTxOutImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$BitcoinTxOutImpl extends _BitcoinTxOut {
   _$BitcoinTxOutImpl(
-      {this.value = 0, this.scriptPubKey = '', this.address = ''})
-      : super._();
+      {this.value = 0,
+      final List<int> scriptPubKey = const [],
+      this.address = ''})
+      : _scriptPubKey = scriptPubKey,
+        super._();
 
   factory _$BitcoinTxOutImpl.fromJson(Map<String, dynamic> json) =>
       _$$BitcoinTxOutImplFromJson(json);
@@ -1122,9 +1114,15 @@ class _$BitcoinTxOutImpl extends _BitcoinTxOut {
   @override
   @JsonKey()
   final int value;
+  final List<int> _scriptPubKey;
   @override
   @JsonKey()
-  final String scriptPubKey;
+  List<int> get scriptPubKey {
+    if (_scriptPubKey is EqualUnmodifiableListView) return _scriptPubKey;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_scriptPubKey);
+  }
+
   @override
   @JsonKey()
   final String address;
@@ -1140,14 +1138,15 @@ class _$BitcoinTxOutImpl extends _BitcoinTxOut {
         (other.runtimeType == runtimeType &&
             other is _$BitcoinTxOutImpl &&
             (identical(other.value, value) || other.value == value) &&
-            (identical(other.scriptPubKey, scriptPubKey) ||
-                other.scriptPubKey == scriptPubKey) &&
+            const DeepCollectionEquality()
+                .equals(other._scriptPubKey, _scriptPubKey) &&
             (identical(other.address, address) || other.address == address));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, value, scriptPubKey, address);
+  int get hashCode => Object.hash(runtimeType, value,
+      const DeepCollectionEquality().hash(_scriptPubKey), address);
 
   @JsonKey(ignore: true)
   @override
@@ -1166,7 +1165,7 @@ class _$BitcoinTxOutImpl extends _BitcoinTxOut {
 abstract class _BitcoinTxOut extends BitcoinTxOut {
   factory _BitcoinTxOut(
       {final int value,
-      final String scriptPubKey,
+      final List<int> scriptPubKey,
       final String address}) = _$BitcoinTxOutImpl;
   _BitcoinTxOut._() : super._();
 
@@ -1176,7 +1175,7 @@ abstract class _BitcoinTxOut extends BitcoinTxOut {
   @override
   int get value;
   @override
-  String get scriptPubKey;
+  List<int> get scriptPubKey;
   @override
   String get address;
   @override

@@ -15,3 +15,10 @@ class PersistWallet extends WalletEvent {
   final Wallet wallet;
   PersistWallet({required this.wallet});
 }
+
+class BuildTx extends WalletEvent {
+  final Wallet wallet;
+  final Address address;
+  final int amount;
+  BuildTx({required this.wallet, required this.address, required this.amount});
+}

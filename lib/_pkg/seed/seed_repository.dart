@@ -28,9 +28,9 @@ class SeedRepository {
 
   Future<Seed> newSeed(WalletType walletType, NetworkType network) async {
     try {
-      final mn = await bdk.Mnemonic.create(bdk.WordCount.Words12);
+      final mn = await bdk.Mnemonic.create(bdk.WordCount.words12);
       return Seed(
-        mnemonic: mn.asString(),
+        mnemonic: await mn.asString(),
         passphrase: '',
         fingerprint: '',
       );

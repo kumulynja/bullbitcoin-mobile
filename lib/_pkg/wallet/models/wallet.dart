@@ -93,7 +93,7 @@ class Wallet {
     throw UnimplementedError('Unsupported Wallet subclass');
   }
 
-  Future<(Iterable<Tx>?, dynamic)> getTxs(Wallet wallet) async {
+  Future<Iterable<Tx>> getTxs(Wallet wallet) async {
     // if (type == WalletType.Bitcoin) {
     //   return wallet.getsTxs();
     // } else if (type == WalletType.Liquid) {
@@ -101,11 +101,40 @@ class Wallet {
     // }
     // throw UnimplementedError('Unsupported Wallet subclass');
     Iterable<Tx> txs = [];
-    return (txs, null);
+    return txs;
   }
 
   Future<Address> getAddress(int index, AddressKind kind) async {
     return Address();
+  }
+
+  Future<void> buildTx(Address address, int amount, Seed seed) async {
+    // if (type == WalletType.Bitcoin) {
+    //   return wallet.send(address, amount);
+    // } else if (type == WalletType.Liquid) {
+    //   return LiquidWallet.send(wallet as LiquidWallet, address, amount);
+    // }
+    // throw UnimplementedError('Unsupported Wallet subclass');
+  }
+
+  Future<Wallet> initializePrivateWallet(Seed seed) async {
+    return this;
+  }
+
+  // TODO: Is this the right place to do this?
+  /// Converts
+  ///   List<Wallet, Wallet, Wallet, Wallet>
+  /// to
+  ///   List<BitcoinWallet, LiquidWallet, BitcoinWallet, FiatWallet>
+  static List<Wallet> mapBaseToChild(List<Wallet> ws) {
+    return ws.map((w) {
+      if (w.type == WalletType.Bitcoin) {
+        return BitcoinWallet.fromJson(w.toJson());
+      } else if (w.type == WalletType.Liquid) {
+        return LiquidWallet.fromJson(w.toJson());
+      }
+      return w;
+    }).toList();
   }
 }
 

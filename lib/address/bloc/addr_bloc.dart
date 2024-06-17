@@ -29,11 +29,11 @@ class AddressBloc extends Bloc<AddressEvent, AddressState> {
 
     print('_onLoadAddresses: ${event.walletId}');
 
-    final (ads, err) = await addrRepository.listAddresses(event.walletId);
-    if (err != null) {
-      emit(state.copyWith(depositAddresses: [], status: LoadStatus.failure, error: err.toString()));
-      return;
-    }
+    final ads = await addrRepository.listAddresses(event.walletId);
+    // if (err != null) {
+    //   emit(state.copyWith(depositAddresses: [], status: LoadStatus.failure, error: err.toString()));
+    //   return;
+    // }
 
     // TODO: Optimize
     final deposit = ads!.where((a) => a.kind == AddressKind.deposit).toList();
@@ -41,7 +41,10 @@ class AddressBloc extends Bloc<AddressEvent, AddressState> {
 
     // await Future.delayed(const Duration(seconds: 10));
 
-    emit(state.copyWith(depositAddresses: deposit, changeAddresses: change, status: LoadStatus.success));
+    emit(state.copyWith(
+        depositAddresses: deposit,
+        changeAddresses: change,
+        status: LoadStatus.success));
   }
 
   /*
@@ -82,11 +85,13 @@ class AddressBloc extends Bloc<AddressEvent, AddressState> {
 
     // await Future.delayed(const Duration(seconds: 2));
 
-    final address = await addrRepository.loadAddress(event.walletId, event.address);
+    final address =
+        await addrRepository.loadAddress(event.walletId, event.address);
     emit(state.copyWith(selectedAddress: address, status: LoadStatus.success));
   }
 
-  void _changeSelectedAddressKind(ChangeSelectedAddressKind event, Emitter<AddressState> emit) async {
+  void _changeSelectedAddressKind(
+      ChangeSelectedAddressKind event, Emitter<AddressState> emit) async {
     emit(state.copyWith(selectedAddressKind: event.kind));
   }
 }

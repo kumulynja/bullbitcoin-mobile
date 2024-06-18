@@ -2,6 +2,8 @@ part of 'wallet_bloc.dart';
 
 class WalletEvent {}
 
+class WalletBlocClearError extends WalletEvent {}
+
 class LoadWallet extends WalletEvent {
   final Wallet wallet;
   LoadWallet({required this.wallet});

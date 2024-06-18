@@ -6,6 +6,7 @@ import 'package:bb_arch/_pkg/address/address_repository.dart';
 import 'package:bb_arch/_pkg/address/models/address.dart';
 import 'package:bb_arch/_pkg/bb_logger.dart';
 import 'package:bb_arch/_pkg/constants.dart';
+import 'package:bb_arch/_pkg/error.dart';
 import 'package:bb_arch/_pkg/misc.dart';
 import 'package:bb_arch/_pkg/seed/seed_repository.dart';
 import 'package:bb_arch/_pkg/tx/tx_repository.dart';
@@ -34,6 +35,10 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
     on<SyncWallet>(_onSyncWallet);
     on<PersistWallet>(_onPersistWallet);
     on<BuildTx>(_onBuildTx);
+    on<WalletBlocClearError>(
+        (WalletBlocClearError event, Emitter<WalletState> emit) {
+      emit(state.copyWith(error: null));
+    });
 
     _loadWalletsTimer = Timer.periodic(
         const Duration(minutes: WALLET_SYNC_INTERVAL_MINS), (timer) {
@@ -112,6 +117,10 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
       await walletRepository.buildTx(
           event.wallet, event.address, event.amount, seed);
       emit(state.copyWith(status: LoadStatus.success));
+    } on BBException catch (e, stackTrace) {
+      emit(state.copyWith(status: LoadStatus.failure, error: e));
+      // TODO: If it's any of BDK Exception just show it to user, don't log. Sure? Re-think Sure? Re-think
+      addError(e, stackTrace);
     } catch (e, stackTrace) {
       emit(state.copyWith(status: LoadStatus.failure));
       addError(e, stackTrace);

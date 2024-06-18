@@ -1,4 +1,6 @@
+import 'package:bb_arch/_pkg/error.dart';
 import 'package:bb_arch/_pkg/misc.dart';
+import 'package:bb_arch/wallet/bloc/wallet_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -6,6 +8,7 @@ class BBScaffold extends StatelessWidget {
   final String title;
   final Widget? child;
   final List<BlocBase<ExceptionState>>? blocs;
+  final List<Type>? clearErrorEvents;
   final List<Widget>? actions;
   final Widget? floatingActionButton;
   final LoadStatus? loadStatus;
@@ -16,6 +19,7 @@ class BBScaffold extends StatelessWidget {
       required this.title,
       this.child,
       this.blocs,
+      this.clearErrorEvents,
       this.actions,
       this.floatingActionButton,
       this.loadStatus = LoadStatus.success,
@@ -48,12 +52,22 @@ class BBScaffold extends StatelessWidget {
       body: (blocs != null)
           ? MultiBlocListener(
               listeners: blocs!
-                  .map((bloc) =>
+                  .asMap()
+                  .entries
+                  .map((entry) =>
                       BlocListener<BlocBase<ExceptionState>, ExceptionState>(
-                        bloc: bloc,
+                        bloc: entry.value,
                         listener: (context, state) {
                           if (state.error != null) {
                             _showErrorDialog(context, state.error!);
+                            int index = entry.key;
+                            Type? clearErrorEvent = clearErrorEvents != null
+                                ? clearErrorEvents![index]
+                                : null;
+                            if (clearErrorEvent != null) {
+                              (entry.value as Bloc)
+                                  .add(EventFactory.create(clearErrorEvent));
+                            }
                           }
                         },
                       ))
@@ -67,11 +81,19 @@ class BBScaffold extends StatelessWidget {
   }
 
   void _showErrorDialog(BuildContext context, Exception error) {
+    String title = 'Error';
+    String msg = error.toString();
+    String desc = '';
+    if (error is BBException) {
+      title = error.title ?? 'Error';
+      msg = error.message ?? error.toString();
+      desc = error.description ?? '';
+    }
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Error"),
-        content: Text(error.toString()),
+        title: Text(title),
+        content: Text('$msg\n\n$desc'),
         actions: <Widget>[
           ElevatedButton(
             child: const Text("OK"),
@@ -80,5 +102,14 @@ class BBScaffold extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class EventFactory {
+  static WalletEvent create(Type type) {
+    if (type == WalletBlocClearError) {
+      return WalletBlocClearError();
+    }
+    throw ArgumentError('Unknown event type: $type');
   }
 }

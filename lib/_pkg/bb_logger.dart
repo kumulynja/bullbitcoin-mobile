@@ -15,7 +15,7 @@ class BBLogger {
   late Logger _logger;
 
   init() async {
-    const bool isProduction = false; // bool.fromEnvironment('dart.vm.product');
+    const bool isProduction = true; // bool.fromEnvironment('dart.vm.product');
     if (isProduction) {
       await _initLogFile();
     }

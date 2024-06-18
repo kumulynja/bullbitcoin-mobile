@@ -15,8 +15,11 @@ class SendScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final walletBloc = context.read<WalletBloc>();
     return BBScaffold(
         title: 'Send',
+        blocs: [walletBloc],
+        clearErrorEvents: const [WalletBlocClearError],
         child: SendView(
           walletId: walletId,
         ));

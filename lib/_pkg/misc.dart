@@ -19,6 +19,10 @@ extension LoadStatusExtension on LoadStatus {
   }
 }
 
+class BBEvent {}
+
+class ClearEvent extends BBEvent {}
+
 abstract class ExceptionState {
   BBException? get error;
 }

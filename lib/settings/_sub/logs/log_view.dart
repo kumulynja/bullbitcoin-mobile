@@ -9,8 +9,6 @@ class LogListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final BBLogger logger = RepositoryProvider.of<BBLogger>(context);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Log Files'),

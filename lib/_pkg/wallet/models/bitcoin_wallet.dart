@@ -75,9 +75,11 @@ class BitcoinWallet extends Wallet with _$BitcoinWallet {
       final bdkAddress = await bdk.Address.fromString(
           s: address.address, network: network.getBdkType);
       final script = await bdkAddress.scriptPubkey();
+      // TODO: App crashes with negative value as fee
+      // So this needs to be handled on our side.
       final txBuilderResult = await builder
-          .feeRate(110)
-          .addRecipient(script, amount)
+          .feeRate(200)
+          .addRecipient(script, 1234)
           .finish(bdkWallet!);
       final psbt = txBuilderResult.$1;
 
@@ -95,28 +97,52 @@ class BitcoinWallet extends Wallet with _$BitcoinWallet {
 
       await bdkBlockchain?.broadcast(transaction: broadcastTx);
     } on bdk.FeeRateUnavailableException catch (e, stackTrace) {
-      // print(e);
-      // } on bdk.fee catch (e, stackTrace) {
-      print(e);
+      Error.throwWithStackTrace(
+          BdkException(e, message: e.message), stackTrace);
     } on bdk.ElectrumException catch (e, stackTrace) {
       Error.throwWithStackTrace(BdkElectrumException(e), stackTrace);
     } on bdk.FeeTooLowException catch (e, stackTrace) {
-      print(e);
+      Error.throwWithStackTrace(
+          BdkException(e, message: e.message), stackTrace);
     } on bdk.FeeRateTooLowException catch (e, stackTrace) {
-      print(e);
+      Error.throwWithStackTrace(
+          BdkException(e, message: e.message), stackTrace);
     } on bdk.RpcException catch (e, stackTrace) {
-      print(e);
+      Error.throwWithStackTrace(
+          BdkException(e, message: e.message), stackTrace);
     } on bdk.GenericException catch (e, stackTrace) {
-      print(e);
+      Error.throwWithStackTrace(
+          BdkException(e, message: e.message), stackTrace);
+    } on bdk.AddressException catch (e, stackTrace) {
+      Error.throwWithStackTrace(
+          BdkException(e,
+              title: 'Invalid address',
+              message: 'Please check if you entered valid address',
+              description: e.message),
+          stackTrace);
+    } on bdk.OutputBelowDustLimitException catch (e, stackTrace) {
+      Error.throwWithStackTrace(
+          BdkException(e,
+              title: 'Invalid amount',
+              message: 'Cannot send below dust',
+              description: e.message),
+          stackTrace);
     } on bdk.InsufficientFundsException catch (e, stackTrace) {
-      print(e);
+      Error.throwWithStackTrace(
+          BdkException(e,
+              title: 'Insufficient Funds',
+              message: 'Check if you got enough balance',
+              description: e.message),
+          stackTrace);
       // TODO: This is being thrown here when min fee.
       // But guess this is not expored from bdk_flutter
       // Hence cannot use it here, to handle this.
-      // } on bdk.BdkError_Electrum catch (e, stackTrace) {
+      // } on bdk.BdkError_Electrum or bdk.RpcException catch (e, stackTrace) {
       //   print(e);
-    } on Exception catch (e) {
-      print(e);
+    } on Exception catch (e, stackTrace) {
+      Error.throwWithStackTrace(
+          BdkException(e, title: 'Send error', message: e.toString()),
+          stackTrace);
     } catch (e) {
       rethrow;
     }

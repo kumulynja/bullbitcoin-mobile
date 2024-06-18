@@ -15,51 +15,59 @@ enum NetworkException { noInternet, timeout, unknown }
 enum HttpException { notFound, badRequest, unauthorized, unknown }
 
 abstract class BBException<T> implements Exception {
-  const BBException(this.error, {this.message});
+  const BBException(this.error, {this.title, this.message, this.description});
   final T error;
+  final String? title;
   final String? message;
+  final String? description;
 }
 
-class DatabaseException<T> implements BBException<T> {
-  const DatabaseException(this.error, {this.message});
-  final T error;
-  final String? message;
+class DatabaseException<T> extends BBException<T> {
+  const DatabaseException(T error,
+      {String? title, String? message, String? description})
+      : super(error, title: title, message: message, description: description);
 }
 
-class JsonParseException<T> implements BBException<T> {
-  const JsonParseException(this.error, {this.message, this.modal});
-  final T error;
-  final String? message;
+class JsonParseException<T> extends BBException<T> {
+  const JsonParseException(T error,
+      {String? title, String? message, String? description, this.modal})
+      : super(error, title: title, message: message, description: description);
   final String? modal;
 }
 
-abstract class WalletException<T> implements BBException<T> {
-  const WalletException(this.error, {this.message});
-  final T error;
-  final String? message;
+class WalletException<T> extends BBException<T> {
+  const WalletException(T error,
+      {String? title, String? message, String? description})
+      : super(error, title: title, message: message, description: description);
 }
 
 class WalletLoadException<T> extends WalletException<T> {
-  const WalletLoadException(super.error, {super.message});
+  const WalletLoadException(T error,
+      {String? title, String? message, String? description})
+      : super(error, title: title, message: message, description: description);
 }
 
 class WalletDeleteException<T> extends WalletException<T> {
-  const WalletDeleteException(super.error, {super.message});
+  const WalletDeleteException(T error,
+      {String? title, String? message, String? description})
+      : super(error, title: title, message: message, description: description);
 }
 
-abstract class BdkException<T> implements BBException<T> {
-  const BdkException(this.error, {this.message});
-  final T error;
-  final String? message;
+class BdkException<T> extends BBException<T> {
+  const BdkException(T error,
+      {String? title, String? message, String? description})
+      : super(error, title: title, message: message, description: description);
 }
 
 class BdkElectrumException<T> extends BdkException<T> {
-  const BdkElectrumException(super.error, {super.message, this.serverUrl});
+  const BdkElectrumException(T error,
+      {String? title, String? message, String? description, this.serverUrl})
+      : super(error, title: title, message: message, description: description);
   final String? serverUrl;
 }
 
-class SeedException<T> implements BBException<T> {
-  const SeedException(this.error, {this.message});
-  final T error;
-  final String? message;
+class SeedException<T> extends BBException<T> {
+  const SeedException(T error,
+      {String? title, String? message, String? description})
+      : super(error, title: title, message: message, description: description);
 }

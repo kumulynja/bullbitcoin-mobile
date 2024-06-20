@@ -62,22 +62,30 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
 
   void _onSyncWallet(SyncWallet event, Emitter<WalletState> emit) async {
     try {
+      Stopwatch stopwatch = Stopwatch()..start();
       BBLogger().logBloc('WalletBloc ${state.wallet?.id} :: SyncWallet');
       emit(state.copyWith(status: LoadStatus.loading));
-      await Future.delayed(const Duration(seconds: 1));
+      // await Future.delayed(const Duration(seconds: 1));
 
       final seed = await seedRepository.loadSeed(state.wallet!.seedFingerprint);
       final loadedWallet =
           await walletRepository.loadNativeSdk(state.wallet!, seed);
+      print('[Time] Sync : To load seed : ${stopwatch.elapsedMilliseconds} ms');
+      stopwatch.reset();
 
       emit(state.copyWith(wallet: loadedWallet));
 
       final syncedWallet = await Wallet.syncWallet(loadedWallet);
+      print('[Time] Sync : wallet sync : ${stopwatch.elapsedMilliseconds} ms');
+      stopwatch.reset();
 
       BBLogger().logBloc(
           'WalletBloc ${state.wallet?.id} :: SyncWallet : process Txs');
-      final txs = await txRepository.syncTxs(syncedWallet);
+      final storedTxs = await txRepository.listAllTxs(syncedWallet);
+      final txs = await txRepository.syncTxs(syncedWallet, storedTxs);
       await txRepository.persistTxs(syncedWallet, txs);
+      print('[Time] Sync : processTxs : ${stopwatch.elapsedMilliseconds} ms');
+      stopwatch.reset();
 
       BBLogger().logBloc(
           'WalletBloc ${state.wallet?.id} :: SyncWallet : process Addresses');
@@ -85,17 +93,28 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
       final depositAddresses = await addressRepository.syncAddresses(
           txs, [], AddressKind.deposit, syncedWallet);
       await addressRepository.persistAddresses(syncedWallet, depositAddresses);
+      print(
+          '[Time] Sync : process Deposit address : ${stopwatch.elapsedMilliseconds} ms');
+      stopwatch.reset();
 
       // TODO: Pass old address
       final changeAddresses = await addressRepository.syncAddresses(
           txs, [], AddressKind.change, syncedWallet);
       await addressRepository.persistAddresses(syncedWallet, changeAddresses);
+      print(
+          '[Time] Sync : process change address : ${stopwatch.elapsedMilliseconds} ms');
+      stopwatch.reset();
+      stopwatch.stop();
 
       await walletRepository.persistWallet(syncedWallet);
 
       emit(state.copyWith(status: LoadStatus.success, wallet: syncedWallet));
       BBLogger().logBloc('WalletBloc ${state.wallet?.id} :: SyncWallet : DONE');
+    } on BBException catch (error, stackTrace) {
+      emit(state.copyWith(status: LoadStatus.failure, error: error));
+      addError(error, stackTrace);
     } catch (error, stackTrace) {
+      emit(state.copyWith(status: LoadStatus.failure));
       addError(error, stackTrace);
     }
   }

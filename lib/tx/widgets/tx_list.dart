@@ -16,7 +16,7 @@ class TxListWidget extends StatelessWidget {
       itemBuilder: (context, index) {
         Tx tx = txs[index];
         String amount =
-            '${tx.amount} - ${(tx.amount ?? 0) > 0 ? 'received' : 'sent'}';
+            '${tx.amount} - ${(tx.amount ?? 0) > 0 ? 'received' : 'sent'} ${tx.timestamp == 0 ? '(pending)' : ''}';
         return TxCard(amount: amount, tx: tx);
       },
       itemCount: txs.length,

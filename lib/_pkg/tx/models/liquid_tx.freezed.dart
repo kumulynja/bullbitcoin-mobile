@@ -27,6 +27,7 @@ mixin _$LiquidTx {
   int get received => throw _privateConstructorUsedError;
   int get amount => throw _privateConstructorUsedError;
   int get fee => throw _privateConstructorUsedError;
+  double get feeRate => throw _privateConstructorUsedError;
   int get height => throw _privateConstructorUsedError;
   int get version => throw _privateConstructorUsedError;
   int get vsize => throw _privateConstructorUsedError;
@@ -61,6 +62,7 @@ abstract class $LiquidTxCopyWith<$Res> {
       int received,
       int amount,
       int fee,
+      double feeRate,
       int height,
       int version,
       int vsize,
@@ -97,6 +99,7 @@ class _$LiquidTxCopyWithImpl<$Res, $Val extends LiquidTx>
     Object? received = null,
     Object? amount = null,
     Object? fee = null,
+    Object? feeRate = null,
     Object? height = null,
     Object? version = null,
     Object? vsize = null,
@@ -141,6 +144,10 @@ class _$LiquidTxCopyWithImpl<$Res, $Val extends LiquidTx>
           ? _value.fee
           : fee // ignore: cast_nullable_to_non_nullable
               as int,
+      feeRate: null == feeRate
+          ? _value.feeRate
+          : feeRate // ignore: cast_nullable_to_non_nullable
+              as double,
       height: null == height
           ? _value.height
           : height // ignore: cast_nullable_to_non_nullable
@@ -217,6 +224,7 @@ abstract class _$$LiquidTxImplCopyWith<$Res>
       int received,
       int amount,
       int fee,
+      double feeRate,
       int height,
       int version,
       int vsize,
@@ -251,6 +259,7 @@ class __$$LiquidTxImplCopyWithImpl<$Res>
     Object? received = null,
     Object? amount = null,
     Object? fee = null,
+    Object? feeRate = null,
     Object? height = null,
     Object? version = null,
     Object? vsize = null,
@@ -295,6 +304,10 @@ class __$$LiquidTxImplCopyWithImpl<$Res>
           ? _value.fee
           : fee // ignore: cast_nullable_to_non_nullable
               as int,
+      feeRate: null == feeRate
+          ? _value.feeRate
+          : feeRate // ignore: cast_nullable_to_non_nullable
+              as double,
       height: null == height
           ? _value.height
           : height // ignore: cast_nullable_to_non_nullable
@@ -366,6 +379,7 @@ class _$LiquidTxImpl extends _LiquidTx {
       this.received = 0,
       required this.amount,
       required this.fee,
+      required this.feeRate,
       required this.height,
       required this.version,
       required this.vsize,
@@ -379,7 +393,7 @@ class _$LiquidTxImpl extends _LiquidTx {
       final List<BitcoinTxIn> inputs = const [],
       final List<BitcoinTxOut> outputs = const [],
       final List<String> rbfChain = const [],
-      this.rbfIndex = 0})
+      this.rbfIndex = -1})
       : _linputs = linputs,
         _loutputs = loutputs,
         _labels = labels,
@@ -407,6 +421,8 @@ class _$LiquidTxImpl extends _LiquidTx {
   final int amount;
   @override
   final int fee;
+  @override
+  final double feeRate;
   @override
   final int height;
   @override
@@ -479,7 +495,7 @@ class _$LiquidTxImpl extends _LiquidTx {
 
   @override
   String toString() {
-    return 'LiquidTx(id: $id, type: $type, timestamp: $timestamp, sent: $sent, received: $received, amount: $amount, fee: $fee, height: $height, version: $version, vsize: $vsize, weight: $weight, locktime: $locktime, linputs: $linputs, loutputs: $loutputs, toAddress: $toAddress, labels: $labels, walletId: $walletId, inputs: $inputs, outputs: $outputs, rbfChain: $rbfChain, rbfIndex: $rbfIndex)';
+    return 'LiquidTx(id: $id, type: $type, timestamp: $timestamp, sent: $sent, received: $received, amount: $amount, fee: $fee, feeRate: $feeRate, height: $height, version: $version, vsize: $vsize, weight: $weight, locktime: $locktime, linputs: $linputs, loutputs: $loutputs, toAddress: $toAddress, labels: $labels, walletId: $walletId, inputs: $inputs, outputs: $outputs, rbfChain: $rbfChain, rbfIndex: $rbfIndex)';
   }
 
   @override
@@ -496,6 +512,7 @@ class _$LiquidTxImpl extends _LiquidTx {
                 other.received == received) &&
             (identical(other.amount, amount) || other.amount == amount) &&
             (identical(other.fee, fee) || other.fee == fee) &&
+            (identical(other.feeRate, feeRate) || other.feeRate == feeRate) &&
             (identical(other.height, height) || other.height == height) &&
             (identical(other.version, version) || other.version == version) &&
             (identical(other.vsize, vsize) || other.vsize == vsize) &&
@@ -527,6 +544,7 @@ class _$LiquidTxImpl extends _LiquidTx {
         received,
         amount,
         fee,
+        feeRate,
         height,
         version,
         vsize,
@@ -566,6 +584,7 @@ abstract class _LiquidTx extends LiquidTx {
       final int received,
       required final int amount,
       required final int fee,
+      required final double feeRate,
       required final int height,
       required final int version,
       required final int vsize,
@@ -599,6 +618,8 @@ abstract class _LiquidTx extends LiquidTx {
   int get amount;
   @override
   int get fee;
+  @override
+  double get feeRate;
   @override
   int get height;
   @override

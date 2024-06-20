@@ -32,113 +32,118 @@ const TxSchema = CollectionSchema(
       name: r'fee',
       type: IsarType.long,
     ),
-    r'height': PropertySchema(
+    r'feeRate': PropertySchema(
       id: 3,
+      name: r'feeRate',
+      type: IsarType.double,
+    ),
+    r'height': PropertySchema(
+      id: 4,
       name: r'height',
       type: IsarType.long,
     ),
     r'id': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'id',
       type: IsarType.string,
     ),
     r'inputs': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'inputs',
       type: IsarType.objectList,
       target: r'BitcoinTxIn',
     ),
     r'labels': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'labels',
       type: IsarType.stringList,
     ),
     r'linputs': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'linputs',
       type: IsarType.objectList,
       target: r'LiquidTxIn',
     ),
     r'locktime': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'locktime',
       type: IsarType.long,
     ),
     r'loutputs': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'loutputs',
       type: IsarType.objectList,
       target: r'LiquidTxOut',
     ),
     r'outputs': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'outputs',
       type: IsarType.objectList,
       target: r'BitcoinTxOut',
     ),
     r'psbt': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'psbt',
       type: IsarType.string,
     ),
     r'rbfChain': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'rbfChain',
       type: IsarType.stringList,
     ),
     r'rbfEnabled': PropertySchema(
-      id: 13,
+      id: 14,
       name: r'rbfEnabled',
       type: IsarType.bool,
     ),
     r'rbfIndex': PropertySchema(
-      id: 14,
+      id: 15,
       name: r'rbfIndex',
       type: IsarType.long,
     ),
     r'received': PropertySchema(
-      id: 15,
+      id: 16,
       name: r'received',
       type: IsarType.long,
     ),
     r'sent': PropertySchema(
-      id: 16,
+      id: 17,
       name: r'sent',
       type: IsarType.long,
     ),
     r'timestamp': PropertySchema(
-      id: 17,
+      id: 18,
       name: r'timestamp',
       type: IsarType.long,
     ),
     r'toAddress': PropertySchema(
-      id: 18,
+      id: 19,
       name: r'toAddress',
       type: IsarType.string,
     ),
     r'type': PropertySchema(
-      id: 19,
+      id: 20,
       name: r'type',
       type: IsarType.byte,
       enumMap: _TxtypeEnumValueMap,
     ),
     r'version': PropertySchema(
-      id: 20,
+      id: 21,
       name: r'version',
       type: IsarType.long,
     ),
     r'vsize': PropertySchema(
-      id: 21,
+      id: 22,
       name: r'vsize',
       type: IsarType.long,
     ),
     r'walletId': PropertySchema(
-      id: 22,
+      id: 23,
       name: r'walletId',
       type: IsarType.string,
     ),
     r'weight': PropertySchema(
-      id: 23,
+      id: 24,
       name: r'weight',
       type: IsarType.long,
     )
@@ -329,47 +334,48 @@ void _txSerialize(
   writer.writeLong(offsets[0], object.amount);
   writer.writeLong(offsets[1], object.broadcastTime);
   writer.writeLong(offsets[2], object.fee);
-  writer.writeLong(offsets[3], object.height);
-  writer.writeString(offsets[4], object.id);
+  writer.writeDouble(offsets[3], object.feeRate);
+  writer.writeLong(offsets[4], object.height);
+  writer.writeString(offsets[5], object.id);
   writer.writeObjectList<BitcoinTxIn>(
-    offsets[5],
+    offsets[6],
     allOffsets,
     BitcoinTxInSchema.serialize,
     object.inputs,
   );
-  writer.writeStringList(offsets[6], object.labels);
+  writer.writeStringList(offsets[7], object.labels);
   writer.writeObjectList<LiquidTxIn>(
-    offsets[7],
+    offsets[8],
     allOffsets,
     LiquidTxInSchema.serialize,
     object.linputs,
   );
-  writer.writeLong(offsets[8], object.locktime);
+  writer.writeLong(offsets[9], object.locktime);
   writer.writeObjectList<LiquidTxOut>(
-    offsets[9],
+    offsets[10],
     allOffsets,
     LiquidTxOutSchema.serialize,
     object.loutputs,
   );
   writer.writeObjectList<BitcoinTxOut>(
-    offsets[10],
+    offsets[11],
     allOffsets,
     BitcoinTxOutSchema.serialize,
     object.outputs,
   );
-  writer.writeString(offsets[11], object.psbt);
-  writer.writeStringList(offsets[12], object.rbfChain);
-  writer.writeBool(offsets[13], object.rbfEnabled);
-  writer.writeLong(offsets[14], object.rbfIndex);
-  writer.writeLong(offsets[15], object.received);
-  writer.writeLong(offsets[16], object.sent);
-  writer.writeLong(offsets[17], object.timestamp);
-  writer.writeString(offsets[18], object.toAddress);
-  writer.writeByte(offsets[19], object.type.index);
-  writer.writeLong(offsets[20], object.version);
-  writer.writeLong(offsets[21], object.vsize);
-  writer.writeString(offsets[22], object.walletId);
-  writer.writeLong(offsets[23], object.weight);
+  writer.writeString(offsets[12], object.psbt);
+  writer.writeStringList(offsets[13], object.rbfChain);
+  writer.writeBool(offsets[14], object.rbfEnabled);
+  writer.writeLong(offsets[15], object.rbfIndex);
+  writer.writeLong(offsets[16], object.received);
+  writer.writeLong(offsets[17], object.sent);
+  writer.writeLong(offsets[18], object.timestamp);
+  writer.writeString(offsets[19], object.toAddress);
+  writer.writeByte(offsets[20], object.type.index);
+  writer.writeLong(offsets[21], object.version);
+  writer.writeLong(offsets[22], object.vsize);
+  writer.writeString(offsets[23], object.walletId);
+  writer.writeLong(offsets[24], object.weight);
 }
 
 Tx _txDeserialize(
@@ -382,49 +388,50 @@ Tx _txDeserialize(
   object.amount = reader.readLong(offsets[0]);
   object.broadcastTime = reader.readLongOrNull(offsets[1]);
   object.fee = reader.readLong(offsets[2]);
-  object.height = reader.readLongOrNull(offsets[3]);
-  object.id = reader.readString(offsets[4]);
+  object.feeRate = reader.readDouble(offsets[3]);
+  object.height = reader.readLongOrNull(offsets[4]);
+  object.id = reader.readString(offsets[5]);
   object.inputs = reader.readObjectList<BitcoinTxIn>(
-    offsets[5],
+    offsets[6],
     BitcoinTxInSchema.deserialize,
     allOffsets,
     BitcoinTxIn(),
   );
   object.isarId = id;
-  object.labels = reader.readStringList(offsets[6]);
+  object.labels = reader.readStringList(offsets[7]);
   object.linputs = reader.readObjectList<LiquidTxIn>(
-    offsets[7],
+    offsets[8],
     LiquidTxInSchema.deserialize,
     allOffsets,
     LiquidTxIn(),
   );
-  object.locktime = reader.readLongOrNull(offsets[8]);
+  object.locktime = reader.readLongOrNull(offsets[9]);
   object.loutputs = reader.readObjectList<LiquidTxOut>(
-    offsets[9],
+    offsets[10],
     LiquidTxOutSchema.deserialize,
     allOffsets,
     LiquidTxOut(),
   );
   object.outputs = reader.readObjectList<BitcoinTxOut>(
-    offsets[10],
+    offsets[11],
     BitcoinTxOutSchema.deserialize,
     allOffsets,
     BitcoinTxOut(),
   );
-  object.psbt = reader.readStringOrNull(offsets[11]);
-  object.rbfChain = reader.readStringList(offsets[12]) ?? [];
-  object.rbfEnabled = reader.readBoolOrNull(offsets[13]);
-  object.rbfIndex = reader.readLong(offsets[14]);
-  object.received = reader.readLong(offsets[15]);
-  object.sent = reader.readLong(offsets[16]);
-  object.timestamp = reader.readLong(offsets[17]);
-  object.toAddress = reader.readStringOrNull(offsets[18]);
+  object.psbt = reader.readStringOrNull(offsets[12]);
+  object.rbfChain = reader.readStringList(offsets[13]) ?? [];
+  object.rbfEnabled = reader.readBoolOrNull(offsets[14]);
+  object.rbfIndex = reader.readLong(offsets[15]);
+  object.received = reader.readLong(offsets[16]);
+  object.sent = reader.readLong(offsets[17]);
+  object.timestamp = reader.readLong(offsets[18]);
+  object.toAddress = reader.readStringOrNull(offsets[19]);
   object.type =
-      _TxtypeValueEnumMap[reader.readByteOrNull(offsets[19])] ?? TxType.Bitcoin;
-  object.version = reader.readLongOrNull(offsets[20]);
-  object.vsize = reader.readLongOrNull(offsets[21]);
-  object.walletId = reader.readStringOrNull(offsets[22]);
-  object.weight = reader.readLongOrNull(offsets[23]);
+      _TxtypeValueEnumMap[reader.readByteOrNull(offsets[20])] ?? TxType.Bitcoin;
+  object.version = reader.readLongOrNull(offsets[21]);
+  object.vsize = reader.readLongOrNull(offsets[22]);
+  object.walletId = reader.readStringOrNull(offsets[23]);
+  object.weight = reader.readLongOrNull(offsets[24]);
   return object;
 }
 
@@ -442,49 +449,49 @@ P _txDeserializeProp<P>(
     case 2:
       return (reader.readLong(offset)) as P;
     case 3:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readDouble(offset)) as P;
     case 4:
-      return (reader.readString(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 5:
+      return (reader.readString(offset)) as P;
+    case 6:
       return (reader.readObjectList<BitcoinTxIn>(
         offset,
         BitcoinTxInSchema.deserialize,
         allOffsets,
         BitcoinTxIn(),
       )) as P;
-    case 6:
-      return (reader.readStringList(offset)) as P;
     case 7:
+      return (reader.readStringList(offset)) as P;
+    case 8:
       return (reader.readObjectList<LiquidTxIn>(
         offset,
         LiquidTxInSchema.deserialize,
         allOffsets,
         LiquidTxIn(),
       )) as P;
-    case 8:
-      return (reader.readLongOrNull(offset)) as P;
     case 9:
+      return (reader.readLongOrNull(offset)) as P;
+    case 10:
       return (reader.readObjectList<LiquidTxOut>(
         offset,
         LiquidTxOutSchema.deserialize,
         allOffsets,
         LiquidTxOut(),
       )) as P;
-    case 10:
+    case 11:
       return (reader.readObjectList<BitcoinTxOut>(
         offset,
         BitcoinTxOutSchema.deserialize,
         allOffsets,
         BitcoinTxOut(),
       )) as P;
-    case 11:
-      return (reader.readStringOrNull(offset)) as P;
     case 12:
-      return (reader.readStringList(offset) ?? []) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 13:
-      return (reader.readBoolOrNull(offset)) as P;
+      return (reader.readStringList(offset) ?? []) as P;
     case 14:
-      return (reader.readLong(offset)) as P;
+      return (reader.readBoolOrNull(offset)) as P;
     case 15:
       return (reader.readLong(offset)) as P;
     case 16:
@@ -492,17 +499,19 @@ P _txDeserializeProp<P>(
     case 17:
       return (reader.readLong(offset)) as P;
     case 18:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 19:
+      return (reader.readStringOrNull(offset)) as P;
+    case 20:
       return (_TxtypeValueEnumMap[reader.readByteOrNull(offset)] ??
           TxType.Bitcoin) as P;
-    case 20:
-      return (reader.readLongOrNull(offset)) as P;
     case 21:
       return (reader.readLongOrNull(offset)) as P;
     case 22:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 23:
+      return (reader.readStringOrNull(offset)) as P;
+    case 24:
       return (reader.readLongOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1124,6 +1133,68 @@ extension TxQueryFilter on QueryBuilder<Tx, Tx, QFilterCondition> {
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> feeRateEqualTo(
+    double value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'feeRate',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> feeRateGreaterThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'feeRate',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> feeRateLessThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'feeRate',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> feeRateBetween(
+    double lower,
+    double upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'feeRate',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
       ));
     });
   }
@@ -3275,6 +3346,18 @@ extension TxQuerySortBy on QueryBuilder<Tx, Tx, QSortBy> {
     });
   }
 
+  QueryBuilder<Tx, Tx, QAfterSortBy> sortByFeeRate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'feeRate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterSortBy> sortByFeeRateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'feeRate', Sort.desc);
+    });
+  }
+
   QueryBuilder<Tx, Tx, QAfterSortBy> sortByHeight() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'height', Sort.asc);
@@ -3493,6 +3576,18 @@ extension TxQuerySortThenBy on QueryBuilder<Tx, Tx, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Tx, Tx, QAfterSortBy> thenByFeeRate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'feeRate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterSortBy> thenByFeeRateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'feeRate', Sort.desc);
+    });
+  }
+
   QueryBuilder<Tx, Tx, QAfterSortBy> thenByHeight() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'height', Sort.asc);
@@ -3705,6 +3800,12 @@ extension TxQueryWhereDistinct on QueryBuilder<Tx, Tx, QDistinct> {
     });
   }
 
+  QueryBuilder<Tx, Tx, QDistinct> distinctByFeeRate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'feeRate');
+    });
+  }
+
   QueryBuilder<Tx, Tx, QDistinct> distinctByHeight() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'height');
@@ -3832,6 +3933,12 @@ extension TxQueryProperty on QueryBuilder<Tx, Tx, QQueryProperty> {
   QueryBuilder<Tx, int, QQueryOperations> feeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'fee');
+    });
+  }
+
+  QueryBuilder<Tx, double, QQueryOperations> feeRateProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'feeRate');
     });
   }
 

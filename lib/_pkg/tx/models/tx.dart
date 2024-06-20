@@ -26,6 +26,7 @@ class Tx {
   int received = 0;
   int amount = 0;
   int fee = 0;
+  double feeRate = 0;
 
   int? height;
 
@@ -93,6 +94,7 @@ class Tx {
       'received': received,
       'amount': amount,
       'fee': fee,
+      'feeRate': feeRate,
       'height': height,
       'psbt': psbt,
       'broadcastTime': broadcastTime,
@@ -117,7 +119,7 @@ class Tx {
       'toAddress': toAddress,
       'labels': labels,
       'walletId': walletId,
-      'rbfChain': rbfChain,
+      'rbfChain': [...rbfChain],
       'rbfIndex': rbfIndex,
     };
   }

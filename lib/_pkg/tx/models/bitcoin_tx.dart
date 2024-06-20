@@ -27,6 +27,7 @@ class BitcoinTx extends Tx with _$BitcoinTx {
     @Default(0) int received,
     required int amount,
     required int fee,
+    required double feeRate,
     required int height,
     String? psbt,
     int? broadcastTime,
@@ -87,6 +88,7 @@ class BitcoinTx extends Tx with _$BitcoinTx {
         received: t.received,
         amount: t.sent - t.received,
         fee: t.fee ?? 0,
+        feeRate: (t.fee ?? 1) / vsize.toDouble(),
         height: t.confirmationTime?.height ?? 0,
         labels: [],
         rbfEnabled: isRbf,
@@ -112,14 +114,15 @@ class BitcoinTx extends Tx with _$BitcoinTx {
 class BitcoinOutPoint with _$BitcoinOutPoint {
   const factory BitcoinOutPoint(
       {@Default('') String txid, @Default(0) int vout}) = _BitcoinOutPoint;
-  BitcoinOutPoint._();
+  // BitcoinOutPoint._();
   factory BitcoinOutPoint.fromJson(Map<String, dynamic> json) =>
       safeFromJson(json, _$BitcoinOutPointFromJson, 'BitcoinOutPoint');
 
-  @override
-  String toString() {
-    return 'BitcoinOutPoint(txid: $txid, vout: $vout)';
-  }
+  // TODO: Not working with freezed
+  // @override
+  // String toString() {
+  //   return 'BitcoinOutPoint(txid: $txid, vout: $vout)';
+  // }
 }
 
 extension BitcoinOutPointX on BitcoinOutPoint {

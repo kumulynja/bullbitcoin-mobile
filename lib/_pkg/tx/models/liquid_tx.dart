@@ -27,6 +27,7 @@ class LiquidTx extends Tx with _$LiquidTx {
     @Default(0) int received,
     required int amount,
     required int fee,
+    required double feeRate,
     required int height,
     required int version,
     required int vsize,
@@ -77,12 +78,15 @@ class LiquidTx extends Tx with _$LiquidTx {
       outputs.add(txOut);
     }
 
+    final vsize = t.vsize;
+
     return LiquidTx(
       id: t.txid,
       type: TxType.Liquid,
       timestamp: t.timestamp ?? 0,
       amount: finalBalance,
       fee: t.fee,
+      feeRate: t.fee / vsize,
       height: 0,
       version: 1,
       vsize: 0,

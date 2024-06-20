@@ -27,6 +27,7 @@ mixin _$BitcoinTx {
   int get received => throw _privateConstructorUsedError;
   int get amount => throw _privateConstructorUsedError;
   int get fee => throw _privateConstructorUsedError;
+  double get feeRate => throw _privateConstructorUsedError;
   int get height => throw _privateConstructorUsedError;
   String? get psbt => throw _privateConstructorUsedError;
   int? get broadcastTime => throw _privateConstructorUsedError;
@@ -64,6 +65,7 @@ abstract class $BitcoinTxCopyWith<$Res> {
       int received,
       int amount,
       int fee,
+      double feeRate,
       int height,
       String? psbt,
       int? broadcastTime,
@@ -103,6 +105,7 @@ class _$BitcoinTxCopyWithImpl<$Res, $Val extends BitcoinTx>
     Object? received = null,
     Object? amount = null,
     Object? fee = null,
+    Object? feeRate = null,
     Object? height = null,
     Object? psbt = freezed,
     Object? broadcastTime = freezed,
@@ -150,6 +153,10 @@ class _$BitcoinTxCopyWithImpl<$Res, $Val extends BitcoinTx>
           ? _value.fee
           : fee // ignore: cast_nullable_to_non_nullable
               as int,
+      feeRate: null == feeRate
+          ? _value.feeRate
+          : feeRate // ignore: cast_nullable_to_non_nullable
+              as double,
       height: null == height
           ? _value.height
           : height // ignore: cast_nullable_to_non_nullable
@@ -238,6 +245,7 @@ abstract class _$$BitcoinTxImplCopyWith<$Res>
       int received,
       int amount,
       int fee,
+      double feeRate,
       int height,
       String? psbt,
       int? broadcastTime,
@@ -275,6 +283,7 @@ class __$$BitcoinTxImplCopyWithImpl<$Res>
     Object? received = null,
     Object? amount = null,
     Object? fee = null,
+    Object? feeRate = null,
     Object? height = null,
     Object? psbt = freezed,
     Object? broadcastTime = freezed,
@@ -322,6 +331,10 @@ class __$$BitcoinTxImplCopyWithImpl<$Res>
           ? _value.fee
           : fee // ignore: cast_nullable_to_non_nullable
               as int,
+      feeRate: null == feeRate
+          ? _value.feeRate
+          : feeRate // ignore: cast_nullable_to_non_nullable
+              as double,
       height: null == height
           ? _value.height
           : height // ignore: cast_nullable_to_non_nullable
@@ -405,6 +418,7 @@ class _$BitcoinTxImpl extends _BitcoinTx {
       this.received = 0,
       required this.amount,
       required this.fee,
+      required this.feeRate,
       required this.height,
       this.psbt,
       this.broadcastTime,
@@ -421,7 +435,7 @@ class _$BitcoinTxImpl extends _BitcoinTx {
       final List<LiquidTxIn> linputs = const [],
       final List<LiquidTxOut> loutputs = const [],
       final List<String> rbfChain = const [],
-      this.rbfIndex = 0})
+      this.rbfIndex = -1})
       : _inputs = inputs,
         _outputs = outputs,
         _labels = labels,
@@ -449,6 +463,8 @@ class _$BitcoinTxImpl extends _BitcoinTx {
   final int amount;
   @override
   final int fee;
+  @override
+  final double feeRate;
   @override
   final int height;
   @override
@@ -527,7 +543,7 @@ class _$BitcoinTxImpl extends _BitcoinTx {
 
   @override
   String toString() {
-    return 'BitcoinTx(id: $id, type: $type, timestamp: $timestamp, sent: $sent, received: $received, amount: $amount, fee: $fee, height: $height, psbt: $psbt, broadcastTime: $broadcastTime, rbfEnabled: $rbfEnabled, version: $version, vsize: $vsize, weight: $weight, locktime: $locktime, inputs: $inputs, outputs: $outputs, toAddress: $toAddress, labels: $labels, walletId: $walletId, linputs: $linputs, loutputs: $loutputs, rbfChain: $rbfChain, rbfIndex: $rbfIndex)';
+    return 'BitcoinTx(id: $id, type: $type, timestamp: $timestamp, sent: $sent, received: $received, amount: $amount, fee: $fee, feeRate: $feeRate, height: $height, psbt: $psbt, broadcastTime: $broadcastTime, rbfEnabled: $rbfEnabled, version: $version, vsize: $vsize, weight: $weight, locktime: $locktime, inputs: $inputs, outputs: $outputs, toAddress: $toAddress, labels: $labels, walletId: $walletId, linputs: $linputs, loutputs: $loutputs, rbfChain: $rbfChain, rbfIndex: $rbfIndex)';
   }
 
   @override
@@ -544,6 +560,7 @@ class _$BitcoinTxImpl extends _BitcoinTx {
                 other.received == received) &&
             (identical(other.amount, amount) || other.amount == amount) &&
             (identical(other.fee, fee) || other.fee == fee) &&
+            (identical(other.feeRate, feeRate) || other.feeRate == feeRate) &&
             (identical(other.height, height) || other.height == height) &&
             (identical(other.psbt, psbt) || other.psbt == psbt) &&
             (identical(other.broadcastTime, broadcastTime) ||
@@ -580,6 +597,7 @@ class _$BitcoinTxImpl extends _BitcoinTx {
         received,
         amount,
         fee,
+        feeRate,
         height,
         psbt,
         broadcastTime,
@@ -622,6 +640,7 @@ abstract class _BitcoinTx extends BitcoinTx {
       final int received,
       required final int amount,
       required final int fee,
+      required final double feeRate,
       required final int height,
       final String? psbt,
       final int? broadcastTime,
@@ -658,6 +677,8 @@ abstract class _BitcoinTx extends BitcoinTx {
   int get amount;
   @override
   int get fee;
+  @override
+  double get feeRate;
   @override
   int get height;
   @override
@@ -803,6 +824,11 @@ class _$BitcoinOutPointImpl implements _BitcoinOutPoint {
   @override
   @JsonKey()
   final int vout;
+
+  @override
+  String toString() {
+    return 'BitcoinOutPoint(txid: $txid, vout: $vout)';
+  }
 
   @override
   bool operator ==(Object other) {

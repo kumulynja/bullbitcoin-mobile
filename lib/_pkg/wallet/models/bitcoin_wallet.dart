@@ -48,11 +48,12 @@ class BitcoinWallet extends Wallet with _$BitcoinWallet {
 
     Stopwatch stopwatch = Stopwatch()..start();
     final bdkTxs = await bdkWallet?.listTransactions(includeRaw: true) ?? [];
-    // print('Time taken to fetch txs: ${stopwatch.elapsedMilliseconds} ms');
+    print('Time taken to fetch txs: ${stopwatch.elapsedMilliseconds} ms');
     stopwatch.reset();
 
     final testTxs = [...storedTxs];
 
+    // To filter out already processed and stored txs
     final filteredList = bdkTxs.where((bdkTx) {
       final matchIndex =
           testTxs.indexWhere((storedTx) => storedTx.id == bdkTx.txid);
@@ -67,7 +68,7 @@ class BitcoinWallet extends Wallet with _$BitcoinWallet {
     final txsFutures =
         filteredList.map((t) => Tx.loadFromNative(t, this)).toList();
     final txs = await Future.wait(txsFutures);
-    // print('Time taken to process txs: ${stopwatch.elapsedMilliseconds} ms');
+    print('Time taken to process txs: ${stopwatch.elapsedMilliseconds} ms');
 
     return txs;
   }

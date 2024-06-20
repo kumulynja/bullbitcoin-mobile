@@ -942,6 +942,7 @@ _$LiquidTxImpl _$$LiquidTxImplFromJson(Map<String, dynamic> json) =>
       received: json['received'] as int? ?? 0,
       amount: json['amount'] as int,
       fee: json['fee'] as int,
+      feeRate: (json['feeRate'] as num).toDouble(),
       height: json['height'] as int,
       version: json['version'] as int,
       vsize: json['vsize'] as int,
@@ -971,7 +972,7 @@ _$LiquidTxImpl _$$LiquidTxImplFromJson(Map<String, dynamic> json) =>
               ?.map((e) => e as String)
               .toList() ??
           const [],
-      rbfIndex: json['rbfIndex'] as int? ?? 0,
+      rbfIndex: json['rbfIndex'] as int? ?? -1,
     )
       ..isarId = json['isarId'] as int
       ..psbt = json['psbt'] as String?
@@ -991,6 +992,7 @@ Map<String, dynamic> _$$LiquidTxImplToJson(_$LiquidTxImpl instance) =>
       'received': instance.received,
       'amount': instance.amount,
       'fee': instance.fee,
+      'feeRate': instance.feeRate,
       'height': instance.height,
       'version': instance.version,
       'vsize': instance.vsize,

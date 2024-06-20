@@ -23,6 +23,8 @@ mixin _$LiquidTx {
   String get id => throw _privateConstructorUsedError;
   TxType get type => throw _privateConstructorUsedError;
   int get timestamp => throw _privateConstructorUsedError;
+  int get sent => throw _privateConstructorUsedError;
+  int get received => throw _privateConstructorUsedError;
   int get amount => throw _privateConstructorUsedError;
   int get fee => throw _privateConstructorUsedError;
   int get height => throw _privateConstructorUsedError;
@@ -37,6 +39,8 @@ mixin _$LiquidTx {
   String? get walletId => throw _privateConstructorUsedError;
   List<BitcoinTxIn> get inputs => throw _privateConstructorUsedError;
   List<BitcoinTxOut> get outputs => throw _privateConstructorUsedError;
+  List<String> get rbfChain => throw _privateConstructorUsedError;
+  int get rbfIndex => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -53,6 +57,8 @@ abstract class $LiquidTxCopyWith<$Res> {
       {String id,
       TxType type,
       int timestamp,
+      int sent,
+      int received,
       int amount,
       int fee,
       int height,
@@ -66,7 +72,9 @@ abstract class $LiquidTxCopyWith<$Res> {
       List<String> labels,
       String? walletId,
       List<BitcoinTxIn> inputs,
-      List<BitcoinTxOut> outputs});
+      List<BitcoinTxOut> outputs,
+      List<String> rbfChain,
+      int rbfIndex});
 }
 
 /// @nodoc
@@ -85,6 +93,8 @@ class _$LiquidTxCopyWithImpl<$Res, $Val extends LiquidTx>
     Object? id = null,
     Object? type = null,
     Object? timestamp = null,
+    Object? sent = null,
+    Object? received = null,
     Object? amount = null,
     Object? fee = null,
     Object? height = null,
@@ -99,6 +109,8 @@ class _$LiquidTxCopyWithImpl<$Res, $Val extends LiquidTx>
     Object? walletId = freezed,
     Object? inputs = null,
     Object? outputs = null,
+    Object? rbfChain = null,
+    Object? rbfIndex = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -112,6 +124,14 @@ class _$LiquidTxCopyWithImpl<$Res, $Val extends LiquidTx>
       timestamp: null == timestamp
           ? _value.timestamp
           : timestamp // ignore: cast_nullable_to_non_nullable
+              as int,
+      sent: null == sent
+          ? _value.sent
+          : sent // ignore: cast_nullable_to_non_nullable
+              as int,
+      received: null == received
+          ? _value.received
+          : received // ignore: cast_nullable_to_non_nullable
               as int,
       amount: null == amount
           ? _value.amount
@@ -169,6 +189,14 @@ class _$LiquidTxCopyWithImpl<$Res, $Val extends LiquidTx>
           ? _value.outputs
           : outputs // ignore: cast_nullable_to_non_nullable
               as List<BitcoinTxOut>,
+      rbfChain: null == rbfChain
+          ? _value.rbfChain
+          : rbfChain // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      rbfIndex: null == rbfIndex
+          ? _value.rbfIndex
+          : rbfIndex // ignore: cast_nullable_to_non_nullable
+              as int,
     ) as $Val);
   }
 }
@@ -185,6 +213,8 @@ abstract class _$$LiquidTxImplCopyWith<$Res>
       {String id,
       TxType type,
       int timestamp,
+      int sent,
+      int received,
       int amount,
       int fee,
       int height,
@@ -198,7 +228,9 @@ abstract class _$$LiquidTxImplCopyWith<$Res>
       List<String> labels,
       String? walletId,
       List<BitcoinTxIn> inputs,
-      List<BitcoinTxOut> outputs});
+      List<BitcoinTxOut> outputs,
+      List<String> rbfChain,
+      int rbfIndex});
 }
 
 /// @nodoc
@@ -215,6 +247,8 @@ class __$$LiquidTxImplCopyWithImpl<$Res>
     Object? id = null,
     Object? type = null,
     Object? timestamp = null,
+    Object? sent = null,
+    Object? received = null,
     Object? amount = null,
     Object? fee = null,
     Object? height = null,
@@ -229,6 +263,8 @@ class __$$LiquidTxImplCopyWithImpl<$Res>
     Object? walletId = freezed,
     Object? inputs = null,
     Object? outputs = null,
+    Object? rbfChain = null,
+    Object? rbfIndex = null,
   }) {
     return _then(_$LiquidTxImpl(
       id: null == id
@@ -242,6 +278,14 @@ class __$$LiquidTxImplCopyWithImpl<$Res>
       timestamp: null == timestamp
           ? _value.timestamp
           : timestamp // ignore: cast_nullable_to_non_nullable
+              as int,
+      sent: null == sent
+          ? _value.sent
+          : sent // ignore: cast_nullable_to_non_nullable
+              as int,
+      received: null == received
+          ? _value.received
+          : received // ignore: cast_nullable_to_non_nullable
               as int,
       amount: null == amount
           ? _value.amount
@@ -299,6 +343,14 @@ class __$$LiquidTxImplCopyWithImpl<$Res>
           ? _value._outputs
           : outputs // ignore: cast_nullable_to_non_nullable
               as List<BitcoinTxOut>,
+      rbfChain: null == rbfChain
+          ? _value._rbfChain
+          : rbfChain // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      rbfIndex: null == rbfIndex
+          ? _value.rbfIndex
+          : rbfIndex // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -310,6 +362,8 @@ class _$LiquidTxImpl extends _LiquidTx {
       {required this.id,
       required this.type,
       required this.timestamp,
+      this.sent = 0,
+      this.received = 0,
       required this.amount,
       required this.fee,
       required this.height,
@@ -323,12 +377,15 @@ class _$LiquidTxImpl extends _LiquidTx {
       final List<String> labels = const [],
       required this.walletId,
       final List<BitcoinTxIn> inputs = const [],
-      final List<BitcoinTxOut> outputs = const []})
+      final List<BitcoinTxOut> outputs = const [],
+      final List<String> rbfChain = const [],
+      this.rbfIndex = 0})
       : _linputs = linputs,
         _loutputs = loutputs,
         _labels = labels,
         _inputs = inputs,
         _outputs = outputs,
+        _rbfChain = rbfChain,
         super._();
 
   factory _$LiquidTxImpl.fromJson(Map<String, dynamic> json) =>
@@ -340,6 +397,12 @@ class _$LiquidTxImpl extends _LiquidTx {
   final TxType type;
   @override
   final int timestamp;
+  @override
+  @JsonKey()
+  final int sent;
+  @override
+  @JsonKey()
+  final int received;
   @override
   final int amount;
   @override
@@ -401,9 +464,22 @@ class _$LiquidTxImpl extends _LiquidTx {
     return EqualUnmodifiableListView(_outputs);
   }
 
+  final List<String> _rbfChain;
+  @override
+  @JsonKey()
+  List<String> get rbfChain {
+    if (_rbfChain is EqualUnmodifiableListView) return _rbfChain;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_rbfChain);
+  }
+
+  @override
+  @JsonKey()
+  final int rbfIndex;
+
   @override
   String toString() {
-    return 'LiquidTx(id: $id, type: $type, timestamp: $timestamp, amount: $amount, fee: $fee, height: $height, version: $version, vsize: $vsize, weight: $weight, locktime: $locktime, linputs: $linputs, loutputs: $loutputs, toAddress: $toAddress, labels: $labels, walletId: $walletId, inputs: $inputs, outputs: $outputs)';
+    return 'LiquidTx(id: $id, type: $type, timestamp: $timestamp, sent: $sent, received: $received, amount: $amount, fee: $fee, height: $height, version: $version, vsize: $vsize, weight: $weight, locktime: $locktime, linputs: $linputs, loutputs: $loutputs, toAddress: $toAddress, labels: $labels, walletId: $walletId, inputs: $inputs, outputs: $outputs, rbfChain: $rbfChain, rbfIndex: $rbfIndex)';
   }
 
   @override
@@ -415,6 +491,9 @@ class _$LiquidTxImpl extends _LiquidTx {
             (identical(other.type, type) || other.type == type) &&
             (identical(other.timestamp, timestamp) ||
                 other.timestamp == timestamp) &&
+            (identical(other.sent, sent) || other.sent == sent) &&
+            (identical(other.received, received) ||
+                other.received == received) &&
             (identical(other.amount, amount) || other.amount == amount) &&
             (identical(other.fee, fee) || other.fee == fee) &&
             (identical(other.height, height) || other.height == height) &&
@@ -431,30 +510,38 @@ class _$LiquidTxImpl extends _LiquidTx {
             (identical(other.walletId, walletId) ||
                 other.walletId == walletId) &&
             const DeepCollectionEquality().equals(other._inputs, _inputs) &&
-            const DeepCollectionEquality().equals(other._outputs, _outputs));
+            const DeepCollectionEquality().equals(other._outputs, _outputs) &&
+            const DeepCollectionEquality().equals(other._rbfChain, _rbfChain) &&
+            (identical(other.rbfIndex, rbfIndex) ||
+                other.rbfIndex == rbfIndex));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      id,
-      type,
-      timestamp,
-      amount,
-      fee,
-      height,
-      version,
-      vsize,
-      weight,
-      locktime,
-      const DeepCollectionEquality().hash(_linputs),
-      const DeepCollectionEquality().hash(_loutputs),
-      toAddress,
-      const DeepCollectionEquality().hash(_labels),
-      walletId,
-      const DeepCollectionEquality().hash(_inputs),
-      const DeepCollectionEquality().hash(_outputs));
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        id,
+        type,
+        timestamp,
+        sent,
+        received,
+        amount,
+        fee,
+        height,
+        version,
+        vsize,
+        weight,
+        locktime,
+        const DeepCollectionEquality().hash(_linputs),
+        const DeepCollectionEquality().hash(_loutputs),
+        toAddress,
+        const DeepCollectionEquality().hash(_labels),
+        walletId,
+        const DeepCollectionEquality().hash(_inputs),
+        const DeepCollectionEquality().hash(_outputs),
+        const DeepCollectionEquality().hash(_rbfChain),
+        rbfIndex
+      ]);
 
   @JsonKey(ignore: true)
   @override
@@ -475,6 +562,8 @@ abstract class _LiquidTx extends LiquidTx {
       {required final String id,
       required final TxType type,
       required final int timestamp,
+      final int sent,
+      final int received,
       required final int amount,
       required final int fee,
       required final int height,
@@ -488,7 +577,9 @@ abstract class _LiquidTx extends LiquidTx {
       final List<String> labels,
       required final String? walletId,
       final List<BitcoinTxIn> inputs,
-      final List<BitcoinTxOut> outputs}) = _$LiquidTxImpl;
+      final List<BitcoinTxOut> outputs,
+      final List<String> rbfChain,
+      final int rbfIndex}) = _$LiquidTxImpl;
   _LiquidTx._() : super._();
 
   factory _LiquidTx.fromJson(Map<String, dynamic> json) =
@@ -500,6 +591,10 @@ abstract class _LiquidTx extends LiquidTx {
   TxType get type;
   @override
   int get timestamp;
+  @override
+  int get sent;
+  @override
+  int get received;
   @override
   int get amount;
   @override
@@ -528,6 +623,10 @@ abstract class _LiquidTx extends LiquidTx {
   List<BitcoinTxIn> get inputs;
   @override
   List<BitcoinTxOut> get outputs;
+  @override
+  List<String> get rbfChain;
+  @override
+  int get rbfIndex;
   @override
   @JsonKey(ignore: true)
   _$$LiquidTxImplCopyWith<_$LiquidTxImpl> get copyWith =>

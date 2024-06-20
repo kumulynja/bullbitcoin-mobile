@@ -41,15 +41,33 @@ class BitcoinWallet extends Wallet with _$BitcoinWallet {
       safeFromJson(json, _$BitcoinWalletFromJson, 'BitcoinWallet');
 
   @override
-  Future<Iterable<Tx>> getTxs(Wallet wallet) async {
+  Future<List<Tx>> getTxs(Wallet wallet, List<Tx> storedTxs) async {
     if (bdkWallet == null) {
       throw 'bdkWallet is null';
     }
 
-    final bdkTxs = await bdkWallet?.listTransactions(includeRaw: true);
-    final txsFutures = bdkTxs?.map((t) => Tx.loadFromNative(t, this)) ?? [];
+    Stopwatch stopwatch = Stopwatch()..start();
+    final bdkTxs = await bdkWallet?.listTransactions(includeRaw: true) ?? [];
+    // print('Time taken to fetch txs: ${stopwatch.elapsedMilliseconds} ms');
+    stopwatch.reset();
 
+    final testTxs = [...storedTxs];
+
+    final filteredList = bdkTxs.where((bdkTx) {
+      final matchIndex =
+          testTxs.indexWhere((storedTx) => storedTx.id == bdkTx.txid);
+      if (matchIndex == -1) {
+        return true;
+      } else {
+        testTxs.removeAt(matchIndex);
+        return false;
+      }
+    }).toList();
+
+    final txsFutures =
+        filteredList.map((t) => Tx.loadFromNative(t, this)).toList();
     final txs = await Future.wait(txsFutures);
+    // print('Time taken to process txs: ${stopwatch.elapsedMilliseconds} ms');
 
     return txs;
   }
@@ -78,7 +96,7 @@ class BitcoinWallet extends Wallet with _$BitcoinWallet {
       // TODO: App crashes with negative value as fee
       // So this needs to be handled on our side.
       final txBuilderResult = await builder
-          .feeRate(200)
+          .feeRate(20)
           .addRecipient(script, 1234)
           .finish(bdkWallet!);
       final psbt = txBuilderResult.$1;

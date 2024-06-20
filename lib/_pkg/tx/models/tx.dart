@@ -22,6 +22,8 @@ class Tx {
   @Index()
   int timestamp = 0;
 
+  int sent = 0;
+  int received = 0;
   int amount = 0;
   int fee = 0;
 
@@ -51,6 +53,27 @@ class Tx {
   @Index()
   String? walletId;
 
+  List<String> rbfChain = [];
+  int rbfIndex = -1;
+
+  Tx copWith(dynamic props) {
+    if (type == TxType.Bitcoin) {
+      (this as BitcoinTx).copWith(props);
+    } else if (type == TxType.Liquid) {
+      (this as LiquidTx).copWith(props);
+    }
+
+    return this;
+  }
+
+  bool isReceive() {
+    return sent == 0 || received > sent;
+  }
+
+  bool isPending() {
+    return timestamp == 0;
+  }
+
   // TODO: Manually doing this sucks
   // This is done, because Tx is not @freezed at base class level.
   // To be experimented
@@ -66,6 +89,8 @@ class Tx {
       'id': id,
       'type': type.name,
       'timestamp': timestamp,
+      'sent': sent,
+      'received': received,
       'amount': amount,
       'fee': fee,
       'height': height,
@@ -92,6 +117,8 @@ class Tx {
       'toAddress': toAddress,
       'labels': labels,
       'walletId': walletId,
+      'rbfChain': rbfChain,
+      'rbfIndex': rbfIndex,
     };
   }
 

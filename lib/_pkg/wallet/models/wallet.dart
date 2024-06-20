@@ -93,14 +93,8 @@ class Wallet {
     throw UnimplementedError('Unsupported Wallet subclass');
   }
 
-  Future<Iterable<Tx>> getTxs(Wallet wallet) async {
-    // if (type == WalletType.Bitcoin) {
-    //   return wallet.getsTxs();
-    // } else if (type == WalletType.Liquid) {
-    //   return LiquidWallet.syncWallet(wallet as LiquidWallet);
-    // }
-    // throw UnimplementedError('Unsupported Wallet subclass');
-    Iterable<Tx> txs = [];
+  Future<List<Tx>> getTxs(Wallet wallet, List<Tx> storedTxs) async {
+    List<Tx> txs = [];
     return txs;
   }
 

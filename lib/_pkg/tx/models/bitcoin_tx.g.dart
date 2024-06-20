@@ -1265,6 +1265,8 @@ _$BitcoinTxImpl _$$BitcoinTxImplFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String,
       type: $enumDecode(_$TxTypeEnumMap, json['type']),
       timestamp: json['timestamp'] as int,
+      sent: json['sent'] as int? ?? 0,
+      received: json['received'] as int? ?? 0,
       amount: json['amount'] as int,
       fee: json['fee'] as int,
       height: json['height'] as int,
@@ -1295,6 +1297,11 @@ _$BitcoinTxImpl _$$BitcoinTxImplFromJson(Map<String, dynamic> json) =>
               ?.map((e) => LiquidTxOut.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      rbfChain: (json['rbfChain'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      rbfIndex: json['rbfIndex'] as int? ?? 0,
     )..isarId = json['isarId'] as int;
 
 Map<String, dynamic> _$$BitcoinTxImplToJson(_$BitcoinTxImpl instance) =>
@@ -1303,6 +1310,8 @@ Map<String, dynamic> _$$BitcoinTxImplToJson(_$BitcoinTxImpl instance) =>
       'id': instance.id,
       'type': _$TxTypeEnumMap[instance.type]!,
       'timestamp': instance.timestamp,
+      'sent': instance.sent,
+      'received': instance.received,
       'amount': instance.amount,
       'fee': instance.fee,
       'height': instance.height,
@@ -1320,6 +1329,8 @@ Map<String, dynamic> _$$BitcoinTxImplToJson(_$BitcoinTxImpl instance) =>
       'walletId': instance.walletId,
       'linputs': instance.linputs,
       'loutputs': instance.loutputs,
+      'rbfChain': instance.rbfChain,
+      'rbfIndex': instance.rbfIndex,
     };
 
 const _$TxTypeEnumMap = {

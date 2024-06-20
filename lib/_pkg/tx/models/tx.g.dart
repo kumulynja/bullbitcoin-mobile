@@ -81,44 +81,64 @@ const TxSchema = CollectionSchema(
       name: r'psbt',
       type: IsarType.string,
     ),
-    r'rbfEnabled': PropertySchema(
+    r'rbfChain': PropertySchema(
       id: 12,
+      name: r'rbfChain',
+      type: IsarType.stringList,
+    ),
+    r'rbfEnabled': PropertySchema(
+      id: 13,
       name: r'rbfEnabled',
       type: IsarType.bool,
     ),
+    r'rbfIndex': PropertySchema(
+      id: 14,
+      name: r'rbfIndex',
+      type: IsarType.long,
+    ),
+    r'received': PropertySchema(
+      id: 15,
+      name: r'received',
+      type: IsarType.long,
+    ),
+    r'sent': PropertySchema(
+      id: 16,
+      name: r'sent',
+      type: IsarType.long,
+    ),
     r'timestamp': PropertySchema(
-      id: 13,
+      id: 17,
       name: r'timestamp',
       type: IsarType.long,
     ),
     r'toAddress': PropertySchema(
-      id: 14,
+      id: 18,
       name: r'toAddress',
       type: IsarType.string,
     ),
     r'type': PropertySchema(
-      id: 15,
+      id: 19,
       name: r'type',
       type: IsarType.byte,
       enumMap: _TxtypeEnumValueMap,
     ),
     r'version': PropertySchema(
-      id: 16,
+      id: 20,
       name: r'version',
       type: IsarType.long,
     ),
     r'vsize': PropertySchema(
-      id: 17,
+      id: 21,
       name: r'vsize',
       type: IsarType.long,
     ),
     r'walletId': PropertySchema(
-      id: 18,
+      id: 22,
       name: r'walletId',
       type: IsarType.string,
     ),
     r'weight': PropertySchema(
-      id: 19,
+      id: 23,
       name: r'weight',
       type: IsarType.long,
     )
@@ -278,6 +298,13 @@ int _txEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  bytesCount += 3 + object.rbfChain.length * 3;
+  {
+    for (var i = 0; i < object.rbfChain.length; i++) {
+      final value = object.rbfChain[i];
+      bytesCount += value.length * 3;
+    }
+  }
   {
     final value = object.toAddress;
     if (value != null) {
@@ -331,14 +358,18 @@ void _txSerialize(
     object.outputs,
   );
   writer.writeString(offsets[11], object.psbt);
-  writer.writeBool(offsets[12], object.rbfEnabled);
-  writer.writeLong(offsets[13], object.timestamp);
-  writer.writeString(offsets[14], object.toAddress);
-  writer.writeByte(offsets[15], object.type.index);
-  writer.writeLong(offsets[16], object.version);
-  writer.writeLong(offsets[17], object.vsize);
-  writer.writeString(offsets[18], object.walletId);
-  writer.writeLong(offsets[19], object.weight);
+  writer.writeStringList(offsets[12], object.rbfChain);
+  writer.writeBool(offsets[13], object.rbfEnabled);
+  writer.writeLong(offsets[14], object.rbfIndex);
+  writer.writeLong(offsets[15], object.received);
+  writer.writeLong(offsets[16], object.sent);
+  writer.writeLong(offsets[17], object.timestamp);
+  writer.writeString(offsets[18], object.toAddress);
+  writer.writeByte(offsets[19], object.type.index);
+  writer.writeLong(offsets[20], object.version);
+  writer.writeLong(offsets[21], object.vsize);
+  writer.writeString(offsets[22], object.walletId);
+  writer.writeLong(offsets[23], object.weight);
 }
 
 Tx _txDeserialize(
@@ -381,15 +412,19 @@ Tx _txDeserialize(
     BitcoinTxOut(),
   );
   object.psbt = reader.readStringOrNull(offsets[11]);
-  object.rbfEnabled = reader.readBoolOrNull(offsets[12]);
-  object.timestamp = reader.readLong(offsets[13]);
-  object.toAddress = reader.readStringOrNull(offsets[14]);
+  object.rbfChain = reader.readStringList(offsets[12]) ?? [];
+  object.rbfEnabled = reader.readBoolOrNull(offsets[13]);
+  object.rbfIndex = reader.readLong(offsets[14]);
+  object.received = reader.readLong(offsets[15]);
+  object.sent = reader.readLong(offsets[16]);
+  object.timestamp = reader.readLong(offsets[17]);
+  object.toAddress = reader.readStringOrNull(offsets[18]);
   object.type =
-      _TxtypeValueEnumMap[reader.readByteOrNull(offsets[15])] ?? TxType.Bitcoin;
-  object.version = reader.readLongOrNull(offsets[16]);
-  object.vsize = reader.readLongOrNull(offsets[17]);
-  object.walletId = reader.readStringOrNull(offsets[18]);
-  object.weight = reader.readLongOrNull(offsets[19]);
+      _TxtypeValueEnumMap[reader.readByteOrNull(offsets[19])] ?? TxType.Bitcoin;
+  object.version = reader.readLongOrNull(offsets[20]);
+  object.vsize = reader.readLongOrNull(offsets[21]);
+  object.walletId = reader.readStringOrNull(offsets[22]);
+  object.weight = reader.readLongOrNull(offsets[23]);
   return object;
 }
 
@@ -445,21 +480,29 @@ P _txDeserializeProp<P>(
     case 11:
       return (reader.readStringOrNull(offset)) as P;
     case 12:
-      return (reader.readBoolOrNull(offset)) as P;
+      return (reader.readStringList(offset) ?? []) as P;
     case 13:
-      return (reader.readLong(offset)) as P;
+      return (reader.readBoolOrNull(offset)) as P;
     case 14:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 15:
-      return (_TxtypeValueEnumMap[reader.readByteOrNull(offset)] ??
-          TxType.Bitcoin) as P;
+      return (reader.readLong(offset)) as P;
     case 16:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 17:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 18:
       return (reader.readStringOrNull(offset)) as P;
     case 19:
+      return (_TxtypeValueEnumMap[reader.readByteOrNull(offset)] ??
+          TxType.Bitcoin) as P;
+    case 20:
+      return (reader.readLongOrNull(offset)) as P;
+    case 21:
+      return (reader.readLongOrNull(offset)) as P;
+    case 22:
+      return (reader.readStringOrNull(offset)) as P;
+    case 23:
       return (reader.readLongOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -2171,6 +2214,220 @@ extension TxQueryFilter on QueryBuilder<Tx, Tx, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> rbfChainElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'rbfChain',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> rbfChainElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'rbfChain',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> rbfChainElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'rbfChain',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> rbfChainElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'rbfChain',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> rbfChainElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'rbfChain',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> rbfChainElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'rbfChain',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> rbfChainElementContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'rbfChain',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> rbfChainElementMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'rbfChain',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> rbfChainElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'rbfChain',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> rbfChainElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'rbfChain',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> rbfChainLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'rbfChain',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> rbfChainIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'rbfChain',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> rbfChainIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'rbfChain',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> rbfChainLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'rbfChain',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> rbfChainLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'rbfChain',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> rbfChainLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'rbfChain',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
   QueryBuilder<Tx, Tx, QAfterFilterCondition> rbfEnabledIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -2192,6 +2449,162 @@ extension TxQueryFilter on QueryBuilder<Tx, Tx, QFilterCondition> {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'rbfEnabled',
         value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> rbfIndexEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'rbfIndex',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> rbfIndexGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'rbfIndex',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> rbfIndexLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'rbfIndex',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> rbfIndexBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'rbfIndex',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> receivedEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'received',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> receivedGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'received',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> receivedLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'received',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> receivedBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'received',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> sentEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'sent',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> sentGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'sent',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> sentLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'sent',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterFilterCondition> sentBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'sent',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -2922,6 +3335,42 @@ extension TxQuerySortBy on QueryBuilder<Tx, Tx, QSortBy> {
     });
   }
 
+  QueryBuilder<Tx, Tx, QAfterSortBy> sortByRbfIndex() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'rbfIndex', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterSortBy> sortByRbfIndexDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'rbfIndex', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterSortBy> sortByReceived() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'received', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterSortBy> sortByReceivedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'received', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterSortBy> sortBySent() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sent', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterSortBy> sortBySentDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sent', Sort.desc);
+    });
+  }
+
   QueryBuilder<Tx, Tx, QAfterSortBy> sortByTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timestamp', Sort.asc);
@@ -3116,6 +3565,42 @@ extension TxQuerySortThenBy on QueryBuilder<Tx, Tx, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Tx, Tx, QAfterSortBy> thenByRbfIndex() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'rbfIndex', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterSortBy> thenByRbfIndexDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'rbfIndex', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterSortBy> thenByReceived() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'received', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterSortBy> thenByReceivedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'received', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterSortBy> thenBySent() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sent', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QAfterSortBy> thenBySentDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sent', Sort.desc);
+    });
+  }
+
   QueryBuilder<Tx, Tx, QAfterSortBy> thenByTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timestamp', Sort.asc);
@@ -3250,9 +3735,33 @@ extension TxQueryWhereDistinct on QueryBuilder<Tx, Tx, QDistinct> {
     });
   }
 
+  QueryBuilder<Tx, Tx, QDistinct> distinctByRbfChain() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'rbfChain');
+    });
+  }
+
   QueryBuilder<Tx, Tx, QDistinct> distinctByRbfEnabled() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'rbfEnabled');
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QDistinct> distinctByRbfIndex() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'rbfIndex');
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QDistinct> distinctByReceived() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'received');
+    });
+  }
+
+  QueryBuilder<Tx, Tx, QDistinct> distinctBySent() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'sent');
     });
   }
 
@@ -3380,9 +3889,33 @@ extension TxQueryProperty on QueryBuilder<Tx, Tx, QQueryProperty> {
     });
   }
 
+  QueryBuilder<Tx, List<String>, QQueryOperations> rbfChainProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'rbfChain');
+    });
+  }
+
   QueryBuilder<Tx, bool?, QQueryOperations> rbfEnabledProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'rbfEnabled');
+    });
+  }
+
+  QueryBuilder<Tx, int, QQueryOperations> rbfIndexProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'rbfIndex');
+    });
+  }
+
+  QueryBuilder<Tx, int, QQueryOperations> receivedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'received');
+    });
+  }
+
+  QueryBuilder<Tx, int, QQueryOperations> sentProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'sent');
     });
   }
 

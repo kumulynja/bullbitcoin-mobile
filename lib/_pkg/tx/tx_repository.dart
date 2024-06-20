@@ -1,12 +1,9 @@
-import 'dart:convert';
-
-import 'package:bb_arch/_pkg/address/models/address.dart';
+import 'package:bb_arch/_pkg/error.dart';
 import 'package:bb_arch/_pkg/storage/hive.dart';
 import 'package:bb_arch/_pkg/tx/models/bitcoin_tx.dart';
 import 'package:bb_arch/_pkg/tx/models/liquid_tx.dart';
 import 'package:bb_arch/_pkg/tx/models/tx.dart';
 import 'package:bb_arch/_pkg/wallet/models/wallet.dart';
-import 'package:bb_arch/tx/bloc/tx_bloc.dart';
 import 'package:isar/isar.dart';
 
 class TxRepository {
@@ -20,17 +17,8 @@ class TxRepository {
       final txs =
           await isar.txs.where().sortByTimestampDesc().limit(limit).findAll();
       return Tx.mapBaseToChild(txs);
-
-      // TODO: Find better way
-      // final ts = txs.map((t) {
-      //   if (t.type == TxType.Bitcoin) {
-      //     return BitcoinTx.fromJson(t.toJson());
-      //   } else if (t.type == TxType.Liquid) {
-      //     return LiquidTx.fromJson(t.toJson());
-      //   }
-      //   return t;
-      // }).toList();
-      // return ts;
+    } on IsarError catch (e, stackTrace) {
+      throw Error.throwWithStackTrace(DatabaseException(e), stackTrace);
     } catch (e) {
       rethrow;
     }
@@ -45,21 +33,8 @@ class TxRepository {
           .findAll();
 
       return Tx.mapBaseToChild(txs);
-
-      // TODO: Find better way
-      // final ts = txs.map((t) {
-      //   if (t.type == TxType.Bitcoin) {
-      //     return BitcoinTx.fromJson(t.toJson());
-      //   } else if (t.type == TxType.Liquid) {
-      //     return LiquidTx.fromJson(t.toJson());
-      //   }
-      //   return t;
-      // }).toList();
-
-      // final (txStr, _) = await storage.getValue('tx.${wallet.id}');
-      // List<dynamic> txsJson = jsonDecode(txStr!);
-      // final txs = txsJson.map((txJson) => Tx.fromJson(txJson)).toList();
-      // return (ts, null);
+    } on IsarError catch (e, stackTrace) {
+      throw Error.throwWithStackTrace(DatabaseException(e), stackTrace);
     } catch (e) {
       rethrow;
     }
@@ -74,16 +49,143 @@ class TxRepository {
       // Then, next time, when the same tx is fetched, it's ignored and local Tx version is used.
 
       final storedTxs = await listTxs(wallet);
-      final updatedTxs = await wallet.getTxs(wallet);
-      final sortedTxs = updatedTxs.toList();
-      sortedTxs.sort(
+      final newTxs = await wallet.getTxs(wallet, storedTxs);
+
+      List<Tx> mergedTxs = [...newTxs.toList(), ...storedTxs];
+
+      final pendingTxs = mergedTxs.where((tx) => tx.isPending()).toList();
+
+      if (wallet.type == WalletType.Bitcoin) {
+        mergedTxs = lookForReceiveRBFs(newTxs, mergedTxs, pendingTxs);
+      }
+
+      mergedTxs.sort(
         (a, b) => b.timestamp - a.timestamp,
       );
 
-      return sortedTxs;
+      return mergedTxs;
     } catch (e) {
       rethrow;
     }
+  }
+
+  List<Tx> lookForReceiveRBFs(
+      List<Tx> newTxs, List<Tx> mergedTxs, List<Tx> pendingTxs) {
+    Tx? newNewTx;
+    Tx? newParent;
+    for (Tx newTx in newTxs) {
+      print('NewTx: ${newTx.id}: ${newTx.isReceive()}');
+      if (newTx.isReceive()) {
+        final rbfParent = isInRbfChain(newTx, pendingTxs);
+
+        if (rbfParent != null) {
+          if (rbfParent.rbfChain.isEmpty) {
+            newParent = (rbfParent as BitcoinTx).copyWith(
+              rbfChain: [...rbfParent.rbfChain, rbfParent.id, newTx.id],
+              rbfIndex: 0,
+            );
+            mergedTxs.removeWhere((tx) => tx.id == newParent!.id);
+            mergedTxs.add(newParent);
+
+            newNewTx = (newTx as BitcoinTx).copyWith(
+              rbfChain: [...rbfParent.rbfChain, rbfParent.id, newTx.id],
+              rbfIndex: 1,
+            );
+            mergedTxs.removeWhere((tx) => tx.id == newNewTx!.id);
+            mergedTxs.add(newNewTx);
+          } else {
+            for (int i = 0; i < rbfParent.rbfChain.length; i++) {
+              final rbfAncestorTxId = rbfParent.rbfChain[i];
+              final rbfAncentorTx =
+                  pendingTxs.firstWhere((pTx) => pTx.id == rbfAncestorTxId);
+              final updatedRbfAncestorTx =
+                  (rbfAncentorTx as BitcoinTx).copyWith(
+                rbfChain: [...rbfAncentorTx.rbfChain, newTx.id],
+              );
+              mergedTxs.removeWhere((tx) => tx.id == updatedRbfAncestorTx!.id);
+              mergedTxs.add(updatedRbfAncestorTx);
+
+              newNewTx = (newTx as BitcoinTx).copyWith(
+                rbfChain: [...rbfAncentorTx.rbfChain, newTx.id],
+                rbfIndex: rbfAncentorTx.rbfChain.length,
+              );
+              mergedTxs.removeWhere((tx) => tx.id == newNewTx!.id);
+              mergedTxs.add(newNewTx);
+            }
+          }
+        }
+
+        /*
+        if (rbfParent != null) {
+          if (rbfParent.type == TxType.Bitcoin) {
+            if (rbfParent.rbfChain.isEmpty) {
+              newParent = (rbfParent as BitcoinTx).copyWith(
+                rbfChain: [...rbfParent.rbfChain, rbfParent.id, newTx.id],
+                rbfIndex: 0,
+              );
+            } else {
+              newParent = (rbfParent as BitcoinTx).copyWith(
+                rbfChain: [...rbfParent.rbfChain, newTx.id],
+              );
+            }
+
+            if (newTx.rbfChain.isEmpty) {
+              newNewTx = (newTx as BitcoinTx).copyWith(
+                rbfChain: [...rbfParent.rbfChain, rbfParent.id, newTx.id],
+                rbfIndex: 1,
+              );
+            } else {
+              newNewTx = (newTx as BitcoinTx).copyWith(
+                rbfChain: [...rbfParent.rbfChain, newTx.id],
+                rbfIndex: rbfParent.rbfChain.length,
+              );
+            }
+          }
+        }
+        */
+      }
+    }
+    if (newParent != null) {}
+    if (newNewTx != null) {
+      mergedTxs.removeWhere((tx) => tx.id == newNewTx!.id);
+      mergedTxs.add(newNewTx);
+    }
+
+    return mergedTxs;
+  }
+
+  Tx? isInRbfChain(Tx tx, List<Tx> pendingTxs) {
+    if (pendingTxs.isEmpty) {
+      return null;
+    }
+
+    for (final pending in pendingTxs) {
+      if (tx.id == pending.id) continue;
+      final pendingMatchIndex = tx.inputs!.indexWhere((txIp) {
+        final outpoint = txIp.previousOutput.toString();
+        final outpointStr = txIp.previousOutput.toStr();
+
+        final matchingIndex = pending.inputs!.indexWhere((pTxIp) {
+          final pendingOutpoint = pTxIp.previousOutput.toString();
+          final pendingOutpointStr = pTxIp.previousOutput.toStr();
+          if (pendingOutpointStr == outpointStr) {
+            return true;
+          }
+          return false;
+        });
+
+        if (matchingIndex != -1) {
+          return true;
+        }
+        return false;
+      });
+
+      if (pendingMatchIndex != -1) {
+        return pending;
+      }
+    }
+
+    return null;
   }
 
   Future<Tx> loadTx(String walletid, String txid) async {

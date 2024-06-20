@@ -23,6 +23,8 @@ class BitcoinTx extends Tx with _$BitcoinTx {
     required String id,
     required TxType type,
     required int timestamp,
+    @Default(0) int sent,
+    @Default(0) int received,
     required int amount,
     required int fee,
     required int height,
@@ -40,6 +42,8 @@ class BitcoinTx extends Tx with _$BitcoinTx {
     required String? walletId,
     @Default([]) List<LiquidTxIn> linputs,
     @Default([]) List<LiquidTxOut> loutputs,
+    @Default([]) List<String> rbfChain,
+    @Default(-1) int rbfIndex,
   }) = _BitcoinTx;
   BitcoinTx._();
 
@@ -61,10 +65,6 @@ class BitcoinTx extends Tx with _$BitcoinTx {
       final weight = await t.transaction?.weight() ?? 0;
       final locktime = await t.transaction?.lockTime();
 
-      // final serializedTx = SerializedTx.fromJson(
-      //   jsonDecode(t.transaction!.inner) as Map<String, dynamic>,
-      // );
-
       final ins = await t.transaction?.input() ?? [];
       List<BitcoinTxIn> inputs = [];
       for (int i = 0; i < ins.length; i++) {
@@ -83,6 +83,8 @@ class BitcoinTx extends Tx with _$BitcoinTx {
         id: t.txid,
         type: TxType.Bitcoin,
         timestamp: t.confirmationTime?.timestamp ?? 0,
+        sent: t.sent,
+        received: t.received,
         amount: t.sent - t.received,
         fee: t.fee ?? 0,
         height: t.confirmationTime?.height ?? 0,
@@ -110,9 +112,20 @@ class BitcoinTx extends Tx with _$BitcoinTx {
 class BitcoinOutPoint with _$BitcoinOutPoint {
   const factory BitcoinOutPoint(
       {@Default('') String txid, @Default(0) int vout}) = _BitcoinOutPoint;
-  // BitcoinOutPoint._();
+  BitcoinOutPoint._();
   factory BitcoinOutPoint.fromJson(Map<String, dynamic> json) =>
       safeFromJson(json, _$BitcoinOutPointFromJson, 'BitcoinOutPoint');
+
+  @override
+  String toString() {
+    return 'BitcoinOutPoint(txid: $txid, vout: $vout)';
+  }
+}
+
+extension BitcoinOutPointX on BitcoinOutPoint {
+  String toStr() {
+    return 'BitcoinOutPoint(txid: $txid, vout: $vout)';
+  }
 }
 
 @freezed

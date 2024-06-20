@@ -39,6 +39,7 @@ class WalletRecoverFormState extends State<WalletRecoverForm> {
     if (_formKey.currentState!.validate() &&
         _syncValidateSeedPhrase(_seedPhraseController.text)) {
       if (widget.asyncValidateSeedPhrase != null) {
+        // TODO: Make sure this error is human friendly.
         final errMsg =
             await widget.asyncValidateSeedPhrase!(_seedPhraseController.text);
         if (errMsg != null) {

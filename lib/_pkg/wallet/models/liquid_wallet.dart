@@ -37,7 +37,7 @@ class LiquidWallet extends Wallet with _$LiquidWallet {
       safeFromJson(json, _$LiquidWalletFromJson, 'LiquidWallet');
 
   @override
-  Future<Iterable<Tx>> getTxs(Wallet wallet) async {
+  Future<List<Tx>> getTxs(Wallet wallet, List<Tx> storedTxs) async {
     if (lwkWallet == null) {
       throw 'lwkWallet is null';
     }

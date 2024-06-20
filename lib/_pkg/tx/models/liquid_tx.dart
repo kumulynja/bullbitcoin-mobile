@@ -23,6 +23,8 @@ class LiquidTx extends Tx with _$LiquidTx {
     required String id,
     required TxType type,
     required int timestamp,
+    @Default(0) int sent,
+    @Default(0) int received,
     required int amount,
     required int fee,
     required int height,
@@ -37,6 +39,8 @@ class LiquidTx extends Tx with _$LiquidTx {
     required String? walletId,
     @Default([]) List<BitcoinTxIn> inputs,
     @Default([]) List<BitcoinTxOut> outputs,
+    @Default([]) List<String> rbfChain,
+    @Default(-1) int rbfIndex,
   }) = _LiquidTx;
   LiquidTx._();
 

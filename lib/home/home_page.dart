@@ -207,6 +207,7 @@ class CardsList extends StatelessWidget {
         ),
       );
     }
+
     return columns;
   }
 
@@ -248,24 +249,61 @@ class CardColumn extends StatelessWidget {
         horizontal: 26,
         vertical: 4,
       ),
-      child: Column(
+      child: Stack(
         children: [
-          BlocProvider.value(
-            value: walletTop,
-            child: const CardItem(),
+          Column(
+            children: [
+              BlocProvider.value(
+                value: walletTop,
+                child: const CardItem(),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              if (walletBottom != null)
+                BlocProvider.value(
+                  value: walletBottom!,
+                  child: const CardItem(),
+                ),
+              if (walletLast != null)
+                BlocProvider.value(
+                  value: walletLast!,
+                  child: const CardItem(),
+                )
+              else if (!onlyOne)
+                const EmptyCard(),
+            ],
           ),
-          if (walletBottom != null)
-            BlocProvider.value(
-              value: walletBottom!,
-              child: const CardItem(),
+          Positioned(
+            left: 120, // 76
+            top: 82, //87
+            child: Center(
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  side: const BorderSide(color: NewColours.lightGray),
+                  backgroundColor: context.colour.background,
+                  surfaceTintColor: context.colour.background.withOpacity(0.5),
+                  elevation: 2,
+                  splashFactory: NoSplash.splashFactory,
+                  enableFeedback: false,
+                  padding: EdgeInsets.zero,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Icon(
+                    Icons.swap_horiz,
+                    color: context.colour.onBackground,
+                    size: 32,
+                  ),
+                ),
+              ),
             ),
-          if (walletLast != null)
-            BlocProvider.value(
-              value: walletLast!,
-              child: const CardItem(),
-            )
-          else if (!onlyOne)
-            const EmptyCard(),
+            // child: Center(child: BBButton.big(label: 'Swap', onPressed: () {})),
+          ),
         ],
       ),
     );

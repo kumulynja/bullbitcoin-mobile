@@ -227,7 +227,7 @@ class BBButton extends StatelessWidget {
         widget = Container(
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(
-              Radius.circular(8.0),
+              Radius.circular(5.0),
             ),
             boxShadow: [
               BoxShadow(
@@ -240,8 +240,8 @@ class BBButton extends StatelessWidget {
             ],
           ),
           child: SizedBox(
-            height: 45,
-            width: fillWidth ? null : 225,
+            height: 36,
+            width: fillWidth ? null : 150,
             child: widget,
           ),
         );

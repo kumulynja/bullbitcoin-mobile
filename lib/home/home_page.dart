@@ -275,14 +275,16 @@ class CardColumn extends StatelessWidget {
             ],
           ),
           Positioned(
-            left: 120, // 76
-            top: 82, //87
-            child: Center(
+            left: 126, // 76 // 120
+            top: 83, //87 // 84
+            child: SizedBox(
+              height: 40,
+              width: 50,
               child: ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   side: const BorderSide(color: NewColours.lightGray),
                   backgroundColor: context.colour.background,
@@ -292,13 +294,10 @@ class CardColumn extends StatelessWidget {
                   enableFeedback: false,
                   padding: EdgeInsets.zero,
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Icon(
-                    Icons.swap_horiz,
-                    color: context.colour.onBackground,
-                    size: 32,
-                  ),
+                child: Icon(
+                  Icons.swap_horiz,
+                  color: context.colour.onBackground,
+                  size: 32,
                 ),
               ),
             ),
@@ -782,7 +781,7 @@ class ScanButton extends StatelessWidget {
         },
         style: ElevatedButton.styleFrom(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(8),
           ),
           side: const BorderSide(color: NewColours.lightGray),
           backgroundColor: bgColour,

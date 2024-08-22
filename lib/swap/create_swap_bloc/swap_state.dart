@@ -16,7 +16,7 @@ class SwapState with _$SwapState {
     @Default(false) bool errSmallAmt,
     double? errHighFees,
     // Wallet? updatedWallet,
-    AllFees? allFees,
+    Fees? allFees,
     String? errAllFees,
   }) = _SwapState;
   const SwapState._();

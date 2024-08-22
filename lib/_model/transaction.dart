@@ -547,6 +547,9 @@ extension X on boltz.SwapStatus? {
   (String, String)? getStr(bool isSubmarine) {
     (String, String) status = ('', '');
     switch (this) {
+      case boltz.SwapStatus.txnServerMempool:
+      case boltz.SwapStatus.txnServerConfirmed:
+        status = ('Expired', 'Test');
       case boltz.SwapStatus.swapCreated:
         status =
             ('Created', 'Swap has been created but no payment has been made.');

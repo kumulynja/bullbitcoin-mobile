@@ -83,24 +83,27 @@ class CreateSwapCubit extends Cubit<SwapState> {
 
     final walletIsLiquid = wallet.baseWalletType == BaseWalletType.Liquid;
 
+    final swapFees = await fees?.reverse();
+
     if (walletIsLiquid) {
-      if (amount < fees!.lbtcLimits.minimal ||
-          amount > fees.lbtcLimits.maximal) {
+      if (amount < swapFees!.lbtcLimits.minimal ||
+          amount > swapFees.lbtcLimits.maximal) {
         emit(
           state.copyWith(
             errCreatingSwapInv:
-                'Amount should be greater than ${fees.lbtcLimits.minimal} and less than ${fees.lbtcLimits.maximal} sats',
+                'Amount should be greater than ${swapFees.lbtcLimits.minimal} and less than ${swapFees.lbtcLimits.maximal} sats',
             generatingSwapInv: false,
           ),
         );
         return;
       }
     } else {
-      if (amount < fees!.btcLimits.minimal || amount > fees.btcLimits.maximal) {
+      if (amount < swapFees!.btcLimits.minimal ||
+          amount > swapFees.btcLimits.maximal) {
         emit(
           state.copyWith(
             errCreatingSwapInv:
-                'Amount should be greater than ${fees.btcLimits.minimal} and less than ${fees.btcLimits.maximal} sats',
+                'Amount should be greater than ${swapFees.btcLimits.minimal} and less than ${swapFees.btcLimits.maximal} sats',
             generatingSwapInv: false,
           ),
         );
@@ -158,6 +161,7 @@ class CreateSwapCubit extends Cubit<SwapState> {
     // );
     final liquidElectrum = _networkCubit.state.selectedLiquidNetwork;
 
+    /*
     final updatedSwap = swap!.copyWith(
       boltzFees: walletIsLiquid
           ? fees.lbtcReverse.boltzFeesRate * amount ~/ 100
@@ -170,6 +174,21 @@ class CreateSwapCubit extends Cubit<SwapState> {
               ? fees.lbtcReverse.claimFeesEstimate
               : fees.lbtcReverse.claimFeesEstimate
           : fees.btcReverse.claimFeesEstimate,
+      label: label,
+    );
+    */
+    final updatedSwap = swap!.copyWith(
+      boltzFees: walletIsLiquid
+          ? swapFees.lbtcFees.percentage * amount ~/ 100
+          : swapFees.btcFees.percentage * amount ~/ 100,
+      lockupFees: walletIsLiquid
+          ? swapFees.lbtcFees.minerFees.lockup
+          : swapFees.btcFees.minerFees.lockup,
+      claimFees: walletIsLiquid
+          ? liquidElectrum == LiquidElectrumTypes.bullbitcoin
+              ? swapFees.lbtcFees.minerFees.claim
+              : swapFees.lbtcFees.minerFees.claim
+          : swapFees.btcFees.minerFees.claim,
       label: label,
     );
 
@@ -314,24 +333,26 @@ class CreateSwapCubit extends Cubit<SwapState> {
     }
 
     final isLiq = wallet.isLiquid();
+    final swapFees = await fees?.submarine();
     if (isLiq) {
-      if (amount < fees!.lbtcLimits.minimal ||
-          amount > fees.lbtcLimits.maximal) {
+      if (amount < swapFees!.lbtcLimits.minimal ||
+          amount > swapFees.lbtcLimits.maximal) {
         emit(
           state.copyWith(
             errCreatingSwapInv:
-                'Amount should be greater than ${fees.lbtcLimits.minimal} and less than ${fees.lbtcLimits.maximal} sats',
+                'Amount should be greater than ${swapFees.lbtcLimits.minimal} and less than ${swapFees.lbtcLimits.maximal} sats',
             generatingSwapInv: false,
           ),
         );
         return;
       }
     } else {
-      if (amount < fees!.btcLimits.minimal || amount > fees.btcLimits.maximal) {
+      if (amount < swapFees!.btcLimits.minimal ||
+          amount > swapFees.btcLimits.maximal) {
         emit(
           state.copyWith(
             errCreatingSwapInv:
-                'Amount should be greater than ${fees.btcLimits.minimal} and less than ${fees.btcLimits.maximal} sats',
+                'Amount should be greater than ${swapFees.btcLimits.minimal} and less than ${swapFees.btcLimits.maximal} sats',
             generatingSwapInv: false,
           ),
         );
@@ -382,6 +403,7 @@ class CreateSwapCubit extends Cubit<SwapState> {
         return;
       }
 
+      /*
       final updatedSwap = swap!.copyWith(
         boltzFees: isLiq
             ? fees.lbtcSubmarine.boltzFeesRate * amount ~/ 100
@@ -391,6 +413,18 @@ class CreateSwapCubit extends Cubit<SwapState> {
             : fees.btcSubmarine.lockupFeesEstimate,
         claimFees:
             isLiq ? fees.lbtcSubmarine.claimFees : fees.btcSubmarine.claimFees,
+        label: label,
+      );
+      */
+
+      final updatedSwap = swap!.copyWith(
+        boltzFees: isLiq
+            ? swapFees.lbtcFees.percentage * amount ~/ 100
+            : swapFees.btcFees.percentage * amount ~/ 100,
+        lockupFees:
+            isLiq ? swapFees.lbtcFees.minerFees : swapFees.btcFees.minerFees,
+        claimFees:
+            isLiq ? swapFees.lbtcFees.minerFees : swapFees.btcFees.minerFees,
         label: label,
       );
 

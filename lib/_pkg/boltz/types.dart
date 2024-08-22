@@ -2,133 +2,10 @@ import 'package:bb_mobile/_model/transaction.dart';
 import 'package:bb_mobile/_model/wallet.dart';
 import 'package:boltz_dart/boltz_dart.dart';
 
-extension Btcln on BtcLnV1Swap {
-  SwapTx createSwapFromBtcLnSwap() {
-    return SwapTx(
-      id: id,
-      isSubmarine: kind == SwapType.submarine,
-      network: network == Chain.bitcoinTestnet
-          ? BBNetwork.Testnet
-          : BBNetwork.Mainnet,
-      // network: BBNetwork.Testnet,
-      walletType: (network == Chain.bitcoin || network == Chain.bitcoinTestnet)
-          ? BaseWalletType.Bitcoin
-          : BaseWalletType.Liquid,
-      redeemScript: redeemScript,
-      invoice: invoice,
-      outAmount: outAmount,
-      scriptAddress: scriptAddress,
-      electrumUrl: electrumUrl,
-      boltzUrl: boltzUrl,
-      creationTime: DateTime.now(),
-    );
-  }
-
-  SwapTxSensitive createSwapSensitiveFromBtcLnSwap() {
-    return SwapTxSensitive(
-      id: id,
-      preimage: preimage.value,
-      sha256: preimage.sha256,
-      hash160: preimage.hash160,
-      publicKey: keys.publicKey,
-      secretKey: keys.secretKey,
-      redeemScript: redeemScript,
-    );
-  }
-}
-
-extension Lbtcln on LbtcLnV1Swap {
-  SwapTx createSwapFromLbtcLnSwap() {
-    return SwapTx(
-      id: id,
-      isSubmarine: kind == SwapType.submarine,
-      // network: network == Chain.Testnet ? BBNetwork.Testnet : BBNetwork.LTestnet,
-      network: network == Chain.liquidTestnet
-          ? BBNetwork.Testnet
-          : BBNetwork.Mainnet,
-      walletType: (network == Chain.bitcoin || network == Chain.bitcoinTestnet)
-          ? BaseWalletType.Bitcoin
-          : BaseWalletType.Liquid,
-      redeemScript: redeemScript,
-      invoice: invoice,
-      outAmount: outAmount,
-      scriptAddress: scriptAddress,
-      electrumUrl: electrumUrl,
-      boltzUrl: boltzUrl,
-      blindingKey: blindingKey,
-      creationTime: DateTime.now(),
-    );
-  }
-
-  SwapTxSensitive createSwapSensitiveFromLbtcLnSwap() {
-    return SwapTxSensitive(
-      id: id,
-      preimage: preimage.value,
-      sha256: preimage.sha256,
-      hash160: preimage.hash160,
-      publicKey: keys.publicKey,
-      secretKey: keys.secretKey,
-      redeemScript: redeemScript,
-      blindingKey: blindingKey,
-    );
-  }
-}
-
 extension SwapExt on SwapTx {
-  BtcLnV1Swap toBtcLnSwap(SwapTxSensitive sensitive) {
+  BtcLnSwap toBtcLnSwap(SwapTxSensitive sensitive) {
     final tx = this;
-    return BtcLnV1Swap(
-      id: tx.id,
-      redeemScript: tx.redeemScript,
-      invoice: tx.invoice,
-      outAmount: tx.outAmount,
-      scriptAddress: tx.scriptAddress,
-      electrumUrl: tx.electrumUrl.replaceAll('ssl://', ''),
-      boltzUrl: tx.boltzUrl,
-      kind: tx.isSubmarine ? SwapType.submarine : SwapType.reverse,
-      network:
-          network == BBNetwork.Testnet ? Chain.bitcoinTestnet : Chain.bitcoin,
-      keys: KeyPair(
-        secretKey: sensitive.secretKey,
-        publicKey: sensitive.publicKey,
-      ),
-      preimage: PreImage(
-        value: sensitive.preimage,
-        sha256: sensitive.sha256,
-        hash160: sensitive.hash160,
-      ),
-    );
-  }
-
-  LbtcLnV1Swap toLbtcLnSwap(SwapTxSensitive sensitive) {
-    final tx = this;
-    return LbtcLnV1Swap(
-      id: tx.id,
-      redeemScript: tx.redeemScript,
-      invoice: tx.invoice,
-      outAmount: tx.outAmount,
-      scriptAddress: tx.scriptAddress,
-      electrumUrl: tx.electrumUrl.replaceAll('ssl://', ''),
-      boltzUrl: tx.boltzUrl,
-      kind: tx.isSubmarine ? SwapType.submarine : SwapType.reverse,
-      network:
-          network == BBNetwork.Testnet ? Chain.liquidTestnet : Chain.liquid,
-      keys: KeyPair(
-        secretKey: sensitive.secretKey,
-        publicKey: sensitive.publicKey,
-      ),
-      preimage: PreImage(
-        value: sensitive.preimage,
-        sha256: sensitive.sha256,
-        hash160: sensitive.hash160,
-      ),
-      blindingKey: sensitive.blindingKey ?? '',
-    );
-  }
-
-  BtcLnV2Swap toBtcLnV2Swap(SwapTxSensitive sensitive) {
-    final tx = this;
-    return BtcLnV2Swap(
+    return BtcLnSwap(
       id: tx.id,
       invoice: tx.invoice,
       outAmount: tx.outAmount,
@@ -147,7 +24,7 @@ extension SwapExt on SwapTx {
         sha256: sensitive.sha256,
         hash160: sensitive.hash160,
       ),
-      swapScript: BtcSwapScriptV2Str(
+      swapScript: BtcSwapScriptStr(
         swapType: tx.isSubmarine ? SwapType.submarine : SwapType.reverse,
         hashlock: sensitive.hash160,
         receiverPubkey: tx.isSubmarine ? tx.boltzPubkey! : tx.publicKey!,
@@ -158,9 +35,9 @@ extension SwapExt on SwapTx {
     );
   }
 
-  LbtcLnV2Swap toLbtcLnV2Swap(SwapTxSensitive sensitive) {
+  LbtcLnSwap toLbtcLnSwap(SwapTxSensitive sensitive) {
     final tx = this;
-    return LbtcLnV2Swap(
+    return LbtcLnSwap(
       id: tx.id,
       invoice: tx.invoice,
       outAmount: tx.outAmount,
@@ -180,7 +57,7 @@ extension SwapExt on SwapTx {
         hash160: sensitive.hash160,
       ),
       blindingKey: sensitive.blindingKey ?? '',
-      swapScript: LBtcSwapScriptV2Str(
+      swapScript: LBtcSwapScriptStr(
         swapType: tx.isSubmarine ? SwapType.submarine : SwapType.reverse,
         hashlock: sensitive.hash160,
         receiverPubkey:
@@ -195,8 +72,8 @@ extension SwapExt on SwapTx {
   }
 }
 
-extension BtcLnV2 on BtcLnV2Swap {
-  SwapTx createSwapFromBtcLnV2Swap() {
+extension BtcLn on BtcLnSwap {
+  SwapTx createSwapFromBtcLnSwap() {
     return SwapTx(
       id: id,
       isSubmarine: kind == SwapType.submarine,
@@ -224,7 +101,7 @@ extension BtcLnV2 on BtcLnV2Swap {
     );
   }
 
-  SwapTxSensitive createSwapSensitiveFromBtcLnV2Swap() {
+  SwapTxSensitive createSwapSensitiveFromBtcLnSwap() {
     return SwapTxSensitive(
       id: id,
       preimage: preimage.value,
@@ -242,8 +119,8 @@ extension BtcLnV2 on BtcLnV2Swap {
   }
 }
 
-extension LbtcLnV2 on LbtcLnV2Swap {
-  SwapTx createSwapFromLbtcLnV2Swap() {
+extension LbtcLn on LbtcLnSwap {
+  SwapTx createSwapFromLbtcLnSwap() {
     return SwapTx(
       id: id,
       isSubmarine: kind == SwapType.submarine,
@@ -272,7 +149,7 @@ extension LbtcLnV2 on LbtcLnV2Swap {
     );
   }
 
-  SwapTxSensitive createSwapSensitiveFromLbtcLnV2Swap() {
+  SwapTxSensitive createSwapSensitiveFromLbtcLnSwap() {
     return SwapTxSensitive(
       id: id,
       preimage: preimage.value,

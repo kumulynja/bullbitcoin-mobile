@@ -128,7 +128,7 @@ class CreateSwapCubit extends Cubit<SwapState> {
         : (walletIsLiquid ? Chain.liquid : Chain.bitcoin);
 
     final claimAddress = wallet.lastGeneratedAddress!.address;
-    final (swap, errCreatingInv) = await _swapBoltz.receiveV2(
+    final (swap, errCreatingInv) = await _swapBoltz.receive(
       mnemonic: seed!.mnemonic,
       index: wallet.revKeyIndex,
       outAmount: amount,
@@ -384,7 +384,7 @@ class CreateSwapCubit extends Cubit<SwapState> {
     if (storedSwapTxIdx != -1) {
       swapTx = wallet.swaps[storedSwapTxIdx];
     } else {
-      final (swap, errCreatingInv) = await _swapBoltz.sendV2(
+      final (swap, errCreatingInv) = await _swapBoltz.send(
         mnemonic: seed!.mnemonic,
         index: wallet.revKeyIndex,
         network: network,

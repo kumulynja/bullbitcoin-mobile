@@ -157,6 +157,7 @@ class SwapBoltz {
           final resp = await swap.claim(
             outAddress: swapTx.claimAddress!,
             absFee: claimFeesEstimate,
+            tryCooperate: false,
           );
           return (resp, null);
         } else {
@@ -187,6 +188,7 @@ class SwapBoltz {
           final resp = await swap.refund(
             outAddress: swapTx.claimAddress!,
             absFee: refundFeesEstimate,
+            tryCooperate: false,
           );
 
           return (resp, null);
@@ -228,7 +230,7 @@ class SwapBoltz {
   /// ------------------------- V2 ------------------------------
   ///
   ///
-  Future<(SwapTx?, Err?)> receiveV2({
+  Future<(SwapTx?, Err?)> receive({
     required String mnemonic,
     required int index,
     required int outAmount,
@@ -281,9 +283,8 @@ class SwapBoltz {
           value: jsonEncode(swapSensitive.toJson()),
         );
         if (err != null) throw err;
-        swapTx = res
-            .createSwapFromLbtcLnV2Swap()
-            .copyWith(claimAddress: claimAddress);
+        swapTx =
+            res.createSwapFromLbtcLnSwap().copyWith(claimAddress: claimAddress);
         // SwapTx.fromLbtcLnSwap(res);
       }
 
@@ -321,7 +322,7 @@ class SwapBoltz {
           value: jsonEncode(swapSensitive.toJson()),
         );
         if (err != null) throw err;
-        final swap = res.createSwapFromLbtcLnV2Swap();
+        final swap = res.createSwapFromLbtcLnSwap();
 
         // SwapTx.fromBtcLnSwap(res);
 
@@ -354,7 +355,7 @@ class SwapBoltz {
     }
   }
 
-  Future<(String?, Err?)> broadcastV2({
+  Future<(String?, Err?)> broadcast({
     required SwapTx swapTx,
     required Uint8List signedBytes,
   }) async {
@@ -371,7 +372,7 @@ class SwapBoltz {
         jsonDecode(swapSensitiveStr!) as Map<String, dynamic>,
       );
 
-      final swap = swapTx.toLbtcLnV2Swap(swapSensitive);
+      final swap = swapTx.toLbtcLnSwap(swapSensitive);
 
       final txid = await swap.broadcastTx(signedBytes: signedBytes);
 
@@ -381,7 +382,7 @@ class SwapBoltz {
     }
   }
 
-  Future<(String?, Err?)> claimV2ReverseSwap({
+  Future<(String?, Err?)> claimReverseSwap({
     required SwapTx swapTx,
     required Wallet wallet,
     required bool tryCooperate,
@@ -408,7 +409,7 @@ class SwapBoltz {
 
         // final claimFeesEstimate = fees?.lbtcReverse.claimFeesEstimate;
         // if (claimFeesEstimate == null) throw 'Fees estimate not found';
-        final swap = swapTx.toLbtcLnV2Swap(swapSensitive);
+        final swap = swapTx.toLbtcLnSwap(swapSensitive);
         // .copyWith(electrumUrl: 'blockstream.info:995');
 
         // await Future.delayed(5.seconds);
@@ -461,7 +462,7 @@ class SwapBoltz {
         //final claimFeesEstimate = fees?.btcReverse.claimFeesEstimate;
         if (claimFeesEstimate == null) throw 'Fees estimate not found';
 
-        final swap = swapTx.toBtcLnV2Swap(swapSensitive);
+        final swap = swapTx.toBtcLnSwap(swapSensitive);
 
         final resp = await swap.claim(
           outAddress: address,
@@ -476,7 +477,7 @@ class SwapBoltz {
     }
   }
 
-  Future<(String?, Err?)> refundV2SubmarineSwap({
+  Future<(String?, Err?)> refundSubmarineSwap({
     required SwapTx swapTx,
     required Wallet wallet,
     required bool tryCooperate,
@@ -513,7 +514,7 @@ class SwapBoltz {
         // final refundFeesEstimate = fees?.lbtcSubmarine.claimFees;
         if (refundFeesEstimate == null) throw 'Fees estimate not found';
 
-        final swap = swapTx.toLbtcLnV2Swap(swapSensitive);
+        final swap = swapTx.toLbtcLnSwap(swapSensitive);
         // waiting on PR to add cooperative refund
         // final resp = await swap.refund(
         //   outAddress: address,
@@ -564,7 +565,7 @@ class SwapBoltz {
         // final refundFeesEstimate = fees?.btcSubmarine.claimFees;
         if (refundFeesEstimate == null) throw 'Fees estimate not found';
 
-        final swap = swapTx.toBtcLnV2Swap(swapSensitive);
+        final swap = swapTx.toBtcLnSwap(swapSensitive);
 
         final resp = await swap.refund(
           outAddress: address,
@@ -596,11 +597,11 @@ class SwapBoltz {
       );
 
       if (isLiquid) {
-        final swap = swapTx.toLbtcLnV2Swap(swapSensitive);
+        final swap = swapTx.toLbtcLnSwap(swapSensitive);
         await swap.coopCloseSubmarine();
         return null;
       } else {
-        final swap = swapTx.toBtcLnV2Swap(swapSensitive);
+        final swap = swapTx.toBtcLnSwap(swapSensitive);
         await swap.coopCloseSubmarine();
         return null;
       }

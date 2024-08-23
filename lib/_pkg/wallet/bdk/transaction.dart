@@ -870,7 +870,6 @@ class BDKTransactions {
       final _ = await bdkWallet.sign(
         psbt: psbtStruct,
         signOptions: const bdk.SignOptions(
-          multiSig: false,
           trustWitnessUtxo: false,
           allowAllSighashes: false,
           removePartialSigs: true,

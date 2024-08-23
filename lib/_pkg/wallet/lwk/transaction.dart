@@ -7,6 +7,7 @@ import 'package:bb_mobile/_model/wallet.dart';
 import 'package:bb_mobile/_pkg/boltz/swap.dart';
 import 'package:bb_mobile/_pkg/error.dart';
 import 'package:bb_mobile/_pkg/wallet/repository/network.dart';
+import 'package:convert/convert.dart' as conv;
 import 'package:lwk_dart/lwk_dart.dart' as lwk;
 
 class LWKTransactions {
@@ -595,7 +596,7 @@ class LWKTransactions {
         } else {
           final (txxid, errBroadcast) = await _swapBoltz.broadcast(
             swapTx: transaction.swapTx!,
-            signedBytes: transaction.pset!,
+            signedBytes: conv.hex.encode(transaction.pset!),
           );
           if (errBroadcast != null) throw errBroadcast;
           txid = txxid!;

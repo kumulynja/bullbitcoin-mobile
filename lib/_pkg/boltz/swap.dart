@@ -357,7 +357,7 @@ class SwapBoltz {
 
   Future<(String?, Err?)> broadcast({
     required SwapTx swapTx,
-    required Uint8List signedBytes,
+    required String signedBytes,
   }) async {
     try {
       if (!swapTx.isLiquid()) throw 'Only Liquid';
@@ -374,7 +374,7 @@ class SwapBoltz {
 
       final swap = swapTx.toLbtcLnSwap(swapSensitive);
 
-      final txid = await swap.broadcastTx(signedBytes: signedBytes);
+      final txid = await swap.broadcastBoltz(signedHex: signedBytes);
 
       return (txid, null);
     } catch (e) {
@@ -413,7 +413,7 @@ class SwapBoltz {
         // .copyWith(electrumUrl: 'blockstream.info:995');
 
         // await Future.delayed(5.seconds);
-        final signedHex = await swap.claimBytes(
+        final signedHex = await swap.claim(
           outAddress: address,
           absFee: swapTx.claimFees!,
           tryCooperate: tryCooperate,
@@ -421,8 +421,8 @@ class SwapBoltz {
         // locator<Logger>()
         //     .log('------${swapTx.id}-----\n$signedHex------signed-claim-----');
         if (broadcastViaBoltz) {
-          final txid = await swap.broadcastTx(
-            signedBytes: Uint8List.fromList(hex.decode(signedHex)),
+          final txid = await swap.broadcastBoltz(
+            signedHex: signedHex,
           );
           return (txid, null);
         } else {
@@ -524,7 +524,7 @@ class SwapBoltz {
 
         // return (resp, null);
 
-        final signedHex = await swap.refundBytes(
+        final signedHex = await swap.refund(
           outAddress: address,
           absFee: refundFeesEstimate,
           tryCooperate: tryCooperate,
@@ -534,8 +534,8 @@ class SwapBoltz {
         final (blockchain, err) = _networkRepository.liquidUrl;
         if (err != null) throw err;
         if (broadcastViaBoltz) {
-          final txid = await swap.broadcastTx(
-            signedBytes: Uint8List.fromList(hex.decode(signedHex)),
+          final txid = await swap.broadcastBoltz(
+            signedHex: signedHex,
           );
           return (txid, null);
         } else {

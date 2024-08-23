@@ -7,6 +7,7 @@ extension SwapExt on SwapTx {
     final tx = this;
     return BtcLnSwap(
       id: tx.id,
+      keyIndex: tx.keyIndex ?? 0,
       invoice: tx.invoice,
       outAmount: tx.outAmount,
       scriptAddress: tx.scriptAddress,
@@ -39,6 +40,7 @@ extension SwapExt on SwapTx {
     final tx = this;
     return LbtcLnSwap(
       id: tx.id,
+      keyIndex: tx.keyIndex ?? 0,
       invoice: tx.invoice,
       outAmount: tx.outAmount,
       scriptAddress: tx.scriptAddress,

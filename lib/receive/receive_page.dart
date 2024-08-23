@@ -554,6 +554,8 @@ class CreateLightningInvoice extends StatelessWidget {
     int finalFee = 0;
 
     if (allFees != null) {
+      // final swapFees = await allFees.reverse();
+      /*
       if (isLiquid == true) {
         finalFee = (((allFees.lbtcReverse.boltzFeesRate) * amount / 100) +
                 (allFees.lbtcReverse.claimFeesEstimate) +
@@ -565,6 +567,9 @@ class CreateLightningInvoice extends StatelessWidget {
                 (allFees.btcReverse.lockupFees))
             .toInt();
       }
+      */
+      //TODO:Migration
+      finalFee = 100;
     }
 
     return Column(

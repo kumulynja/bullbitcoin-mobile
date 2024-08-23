@@ -24,7 +24,7 @@ mixin _$SwapState {
   bool get errSmallAmt => throw _privateConstructorUsedError;
   double? get errHighFees =>
       throw _privateConstructorUsedError; // Wallet? updatedWallet,
-  AllFees? get allFees => throw _privateConstructorUsedError;
+  Fees? get allFees => throw _privateConstructorUsedError;
   String? get errAllFees => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -43,11 +43,11 @@ abstract class $SwapStateCopyWith<$Res> {
       SwapTx? swapTx,
       bool errSmallAmt,
       double? errHighFees,
-      AllFees? allFees,
+      Fees? allFees,
       String? errAllFees});
 
   $SwapTxCopyWith<$Res>? get swapTx;
-  $AllFeesCopyWith<$Res>? get allFees;
+  $FeesCopyWith<$Res>? get allFees;
 }
 
 /// @nodoc
@@ -95,7 +95,7 @@ class _$SwapStateCopyWithImpl<$Res, $Val extends SwapState>
       allFees: freezed == allFees
           ? _value.allFees
           : allFees // ignore: cast_nullable_to_non_nullable
-              as AllFees?,
+              as Fees?,
       errAllFees: freezed == errAllFees
           ? _value.errAllFees
           : errAllFees // ignore: cast_nullable_to_non_nullable
@@ -117,12 +117,12 @@ class _$SwapStateCopyWithImpl<$Res, $Val extends SwapState>
 
   @override
   @pragma('vm:prefer-inline')
-  $AllFeesCopyWith<$Res>? get allFees {
+  $FeesCopyWith<$Res>? get allFees {
     if (_value.allFees == null) {
       return null;
     }
 
-    return $AllFeesCopyWith<$Res>(_value.allFees!, (value) {
+    return $FeesCopyWith<$Res>(_value.allFees!, (value) {
       return _then(_value.copyWith(allFees: value) as $Val);
     });
   }
@@ -142,13 +142,13 @@ abstract class _$$SwapStateImplCopyWith<$Res>
       SwapTx? swapTx,
       bool errSmallAmt,
       double? errHighFees,
-      AllFees? allFees,
+      Fees? allFees,
       String? errAllFees});
 
   @override
   $SwapTxCopyWith<$Res>? get swapTx;
   @override
-  $AllFeesCopyWith<$Res>? get allFees;
+  $FeesCopyWith<$Res>? get allFees;
 }
 
 /// @nodoc
@@ -194,7 +194,7 @@ class __$$SwapStateImplCopyWithImpl<$Res>
       allFees: freezed == allFees
           ? _value.allFees
           : allFees // ignore: cast_nullable_to_non_nullable
-              as AllFees?,
+              as Fees?,
       errAllFees: freezed == errAllFees
           ? _value.errAllFees
           : errAllFees // ignore: cast_nullable_to_non_nullable
@@ -234,7 +234,7 @@ class _$SwapStateImpl extends _SwapState {
   final double? errHighFees;
 // Wallet? updatedWallet,
   @override
-  final AllFees? allFees;
+  final Fees? allFees;
   @override
   final String? errAllFees;
 
@@ -280,7 +280,7 @@ abstract class _SwapState extends SwapState {
       final SwapTx? swapTx,
       final bool errSmallAmt,
       final double? errHighFees,
-      final AllFees? allFees,
+      final Fees? allFees,
       final String? errAllFees}) = _$SwapStateImpl;
   const _SwapState._() : super._();
 
@@ -296,7 +296,7 @@ abstract class _SwapState extends SwapState {
   @override
   double? get errHighFees;
   @override // Wallet? updatedWallet,
-  AllFees? get allFees;
+  Fees? get allFees;
   @override
   String? get errAllFees;
   @override

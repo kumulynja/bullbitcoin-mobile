@@ -61,7 +61,7 @@ class CreateSwapCubit extends Cubit<SwapState> {
     emit(state.copyWith(generatingSwapInv: true, errCreatingSwapInv: ''));
 
     final boltzurl = isTestnet ? boltzTestnet : boltzMainnet;
-    final boltzurlV2 = isTestnet ? boltzTestnetV2 : boltzMainnetV2;
+    // final boltzurlV2 = isTestnet ? boltzTestnetV2 : boltzMainnetV2;
 
     // we dont have to make this call here
     // we have fees stored which has a pairHash
@@ -134,7 +134,7 @@ class CreateSwapCubit extends Cubit<SwapState> {
       outAmount: amount,
       network: network,
       electrumUrl: networkUrl,
-      boltzUrl: boltzurlV2,
+      boltzUrl: boltzurl,
       isLiquid: walletIsLiquid,
       claimAddress: claimAddress,
     );
@@ -312,7 +312,6 @@ class CreateSwapCubit extends Cubit<SwapState> {
     emit(state.copyWith(generatingSwapInv: true, errCreatingSwapInv: ''));
 
     final boltzurl = isTestnet ? boltzTestnet : boltzMainnet;
-    final boltzurlV2 = isTestnet ? boltzTestnetV2 : boltzMainnetV2;
 
     // we dont have to make this call here
     // we have fees stored which has a pairHash
@@ -389,7 +388,7 @@ class CreateSwapCubit extends Cubit<SwapState> {
         index: wallet.revKeyIndex,
         network: network,
         electrumUrl: networkUrl,
-        boltzUrl: boltzurlV2,
+        boltzUrl: boltzurl,
         isLiquid: isLiq,
         invoice: address,
       );

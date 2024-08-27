@@ -16,11 +16,11 @@ const liquidElectrumTestUrl = 'blockstream.info:465';
 const bbLiquidElectrumUrl = 'les.bullbitcoin.com:995';
 const bbLiquidElectrumTestUrl = 'blockstream.info:465';
 
-const boltzTestnet = 'api.testnet.boltz.exchange';
-const boltzMainnet = 'api.boltz.exchange';
+// const boltzTestnet = 'api.testnet.boltz.exchange';
+// const boltzMainnet = 'api.boltz.exchange';
 
-const boltzTestnetV2 = 'api.testnet.boltz.exchange/v2';
-const boltzMainnetV2 = 'api.boltz.exchange/v2';
+const boltzTestnet = 'api.testnet.boltz.exchange/v2';
+const boltzMainnet = 'api.boltz.exchange/v2';
 
 final exchangeapi = bbexchangeapi;
 final mempoolapi = openmempoolapi; //bbmempoolapi;

@@ -145,7 +145,7 @@ class SendCubit extends Cubit<SendState> {
         }
       case AddressNetwork.lightning:
         final boltzUrl =
-            _networkCubit.state.testnet ? boltzTestnetV2 : boltzMainnetV2;
+            _networkCubit.state.testnet ? boltzTestnet : boltzMainnet;
         final (inv, errInv) = await _swapBoltz.decodeInvoice(
           invoice: address.toLowerCase(),
           boltzUrl: boltzUrl,

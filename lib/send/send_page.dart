@@ -170,14 +170,16 @@ class _Screen extends StatelessWidget {
       (SendCubit x) => x.state.couldBeOnchainSwap(),
     );
 
-    if (showWarning && !walletIsLiquid && potentialonchainSwap == false)
+    if (showWarning && !walletIsLiquid && potentialonchainSwap == false) {
       return const _Warnings();
+    }
 
     if (signed && !isLn) {
-      if (!sent)
+      if (!sent) {
         return const TxDetailsScreen();
-      else
+      } else {
         return const TxSuccess();
+      }
     }
 
     return ColoredBox(
@@ -405,8 +407,9 @@ class NetworkFees extends StatelessWidget {
     final isLiquid =
         context.select((SendCubit cubit) => cubit.state.isLiquidPayment());
 
-    if (isLn || isLiquid || !walletSelected || isSelectedWalletLiquid)
+    if (isLn || isLiquid || !walletSelected || isSelectedWalletLiquid) {
       return const SizedBox.shrink();
+    }
 
     return AnimatedOpacity(
       opacity: sending ? 0.3 : 1,
@@ -438,8 +441,9 @@ class AdvancedOptions extends StatelessWidget {
     final addressReady =
         context.select((SendCubit _) => _.state.address.isNotEmpty);
 
-    if (isLn || !walletSelected || !addressReady || isLiquid == true)
+    if (isLn || !walletSelected || !addressReady || isLiquid == true) {
       return const SizedBox.shrink();
+    }
 
     final text =
         context.select((SendCubit _) => _.state.advancedOptionsButtonText());

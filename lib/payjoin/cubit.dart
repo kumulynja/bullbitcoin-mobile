@@ -35,26 +35,31 @@ class PayjoinCubit extends Cubit<PayjoinState> {
 
   final address = TextEditingController();
   final satoshis = TextEditingController();
+  final fees = TextEditingController();
+  final uri = TextEditingController();
   final form = GlobalKey<FormState>();
 
   Future<void> init() async {
-    final wallet = walletBloc.state.wallet!;
+    try {
+      final wallet = walletBloc.state.wallet!;
 
-    final (seed, errRead) = await walletSensitiveStorageRepository.readSeed(
-      fingerprintIndex: wallet.getRelatedSeedStorageString(),
-    );
+      final (seed, errRead) = await walletSensitiveStorageRepository.readSeed(
+        fingerprintIndex: wallet.getRelatedSeedStorageString(),
+      );
 
-    final (bdkW, errLoad) =
-        await bdkSensitiveCreate.loadPrivateBdkWallet(wallet, seed!);
+      final (bdkW, errLoad) =
+          await bdkSensitiveCreate.loadPrivateBdkWallet(wallet, seed!);
+      bdkWallet = bdkW!;
 
-    bdkWallet = bdkW!;
+      final lastUnused = bdkWallet.getAddress(
+        addressIndex: const bdk.AddressIndex.lastUnused(),
+      );
 
-    final lastUnused = bdkWallet.getAddress(
-      addressIndex: const bdk.AddressIndex.lastUnused(),
-    );
-
-    print(lastUnused.address);
-    address.text = lastUnused.address.toString();
+      print(lastUnused.address);
+      address.text = lastUnused.address.toString();
+    } catch (e) {
+      print(e);
+    }
   }
 
   void clearToast() => state.copyWith(toast: '');
@@ -70,6 +75,54 @@ class PayjoinCubit extends Cubit<PayjoinState> {
       return 'Invalid number';
     }
     return null;
+  }
+
+  Future clickConfirmPayJoin() async {
+    final pjFees = int.parse(fees.text);
+    // Build payjoin request with original psbt and send it to the
+    //  payjoin directory where the receiver can poll it
+
+    final pjUri = await PayJoin.stringToUri(uri.text);
+    final originalPsbt = await PayJoin.buildOriginalPsbt(
+      bdkWallet,
+      pjUri,
+      pjFees,
+    );
+    final senderRequest = await PayJoin.buildPayjoinRequest(
+      originalPsbt,
+      pjUri,
+      pjFees,
+    );
+
+    // TODO: emit request ?
+    print(senderRequest);
+
+    // Request and keep polling the payjoin directoy for the proposal
+    //  from the receiver
+    String psbt = originalPsbt;
+    try {
+      psbt = await PayJoin.requestAndPollV2Proposal(senderRequest);
+      print('Receiver proposed payjoin PSBT: $psbt');
+    } catch (e) {
+      // No proposal received, make a normal tx with the original psbt
+      print('No proposal received, broadcasting original tx');
+    }
+
+    // If a proposal is received, finalize the payjoin
+    final transaction = await PayJoin.extractPjTx(bdkWallet, psbt);
+
+    final (blockchain, errNetwork) = networkRepository.bdkBlockchain;
+    final txId = await blockchain!.broadcast(transaction: transaction);
+
+    print('Broacasted tx: $txId');
+
+// TODO: emit txid
+    // showBottomSheet(
+    //   '${psbt == originalPsbt ? 'Original tx with id' : 'Payjoin tx with id'} '
+    //   '$txId broadcasted!',
+    //   toCopy: txId,
+    //   toUrl: 'https://mutinynet.com/tx/$txId',
+    // );
   }
 
   Future<void> clickCreateInvoice() async {

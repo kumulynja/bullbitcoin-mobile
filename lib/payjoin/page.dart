@@ -60,7 +60,7 @@ class PayjoinPage extends StatelessWidget {
                   Expanded(
                     child: state.isReceiver
                         ? _buildReceiver(context, cubit, state)
-                        : _buildSender(),
+                        : _buildSender(context, cubit, state),
                   ),
                 ],
               );
@@ -85,7 +85,7 @@ class PayjoinPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               SizedBox(
-                width: 100,
+                width: 200,
                 child: TextFormField(
                   controller: cubit.address,
                   decoration: const InputDecoration(
@@ -94,7 +94,7 @@ class PayjoinPage extends StatelessWidget {
                 ),
               ),
               SizedBox(
-                width: 100,
+                width: 50,
                 child: TextFormField(
                   controller: cubit.satoshis,
                   decoration: const InputDecoration(
@@ -117,10 +117,40 @@ class PayjoinPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSender() {
-    // TODO
-    return const Column(
+  Widget _buildSender(
+    BuildContext context,
+    PayjoinCubit cubit,
+    PayjoinState state,
+  ) {
+    return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        SizedBox(
+          width: 200,
+          child: TextFormField(
+            controller: cubit.uri,
+            decoration: const InputDecoration(labelText: 'payjoin link'),
+            keyboardType: TextInputType.multiline,
+            maxLines: null,
+          ),
+        ),
+        SizedBox(
+          width: 50,
+          child: TextFormField(
+            controller: cubit.fees,
+            decoration: const InputDecoration(
+              labelText: 'fees',
+            ),
+            validator: cubit.validateSatoshis,
+            keyboardType: TextInputType.number,
+          ),
+        ),
+        BBButton.big(
+          loading: state.isAwaiting,
+          onPressed: cubit.clickConfirmPayJoin,
+          label: 'payjoin',
+        ),
+      ],
     );
   }
 }

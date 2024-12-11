@@ -8,7 +8,8 @@ part of 'state.dart';
 
 _$NetworkStateImpl _$$NetworkStateImplFromJson(Map<String, dynamic> json) =>
     _$NetworkStateImpl(
-      testnet: json['testnet'] as bool? ?? false,
+      bbNetwork: $enumDecodeNullable(_$BBNetworkEnumMap, json['bbNetwork']) ??
+          BBNetwork.Mainnet,
       reloadWalletTimer: (json['reloadWalletTimer'] as num?)?.toInt() ?? 20,
       networks: (json['networks'] as List<dynamic>?)
               ?.map((e) => ElectrumNetwork.fromJson(e as Map<String, dynamic>))
@@ -46,7 +47,7 @@ _$NetworkStateImpl _$$NetworkStateImplFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$$NetworkStateImplToJson(_$NetworkStateImpl instance) =>
     <String, dynamic>{
-      'testnet': instance.testnet,
+      'bbNetwork': _$BBNetworkEnumMap[instance.bbNetwork]!,
       'reloadWalletTimer': instance.reloadWalletTimer,
       'networks': instance.networks,
       'selectedNetwork': _$ElectrumTypesEnumMap[instance.selectedNetwork]!,
@@ -64,6 +65,12 @@ Map<String, dynamic> _$$NetworkStateImplToJson(_$NetworkStateImpl instance) =>
       'tempLiquidNetworkDetails': instance.tempLiquidNetworkDetails,
       'goToSettings': instance.goToSettings,
     };
+
+const _$BBNetworkEnumMap = {
+  BBNetwork.Testnet: 'Testnet',
+  BBNetwork.Mainnet: 'Mainnet',
+  BBNetwork.Regtest: 'Regtest',
+};
 
 const _$ElectrumTypesEnumMap = {
   ElectrumTypes.blockstream: 'blockstream',

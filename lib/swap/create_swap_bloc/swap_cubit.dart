@@ -646,7 +646,7 @@ class CreateSwapCubit extends Cubit<SwapState> {
     try {
       emit(state.copyWith(generatingSwapInv: true, errCreatingSwapInv: ''));
 
-      final isTestnet = _networkCubit.state.testnet;
+      final isTestnet = _networkCubit.state.bbNetwork == BBNetwork.Testnet;
       final lbtcElectrumUrl = _networkCubit.state.getLiquidNetworkUrl();
       final btcNetworkUrl = _networkCubit.state.getNetworkUrl();
       final btcElectrumUrl = btcNetworkUrl.startsWith('ssl://')

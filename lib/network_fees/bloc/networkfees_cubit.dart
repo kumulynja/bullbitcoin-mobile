@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:bb_mobile/_model/wallet.dart';
 import 'package:bb_mobile/_pkg/mempool_api.dart';
 import 'package:bb_mobile/_pkg/storage/hive.dart';
 import 'package:bb_mobile/_pkg/storage/storage.dart';
@@ -66,8 +67,8 @@ class NetworkFeesCubit extends Cubit<NetworkFeesState> {
 
   Future loadFees() async {
     emit(state.copyWith(loadingFees: true, errLoadingFees: ''));
-    final testnet = _networkCubit.state.testnet;
-    final (fees, err) = await _mempoolAPI.getFees(testnet);
+    final bbNetwork = _networkCubit.state.bbNetwork;
+    final (fees, err) = await _mempoolAPI.getFees(bbNetwork);
     if (err != null) {
       emit(
         state.copyWith(
@@ -120,7 +121,7 @@ class NetworkFeesCubit extends Cubit<NetworkFeesState> {
 
   void checkMinimumFees() async {
     await Future.delayed(50.ms);
-    final isTestnet = _networkCubit.state.testnet;
+    final isTestnet = _networkCubit.state.bbNetwork == BBNetwork.Testnet;
     final minFees = isTestnet ? 0 : state.feesList!.last;
 
     int max;
@@ -159,7 +160,7 @@ class NetworkFeesCubit extends Cubit<NetworkFeesState> {
     if (state.feesList == null) return;
     // final minFees = state.feesList!.last;
     // final max = state.feesList!.first * 2;
-    final isTestnet = _networkCubit.state.testnet;
+    final isTestnet = _networkCubit.state.bbNetwork == BBNetwork.Testnet;
     int max;
     if (!isTestnet)
       max = state.feesList!.first * feemultiple;

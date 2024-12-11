@@ -1,3 +1,4 @@
+import 'package:bb_mobile/_model/wallet.dart';
 import 'package:bb_mobile/_pkg/consts/configs.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -48,12 +49,18 @@ class ElectrumNetwork with _$ElectrumNetwork {
   factory ElectrumNetwork.fromJson(Map<String, dynamic> json) =>
       _$ElectrumNetworkFromJson(json);
 
-  String getNetworkUrl(bool isTestnet, {bool split = false}) {
+  String getNetworkUrl(BBNetwork network, {bool split = false}) {
     String url;
-    if (isTestnet)
-      url = testnet;
-    else
-      url = mainnet;
+    switch (network) {
+      case BBNetwork.Mainnet:
+        url = mainnet;
+      case BBNetwork.Testnet:
+        url = testnet;
+      case BBNetwork.Regtest:
+        return '';
+      default:
+        return '';
+    }
 
     if (split) {
       final spliturl = url.split('://');
@@ -95,16 +102,17 @@ class LiquidElectrumNetwork with _$LiquidElectrumNetwork {
   factory LiquidElectrumNetwork.fromJson(Map<String, dynamic> json) =>
       _$LiquidElectrumNetworkFromJson(json);
 
-  String getNetworkUrl(bool isTestnet, {bool split = true}) {
-    String url;
-    if (isTestnet)
-      url = testnet;
-    else
-      url = mainnet;
-
-    // if (split) url = url.split('://')[1];
-
-    return url;
+  String getNetworkUrl(BBNetwork network) {
+    switch (network) {
+      case BBNetwork.Mainnet:
+        return mainnet;
+      case BBNetwork.Testnet:
+        return testnet;
+      case BBNetwork.Regtest:
+        return '';
+      default:
+        return '';
+    }
   }
 
   // String getNetworkUrl(bool isTestnet, {bool split = true}) {

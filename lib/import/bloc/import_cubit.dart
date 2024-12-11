@@ -429,8 +429,7 @@ class ImportWalletCubit extends Cubit<ImportState> {
       final type = state.importType;
 
       final wallets = <Wallet>[];
-      final network =
-          _networkCubit.state.testnet ? BBNetwork.Testnet : BBNetwork.Mainnet;
+      final network = _networkCubit.state.bbNetwork;
 
       switch (type) {
         case ImportTypes.words12:
@@ -576,8 +575,7 @@ class ImportWalletCubit extends Cubit<ImportState> {
         ? selectedWallet.copyWith(name: state.walletLabel)
         : selectedWallet;
 
-    final network =
-        _networkCubit.state.testnet ? BBNetwork.Testnet : BBNetwork.Mainnet;
+    final network = _networkCubit.state.bbNetwork;
 
     if (selectedWallet.type == BBWalletType.words) {
       final mnemonic = (state.importType == ImportTypes.words12)

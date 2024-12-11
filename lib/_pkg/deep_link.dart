@@ -50,8 +50,9 @@ class DeepLink {
       final address = bip21Obj.address;
       final isTestnet = isTestnetAddress(address);
       if (isTestnet == null) return Err('Invalid address');
-      final currentIsTestnet = networkCubit.state.testnet;
-      if (currentIsTestnet != isTestnet) networkCubit.toggleTestnet();
+
+      final bbNetwork = networkCubit.state.bbNetwork;
+      if (bbNetwork != BBNetwork.Testnet) networkCubit.toggleNetwork(bbNetwork);
       await Future.delayed(const Duration(milliseconds: 200));
       final wallet = homeCubit.state.getFirstWithSpendableAndBalance(
         isTestnet ? BBNetwork.Testnet : BBNetwork.Mainnet,

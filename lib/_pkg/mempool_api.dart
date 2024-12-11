@@ -1,3 +1,4 @@
+import 'package:bb_mobile/_model/wallet.dart';
 import 'package:bb_mobile/_pkg/consts/configs.dart';
 import 'package:bb_mobile/_pkg/error.dart';
 import 'package:dio/dio.dart';
@@ -9,9 +10,13 @@ class MempoolAPI {
 
   // Future<(List<int>?, Err?)>
 
-  Result<List<int>> getFees(bool isTestnet) async {
+  Result<List<int>> getFees(BBNetwork net) async {
     try {
-      final testnet = isTestnet ? '/testnet' : '';
+      if (net == BBNetwork.Regtest) {
+        return ([1000, 500, 250, 125, 1], null);
+      }
+
+      final testnet = net == BBNetwork.Testnet ? '/testnet' : '';
       final url = 'https://$mempoolapi$testnet/api/v1/fees/recommended';
       final resp = await http.get(url);
       if (resp.statusCode == null || resp.statusCode != 200) {
@@ -40,7 +45,8 @@ class MempoolAPI {
     }
   }
 
-  Future<(List<String>?, Err?)> getVinAddressesFromTx(String txid, bool isTestnet) async {
+  Future<(List<String>?, Err?)> getVinAddressesFromTx(
+      String txid, bool isTestnet) async {
     try {
       final testnet = isTestnet ? '/testnet' : '';
       final url = 'https://$mempoolapi$testnet/api/tx/$txid';
@@ -50,7 +56,8 @@ class MempoolAPI {
       }
       final data = resp.data as Map<String, dynamic>;
       final inputs = data['in'] as List<dynamic>;
-      final addresses = inputs.map((e) => e['scriptpubkey_address'] as String).toList();
+      final addresses =
+          inputs.map((e) => e['scriptpubkey_address'] as String).toList();
 
       return (addresses, null);
     } catch (e) {

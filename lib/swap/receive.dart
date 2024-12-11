@@ -1,4 +1,5 @@
 import 'package:bb_mobile/_model/swap.dart';
+import 'package:bb_mobile/_model/wallet.dart';
 import 'package:bb_mobile/_ui/app_bar.dart';
 import 'package:bb_mobile/_ui/bottom_sheet.dart';
 import 'package:bb_mobile/_ui/components/button.dart';
@@ -373,8 +374,8 @@ class _ReceivingSwapPageState extends State<ReceivingSwapPage>
         .select((CurrencyCubit cubit) => cubit.state.defaultFiatCurrency);
     final fiatAmt =
         context.select((CurrencyCubit cubit) => cubit.state.fiatAmt);
-    final isTestNet =
-        context.select((NetworkCubit cubit) => cubit.state.testnet);
+    final isTestNet = context.select(
+        (NetworkCubit cubit) => cubit.state.bbNetwork == BBNetwork.Testnet);
     final fiatUnit = defaultCurrency?.name ?? '';
     final fiatAmtStr = isTestNet ? '0' : fiatAmt.toStringAsFixed(2);
 

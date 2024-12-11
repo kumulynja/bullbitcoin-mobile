@@ -176,9 +176,12 @@ class BroadcastTxCubit extends Cubit<BroadcastTxState> {
         final scriptBuf = await bdk.ScriptBuf.fromHex(
           hex.encode(outpoint.scriptPubkey.bytes),
         );
+
+        final network = relatedWallet!.state.wallet!.getBdkNetwork();
+
         final addressStruct = await bdk.Address.fromScript(
           script: scriptBuf,
-          network: _networkCubit.state.getBdkNetwork(),
+          network: network,
         );
         final addressStr = addressStruct.asString();
         if (transaction != null) {

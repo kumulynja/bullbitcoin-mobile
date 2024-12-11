@@ -91,7 +91,7 @@ String? convertToSlipPub(
     switch (script) {
       case ScriptType.bip44:
         switch (network) {
-          case BBNetwork.Testnet:
+          case BBNetwork.Testnet || BBNetwork.Regtest:
             final result = convertVersion(
               extendedKey,
               Version.tPub,
@@ -111,7 +111,7 @@ String? convertToSlipPub(
       // TODO: Handle this case.
       case ScriptType.bip84:
         switch (network) {
-          case BBNetwork.Testnet:
+          case BBNetwork.Testnet || BBNetwork.Regtest:
             final result = convertVersion(
               extendedKey,
               Version.vPub,
@@ -131,7 +131,7 @@ String? convertToSlipPub(
       // TODO: Handle this case.
       case ScriptType.bip49:
         switch (network) {
-          case BBNetwork.Testnet:
+          case BBNetwork.Testnet || BBNetwork.Regtest:
             final result = convertVersion(
               extendedKey,
               Version.uPub,

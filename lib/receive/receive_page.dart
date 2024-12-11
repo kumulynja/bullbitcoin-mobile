@@ -1,4 +1,5 @@
 import 'package:bb_mobile/_model/swap.dart';
+import 'package:bb_mobile/_model/wallet.dart';
 import 'package:bb_mobile/_pkg/boltz/swap.dart';
 import 'package:bb_mobile/_pkg/bull_bitcoin_api.dart';
 import 'package:bb_mobile/_pkg/clipboard.dart';
@@ -69,7 +70,9 @@ class _ReceivePageState extends State<ReceivePage> {
       homeCubit: context.read<HomeCubit>(),
       watchTxsBloc: context.read<WatchTxsBloc>(),
       networkCubit: context.read<NetworkCubit>(),
-    )..fetchFees(context.read<NetworkCubit>().state.testnet);
+    )..fetchFees(
+        context.read<NetworkCubit>().state.bbNetwork == BBNetwork.Testnet,
+      );
 
     _currencyCubit = CurrencyCubit(
       hiveStorage: locator<HiveStorage>(),
@@ -90,13 +93,13 @@ class _ReceivePageState extends State<ReceivePage> {
     if (walletBloc!.state.wallet!.isLiquid()) {
       _receiveCubit.updateWalletType(
         PaymentNetwork.lightning,
-        context.read<NetworkCubit>().state.testnet,
+        context.read<NetworkCubit>().state.bbNetwork == BBNetwork.Testnet,
         onStart: true,
       );
     } else {
       _receiveCubit.updateWalletType(
         PaymentNetwork.bitcoin,
-        context.read<NetworkCubit>().state.testnet,
+        context.read<NetworkCubit>().state.bbNetwork == BBNetwork.Testnet,
         onStart: true,
       );
     }
@@ -340,7 +343,8 @@ class SelectWalletType extends StatelessWidget {
         context.read<CurrencyCubit>().updateAmountDirect(0);
         context.read<CreateSwapCubit>().removeWarnings();
 
-        final isTestnet = context.read<NetworkCubit>().state.testnet;
+        final isTestnet =
+            context.read<NetworkCubit>().state.bbNetwork == BBNetwork.Testnet;
         context.read<ReceiveCubit>().updateWalletType(value, isTestnet);
       },
     );
@@ -615,7 +619,8 @@ class ChainSwapDisplayReceive extends StatelessWidget {
     if (swapTx == null) return const SizedBox.shrink();
 
     final amount = swapTx.outAmount / 100000000.0;
-    final isTestnet = context.select((NetworkCubit x) => x.state.testnet);
+    final isTestnet = context
+        .select((NetworkCubit x) => x.state.bbNetwork == BBNetwork.Testnet);
     final bip21Address = context.select(
       (ReceiveCubit x) => x.state.getAddressWithAmountAndLabel(
         amount,
@@ -817,7 +822,8 @@ class CreateLightningInvoice extends StatelessWidget {
                   context.read<ReceiveCubit>().state.walletBloc!.state.wallet!;
               final walletIsLiquid = wallet.isLiquid();
               final label = context.read<ReceiveCubit>().state.description;
-              final isTestnet = context.read<NetworkCubit>().state.testnet;
+              final isTestnet = context.read<NetworkCubit>().state.bbNetwork ==
+                  BBNetwork.Testnet;
               final networkUrl = !walletIsLiquid
                   ? context.read<NetworkCubit>().state.getNetworkUrl()
                   : context.read<NetworkCubit>().state.getLiquidNetworkUrl();
@@ -963,7 +969,8 @@ class ReceiveQR extends StatelessWidget {
     final swapTx = context.select((CreateSwapCubit x) => x.state.swapTx);
     final amount =
         context.select((CurrencyCubit x) => x.state.amount / 100000000.0);
-    final isTestnet = context.select((NetworkCubit x) => x.state.testnet);
+    final isTestnet = context
+        .select((NetworkCubit x) => x.state.bbNetwork == BBNetwork.Testnet);
     final isLiquid = context.select(
       (ReceiveCubit x) => x.state.walletBloc?.state.wallet?.isLiquid() ?? false,
     );
@@ -1113,7 +1120,8 @@ class _ReceiveDisplayAddressState extends State<ReceiveDisplayAddress> {
     final swapTx = context.select((CreateSwapCubit x) => x.state.swapTx);
     final amount =
         context.select((CurrencyCubit x) => x.state.amount / 100000000.0);
-    final isTestnet = context.select((NetworkCubit x) => x.state.testnet);
+    final isTestnet = context
+        .select((NetworkCubit x) => x.state.bbNetwork == BBNetwork.Testnet);
     final isLiquid = context.select(
       (ReceiveCubit x) => x.state.walletBloc?.state.wallet?.isLiquid() ?? false,
     );

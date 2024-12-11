@@ -155,8 +155,9 @@ class SendCubit extends Cubit<SendState> {
           emit(state.copyWith(note: label));
         }
       case AddressNetwork.lightning:
-        final boltzUrl =
-            _networkCubit.state.testnet ? boltzTestnetUrl : boltzMainnetUrl;
+        final boltzUrl = _networkCubit.state.bbNetwork == BBNetwork.Testnet
+            ? boltzTestnetUrl
+            : boltzMainnetUrl;
         final (inv, errInv) = await _swapBoltz.decodeInvoice(
           invoice: address.toLowerCase(),
           boltzUrl: boltzUrl,
@@ -177,7 +178,8 @@ class SendCubit extends Cubit<SendState> {
           );
           return;
         }
-        if (_networkCubit.state.testnet != inv.isTestnet()) {
+        if ((_networkCubit.state.bbNetwork == BBNetwork.Testnet) !=
+            inv.isTestnet()) {
           emit(state.copyWith(errScanningAddress: 'Network mismatch'));
           return;
         }
@@ -201,7 +203,8 @@ class SendCubit extends Cubit<SendState> {
           );
           return;
         }
-        if (_networkCubit.state.testnet != inv.isTestnet()) {
+        if ((_networkCubit.state.bbNetwork == BBNetwork.Testnet) !=
+            inv.isTestnet()) {
           emit(state.copyWith(errScanningAddress: 'Network mismatch'));
 
           return;
@@ -326,7 +329,7 @@ class SendCubit extends Cubit<SendState> {
         address: state.address,
         invoice: state.invoice!,
         amount: amt,
-        isTestnet: _networkCubit.state.testnet,
+        isTestnet: _networkCubit.state.bbNetwork == BBNetwork.Testnet,
         networkUrl: networkurl,
       );
       return;
@@ -1047,8 +1050,7 @@ class SendCubit extends Cubit<SendState> {
   }
 
   void processSendButton(String label) async {
-    final network =
-        _networkCubit.state.testnet ? BBNetwork.Testnet : BBNetwork.Mainnet;
+    final network = _networkCubit.state.bbNetwork;
     final (_, addressError) =
         await state.getPaymentNetwork(state.address, network);
 
@@ -1096,7 +1098,7 @@ class SendCubit extends Cubit<SendState> {
       _swapCubit.createOnChainSwap(
         wallet: wallet,
         amount: state.sendAllCoin == true ? sweepAmount : swapAmount,
-        isTestnet: _networkCubit.state.testnet,
+        isTestnet: _networkCubit.state.bbNetwork == BBNetwork.Testnet,
         btcElectrumUrl:
             btcNetworkUrlWithoutSSL, // 'electrum.blockstream.info:60002',
         lbtcElectrumUrl: liqNetworkurl, // 'blockstream.info:465',
@@ -1130,7 +1132,7 @@ class SendCubit extends Cubit<SendState> {
         wallet: wallet,
         address: state.address,
         amount: _currencyCubit.state.amount,
-        isTestnet: _networkCubit.state.testnet,
+        isTestnet: _networkCubit.state.bbNetwork == BBNetwork.Testnet,
         invoice: state.invoice!,
         networkUrl: networkurl,
         label: label,
@@ -1223,7 +1225,7 @@ class SendCubit extends Cubit<SendState> {
       wallet: fromWallet,
       amount: finalAmount, //20000,
       sweep: finalSweep,
-      isTestnet: _networkCubit.state.testnet,
+      isTestnet: _networkCubit.state.bbNetwork == BBNetwork.Testnet,
       btcElectrumUrl:
           btcNetworkUrlWithoutSSL, // 'electrum.blockstream.info:60002',
       lbtcElectrumUrl: liqNetworkurl, // 'blockstream.info:465',

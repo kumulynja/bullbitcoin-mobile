@@ -95,6 +95,7 @@ Map<String, dynamic> _$$WalletImplToJson(_$WalletImpl instance) =>
 const _$BBNetworkEnumMap = {
   BBNetwork.Testnet: 'Testnet',
   BBNetwork.Mainnet: 'Mainnet',
+  BBNetwork.Regtest: 'Regtest',
 };
 
 const _$BBWalletTypeEnumMap = {

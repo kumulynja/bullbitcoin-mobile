@@ -152,9 +152,10 @@ class ColdcardWallet extends StatelessWidget {
       label: 'Coldcard wallet',
       onPressed: () {
         final walletBlocs = context.read<HomeCubit>().state.walletBlocs;
-        final network = context.read<NetworkCubit>().state.testnet
-            ? BBNetwork.Testnet
-            : BBNetwork.Mainnet;
+        final network =
+            context.read<NetworkCubit>().state.bbNetwork == BBNetwork.Testnet
+                ? BBNetwork.Testnet
+                : BBNetwork.Mainnet;
         final walletBloc = walletBlocs
             ?.where(
               (w) =>

@@ -64,7 +64,7 @@ class WatchTxsBloc extends Bloc<WatchTxsEvent, WatchTxsState> {
   }
 
   void _onWatchWallets(WatchWallets event, Emitter<WatchTxsState> emit) async {
-    final isTestnet = _networkCubit.state.testnet;
+    final isTestnet = _networkCubit.state.bbNetwork == BBNetwork.Testnet;
     await Future.delayed(100.ms);
     final network = _networkCubit.state.getBBNetwork();
     final walletBlocs = _homeCubit.state.walletBlocsFromNetwork(network);

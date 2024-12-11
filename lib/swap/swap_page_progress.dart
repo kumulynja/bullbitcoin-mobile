@@ -1,5 +1,6 @@
 import 'package:bb_mobile/_model/swap.dart';
 import 'package:bb_mobile/_model/transaction.dart';
+import 'package:bb_mobile/_model/wallet.dart';
 import 'package:bb_mobile/_ui/components/button.dart';
 import 'package:bb_mobile/_ui/components/text.dart';
 import 'package:bb_mobile/currency/bloc/currency_cubit.dart';
@@ -58,8 +59,8 @@ class _ChainSwapProgressWidgetState extends State<ChainSwapProgressWidget> {
         .select((CurrencyCubit cubit) => cubit.state.defaultFiatCurrency);
     final fiatAmt =
         context.select((CurrencyCubit cubit) => cubit.state.fiatAmt);
-    final isTestNet =
-        context.select((NetworkCubit cubit) => cubit.state.testnet);
+    final isTestNet = context.select(
+        (NetworkCubit cubit) => cubit.state.bbNetwork == BBNetwork.Testnet);
     final unit = defaultCurrency?.name ?? '';
     final amt = isTestNet ? '0' : fiatAmt.toStringAsFixed(2);
     Transaction? tx;

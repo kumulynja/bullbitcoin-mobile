@@ -1,3 +1,4 @@
+import 'package:bb_mobile/_model/wallet.dart';
 import 'package:bb_mobile/_pkg/barcode.dart';
 import 'package:bb_mobile/_pkg/boltz/swap.dart';
 import 'package:bb_mobile/_pkg/bull_bitcoin_api.dart';
@@ -63,7 +64,9 @@ class _SendPageState extends State<SendPage> {
       homeCubit: context.read<HomeCubit>(),
       watchTxsBloc: context.read<WatchTxsBloc>(),
       networkCubit: context.read<NetworkCubit>(),
-    )..fetchFees(context.read<NetworkCubit>().state.testnet);
+    )..fetchFees(
+        context.read<NetworkCubit>().state.bbNetwork == BBNetwork.Testnet,
+      );
 
     networkFees = NetworkFeesCubit(
       networkCubit: locator<NetworkCubit>(),
@@ -84,7 +87,8 @@ class _SendPageState extends State<SendPage> {
       walletBloc =
           context.read<HomeCubit>().state.getWalletBlocById(widget.walletId!);
     } else {
-      final isTestnet = context.read<NetworkCubit>().state.testnet;
+      final isTestnet =
+          context.read<NetworkCubit>().state.bbNetwork == BBNetwork.Testnet;
       walletBloc =
           context.read<HomeCubit>().state.getMainWallets(isTestnet).first;
     }

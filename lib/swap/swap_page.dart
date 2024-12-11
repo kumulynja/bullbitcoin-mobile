@@ -50,7 +50,8 @@ class _SwapPageState extends State<SwapPage> {
       homeCubit: context.read<HomeCubit>(),
       watchTxsBloc: context.read<WatchTxsBloc>(),
       networkCubit: context.read<NetworkCubit>(),
-    )..fetchFees(context.read<NetworkCubit>().state.testnet);
+    )..fetchFees(
+        context.read<NetworkCubit>().state.bbNetwork == BBNetwork.Testnet);
 
     networkFees = NetworkFeesCubit(
       networkCubit: locator<NetworkCubit>(),

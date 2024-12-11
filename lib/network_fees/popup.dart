@@ -1,3 +1,4 @@
+import 'package:bb_mobile/_model/wallet.dart';
 import 'package:bb_mobile/_ui/bottom_sheet.dart';
 import 'package:bb_mobile/_ui/components/button.dart';
 import 'package:bb_mobile/_ui/components/text.dart';
@@ -289,7 +290,8 @@ class SelectFeesItem extends StatelessWidget {
     final currency =
         context.select((CurrencyCubit x) => x.state.defaultFiatCurrency);
 
-    final isTestnet = context.select((NetworkCubit x) => x.state.testnet);
+    final isTestnet = context.select((NetworkCubit x) => x.state.bbNetwork) ==
+        BBNetwork.Testnet;
 
     final fiatRateStr = context.select(
       (NetworkFeesCubit _) => _.state.calculateFiatPriceForFees(

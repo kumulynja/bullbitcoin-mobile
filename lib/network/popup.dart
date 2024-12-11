@@ -121,13 +121,14 @@ class NetworkStatus extends StatelessWidget {
         context.select((NetworkCubit x) => x.state.networkConnected);
     final errLoadingNetwork =
         context.select((NetworkCubit x) => x.state.errLoadingNetworks);
-    final isTestnet = context.select((NetworkCubit x) => x.state.testnet);
+    final bbNetwork = context.select((NetworkCubit x) => x.state.bbNetwork);
+
     var network = context.select(
-      (NetworkCubit x) => x.state.getNetwork()?.getNetworkUrl(isTestnet) ?? '',
+      (NetworkCubit x) => x.state.getNetwork()?.getNetworkUrl(bbNetwork) ?? '',
     );
     var liqNetwork = context.select(
       (NetworkCubit x) =>
-          x.state.getLiquidNetwork()?.getNetworkUrl(isTestnet) ?? '',
+          x.state.getLiquidNetwork()?.getNetworkUrl(bbNetwork) ?? '',
     );
 
     network = removeSubAndPort(network);

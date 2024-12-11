@@ -107,7 +107,6 @@ class BDKTransactions {
       final storedTxs = wallet.transactions.toList();
       final unsignedTxs = wallet.unsignedTxs.toList();
       final bdkNetwork = wallet.getBdkNetwork();
-      if (bdkNetwork == null) throw 'No bdkNetwork';
 
       final bdkTxs = bdkWallet.listTransactions(includeRaw: true);
       // final x = bdk.TxBuilderResult();
@@ -446,7 +445,7 @@ class BDKTransactions {
       var txBuilder = bdk.TxBuilder();
       final bdkAddress = await bdk.Address.fromString(
         s: address,
-        network: wallet.getBdkNetwork()!,
+        network: wallet.getBdkNetwork(),
       );
 
       for (final utxo in frozenUtxos) {
@@ -496,7 +495,6 @@ class BDKTransactions {
       final inputs = await extractedTx.input();
 
       final bdkNetwork = wallet.getBdkNetwork();
-      if (bdkNetwork == null) throw 'No bdkNetwork';
 
       final outAddrsFutures = outputs.map((txOut) async {
         final scriptAddress = await bdk.Address.fromScript(

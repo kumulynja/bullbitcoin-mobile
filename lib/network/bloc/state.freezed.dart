@@ -20,7 +20,7 @@ NetworkState _$NetworkStateFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$NetworkState {
-  bool get testnet => throw _privateConstructorUsedError;
+  BBNetwork get bbNetwork => throw _privateConstructorUsedError;
   int get reloadWalletTimer => throw _privateConstructorUsedError;
   List<ElectrumNetwork> get networks => throw _privateConstructorUsedError;
   ElectrumTypes get selectedNetwork => throw _privateConstructorUsedError;
@@ -41,8 +41,12 @@ mixin _$NetworkState {
       throw _privateConstructorUsedError;
   bool get goToSettings => throw _privateConstructorUsedError;
 
+  /// Serializes this NetworkState to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of NetworkState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $NetworkStateCopyWith<NetworkState> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -54,7 +58,7 @@ abstract class $NetworkStateCopyWith<$Res> {
       _$NetworkStateCopyWithImpl<$Res, NetworkState>;
   @useResult
   $Res call(
-      {bool testnet,
+      {BBNetwork bbNetwork,
       int reloadWalletTimer,
       List<ElectrumNetwork> networks,
       ElectrumTypes selectedNetwork,
@@ -84,10 +88,12 @@ class _$NetworkStateCopyWithImpl<$Res, $Val extends NetworkState>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of NetworkState
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? testnet = null,
+    Object? bbNetwork = null,
     Object? reloadWalletTimer = null,
     Object? networks = null,
     Object? selectedNetwork = null,
@@ -104,10 +110,10 @@ class _$NetworkStateCopyWithImpl<$Res, $Val extends NetworkState>
     Object? goToSettings = null,
   }) {
     return _then(_value.copyWith(
-      testnet: null == testnet
-          ? _value.testnet
-          : testnet // ignore: cast_nullable_to_non_nullable
-              as bool,
+      bbNetwork: null == bbNetwork
+          ? _value.bbNetwork
+          : bbNetwork // ignore: cast_nullable_to_non_nullable
+              as BBNetwork,
       reloadWalletTimer: null == reloadWalletTimer
           ? _value.reloadWalletTimer
           : reloadWalletTimer // ignore: cast_nullable_to_non_nullable
@@ -167,6 +173,8 @@ class _$NetworkStateCopyWithImpl<$Res, $Val extends NetworkState>
     ) as $Val);
   }
 
+  /// Create a copy of NetworkState
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $ElectrumNetworkCopyWith<$Res>? get tempNetworkDetails {
@@ -179,6 +187,8 @@ class _$NetworkStateCopyWithImpl<$Res, $Val extends NetworkState>
     });
   }
 
+  /// Create a copy of NetworkState
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $LiquidElectrumNetworkCopyWith<$Res>? get tempLiquidNetworkDetails {
@@ -202,7 +212,7 @@ abstract class _$$NetworkStateImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {bool testnet,
+      {BBNetwork bbNetwork,
       int reloadWalletTimer,
       List<ElectrumNetwork> networks,
       ElectrumTypes selectedNetwork,
@@ -232,10 +242,12 @@ class __$$NetworkStateImplCopyWithImpl<$Res>
       _$NetworkStateImpl _value, $Res Function(_$NetworkStateImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of NetworkState
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? testnet = null,
+    Object? bbNetwork = null,
     Object? reloadWalletTimer = null,
     Object? networks = null,
     Object? selectedNetwork = null,
@@ -252,10 +264,10 @@ class __$$NetworkStateImplCopyWithImpl<$Res>
     Object? goToSettings = null,
   }) {
     return _then(_$NetworkStateImpl(
-      testnet: null == testnet
-          ? _value.testnet
-          : testnet // ignore: cast_nullable_to_non_nullable
-              as bool,
+      bbNetwork: null == bbNetwork
+          ? _value.bbNetwork
+          : bbNetwork // ignore: cast_nullable_to_non_nullable
+              as BBNetwork,
       reloadWalletTimer: null == reloadWalletTimer
           ? _value.reloadWalletTimer
           : reloadWalletTimer // ignore: cast_nullable_to_non_nullable
@@ -320,7 +332,7 @@ class __$$NetworkStateImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$NetworkStateImpl extends _NetworkState {
   const _$NetworkStateImpl(
-      {this.testnet = false,
+      {this.bbNetwork = BBNetwork.Mainnet,
       this.reloadWalletTimer = 20,
       final List<ElectrumNetwork> networks = const [],
       this.selectedNetwork = ElectrumTypes.bullbitcoin,
@@ -344,7 +356,7 @@ class _$NetworkStateImpl extends _NetworkState {
 
   @override
   @JsonKey()
-  final bool testnet;
+  final BBNetwork bbNetwork;
   @override
   @JsonKey()
   final int reloadWalletTimer;
@@ -399,7 +411,7 @@ class _$NetworkStateImpl extends _NetworkState {
 
   @override
   String toString() {
-    return 'NetworkState(testnet: $testnet, reloadWalletTimer: $reloadWalletTimer, networks: $networks, selectedNetwork: $selectedNetwork, liquidNetworks: $liquidNetworks, selectedLiquidNetwork: $selectedLiquidNetwork, loadingNetworks: $loadingNetworks, errLoadingNetworks: $errLoadingNetworks, networkConnected: $networkConnected, networkErrorOpened: $networkErrorOpened, tempNetwork: $tempNetwork, tempNetworkDetails: $tempNetworkDetails, tempLiquidNetwork: $tempLiquidNetwork, tempLiquidNetworkDetails: $tempLiquidNetworkDetails, goToSettings: $goToSettings)';
+    return 'NetworkState(bbNetwork: $bbNetwork, reloadWalletTimer: $reloadWalletTimer, networks: $networks, selectedNetwork: $selectedNetwork, liquidNetworks: $liquidNetworks, selectedLiquidNetwork: $selectedLiquidNetwork, loadingNetworks: $loadingNetworks, errLoadingNetworks: $errLoadingNetworks, networkConnected: $networkConnected, networkErrorOpened: $networkErrorOpened, tempNetwork: $tempNetwork, tempNetworkDetails: $tempNetworkDetails, tempLiquidNetwork: $tempLiquidNetwork, tempLiquidNetworkDetails: $tempLiquidNetworkDetails, goToSettings: $goToSettings)';
   }
 
   @override
@@ -407,7 +419,8 @@ class _$NetworkStateImpl extends _NetworkState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$NetworkStateImpl &&
-            (identical(other.testnet, testnet) || other.testnet == testnet) &&
+            (identical(other.bbNetwork, bbNetwork) ||
+                other.bbNetwork == bbNetwork) &&
             (identical(other.reloadWalletTimer, reloadWalletTimer) ||
                 other.reloadWalletTimer == reloadWalletTimer) &&
             const DeepCollectionEquality().equals(other._networks, _networks) &&
@@ -438,11 +451,11 @@ class _$NetworkStateImpl extends _NetworkState {
                 other.goToSettings == goToSettings));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
-      testnet,
+      bbNetwork,
       reloadWalletTimer,
       const DeepCollectionEquality().hash(_networks),
       selectedNetwork,
@@ -458,7 +471,9 @@ class _$NetworkStateImpl extends _NetworkState {
       tempLiquidNetworkDetails,
       goToSettings);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of NetworkState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$NetworkStateImplCopyWith<_$NetworkStateImpl> get copyWith =>
@@ -474,7 +489,7 @@ class _$NetworkStateImpl extends _NetworkState {
 
 abstract class _NetworkState extends NetworkState {
   const factory _NetworkState(
-      {final bool testnet,
+      {final BBNetwork bbNetwork,
       final int reloadWalletTimer,
       final List<ElectrumNetwork> networks,
       final ElectrumTypes selectedNetwork,
@@ -495,7 +510,7 @@ abstract class _NetworkState extends NetworkState {
       _$NetworkStateImpl.fromJson;
 
   @override
-  bool get testnet;
+  BBNetwork get bbNetwork;
   @override
   int get reloadWalletTimer;
   @override
@@ -513,8 +528,8 @@ abstract class _NetworkState extends NetworkState {
   @override
   bool get networkConnected;
   @override
-  bool get networkErrorOpened;
-  @override // @Default(20) int stopGap,
+  bool get networkErrorOpened; // @Default(20) int stopGap,
+  @override
   ElectrumTypes? get tempNetwork;
   @override
   ElectrumNetwork? get tempNetworkDetails;
@@ -524,8 +539,11 @@ abstract class _NetworkState extends NetworkState {
   LiquidElectrumNetwork? get tempLiquidNetworkDetails;
   @override
   bool get goToSettings;
+
+  /// Create a copy of NetworkState
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$NetworkStateImplCopyWith<_$NetworkStateImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

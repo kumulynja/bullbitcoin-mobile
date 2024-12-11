@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:bb_mobile/_model/network.dart';
+import 'package:bb_mobile/_model/wallet.dart';
 import 'package:bb_mobile/_pkg/consts/configs.dart';
 import 'package:bb_mobile/_pkg/electrum_test.dart';
 import 'package:bb_mobile/_pkg/storage/hive.dart';
@@ -149,17 +150,13 @@ class NetworkCubit extends Cubit<NetworkState> {
     emit(state.copyWith(loadingNetworks: false));
   }
 
-  void toggleTestnet() async {
-    final isTestnet = state.testnet;
-    await Future.delayed(const Duration(milliseconds: 50));
+  void toggleNetwork(BBNetwork net) async {
     try {
-      await setupBlockchain(isTestnetLocal: !isTestnet);
+      await setupBlockchain();
     } catch (e) {
       emit(state.copyWith(errLoadingNetworks: e.toString()));
     }
-    // await Future.delayed(const Duration(milliseconds: 50));
-    emit(state.copyWith(testnet: !isTestnet));
-    // homeCubit?.networkChanged(state.testnet ? BBNetwork.Testnet : BBNetwork.Mainnet);
+    emit(state.copyWith(bbNetwork: net));
   }
 
   void updateStopGapAndSave(int gap) async {
@@ -182,16 +179,16 @@ class NetworkCubit extends Cubit<NetworkState> {
     setupBlockchain();
   }
 
-  Future setupBlockchain({bool? isLiquid, bool? isTestnetLocal}) async {
+  Future setupBlockchain({bool? isLiquid}) async {
     emit(state.copyWith(errLoadingNetworks: '', networkConnected: false));
-    final isTestnet = isTestnetLocal ?? state.testnet;
+    final isTestnet = state.getBBNetwork() == BBNetwork.Testnet;
 
     if (isLiquid == null || !isLiquid) {
       final selectedNetwork = state.getNetwork();
+
       if (selectedNetwork == null) return;
 
       final errBitcoin = await _walletNetwork.createBlockChain(
-        isTestnet: isTestnet,
         stopGap: selectedNetwork.stopGap,
         timeout: selectedNetwork.timeout,
         retry: selectedNetwork.retry,
@@ -222,7 +219,6 @@ class NetworkCubit extends Cubit<NetworkState> {
       final errLiquid = await _walletNetwork.createBlockChain(
         url:
             isTestnet ? selectedLiqNetwork.testnet : selectedLiqNetwork.mainnet,
-        isTestnet: isTestnet,
       );
       if (errLiquid != null) {
         if (!state.networkErrorOpened) {

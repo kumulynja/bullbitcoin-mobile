@@ -26,6 +26,7 @@ Map<String, dynamic> _$$SeedImplToJson(_$SeedImpl instance) =>
 const _$BBNetworkEnumMap = {
   BBNetwork.Testnet: 'Testnet',
   BBNetwork.Mainnet: 'Mainnet',
+  BBNetwork.Regtest: 'Regtest',
 };
 
 _$PassphraseImpl _$$PassphraseImplFromJson(Map<String, dynamic> json) =>

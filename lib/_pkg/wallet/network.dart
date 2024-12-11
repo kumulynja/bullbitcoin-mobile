@@ -20,7 +20,6 @@ class WalletNetwork implements IWalletNetwork {
   @override
   Future<Err?> createBlockChain({
     required String url,
-    required bool isTestnet,
     int? stopGap,
     int? timeout,
     int? retry,
@@ -45,9 +44,6 @@ class WalletNetwork implements IWalletNetwork {
         final errSet = _networkRepository.setLiquidUrl(url);
         if (errSet != null) return errSet;
       }
-
-      // final errTestnet = _networkRepository.setTestnet(isTestnet);
-      // if (errTestnet != null) return errTestnet;
 
       return null;
     } catch (r) {

@@ -11,7 +11,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'wallet.freezed.dart';
 part 'wallet.g.dart';
 
-enum BBNetwork { Testnet, Mainnet }
+enum BBNetwork { Testnet, Mainnet, Regtest }
 
 enum BBWalletType { main, xpub, descriptors, words, coldcard }
 
@@ -71,6 +71,7 @@ class Wallet with _$Wallet {
 
   bool isTestnet() => network == BBNetwork.Testnet;
   bool isMainnet() => network == BBNetwork.Mainnet;
+  bool isRegtest() => network == BBNetwork.Mainnet;
 
   bool isMain() => type == BBWalletType.main;
   bool isLiquid() => baseWalletType == BaseWalletType.Liquid;
@@ -414,18 +415,15 @@ class Wallet with _$Wallet {
       type == BBWalletType.coldcard ||
       type == BBWalletType.descriptors;
 
-  bdk.Network? getBdkNetwork() {
+  bdk.Network getBdkNetwork() {
     switch (network) {
       case BBNetwork.Testnet:
         return bdk.Network.testnet;
       case BBNetwork.Mainnet:
         return bdk.Network.bitcoin;
-
-      // case BBNetwork.LTestnet:
-      // case BBNetwork.LMainnet:
-      //   return null;
+      case BBNetwork.Regtest:
+        return bdk.Network.regtest;
     }
-    // return null;
   }
 
   bool isInstant() =>

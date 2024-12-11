@@ -1,3 +1,4 @@
+import 'package:bb_mobile/_model/wallet.dart';
 import 'package:bb_mobile/_pkg/consts/keys.dart';
 import 'package:bb_mobile/_pkg/extensions.dart';
 import 'package:bb_mobile/_pkg/launcher.dart';
@@ -52,7 +53,7 @@ class _Screen extends StatelessWidget {
             child: Column(
               children: [
                 // Gap(8),
-                // TestNetButton(),
+                NetworkButton(),
                 Gap(8),
                 DefaultRBFToggle(),
                 Gap(8),
@@ -307,17 +308,37 @@ class DefaultRBFToggle extends StatelessWidget {
   }
 }
 
-class TestNetButton extends StatelessWidget {
-  const TestNetButton({super.key});
+class NetworkButton extends StatelessWidget {
+  const NetworkButton({super.key});
+
+  Color _getButtonColor(BBNetwork net) {
+    switch (net) {
+      case BBNetwork.Mainnet:
+        return Colors.orange;
+      case BBNetwork.Testnet:
+        return Colors.red;
+      case BBNetwork.Regtest:
+        return Colors.red;
+    }
+  }
+
+  String _getButtonText(BBNetwork net) {
+    switch (net) {
+      case BBNetwork.Mainnet:
+        return 'Mainnet';
+      case BBNetwork.Testnet:
+        return 'Testnet';
+      case BBNetwork.Regtest:
+        return 'Regtest';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final testnet = context.select((NetworkCubit _) => _.state.testnet);
-
-    // if (!testnet) return const SizedBox.shrink();
+    final bbNetwork = context.select((NetworkCubit _) => _.state.bbNetwork);
 
     return BlocListener<NetworkCubit, NetworkState>(
-      listenWhen: (previous, current) => previous.testnet != current.testnet,
+      listenWhen: (prev, curr) => prev.bbNetwork != curr.bbNetwork,
       listener: (context, state) {
         context.read<NetworkFeesCubit>().loadFees();
         final network = state.getBBNetwork();
@@ -326,19 +347,43 @@ class TestNetButton extends StatelessWidget {
       },
       child: Row(
         children: [
-          // const Gap(8),
-          const BBText.body(
-            'Testnet mode',
-          ),
+          const BBText.body('Network mode'),
           const Spacer(),
-          BBSwitch(
-            key: UIKeys.settingsTestnetSwitch,
-            value: testnet,
-            onChanged: (e) {
-              context.read<NetworkCubit>().toggleTestnet();
-            },
-          ),
+          buildTriStateButton(bbNetwork, context),
         ],
+      ),
+    );
+  }
+
+  Widget buildTriStateButton(BBNetwork net, BuildContext context) {
+    return PopupMenuButton<BBNetwork>(
+      onSelected: (BBNetwork selectedNetwork) {
+        context.read<NetworkCubit>().toggleNetwork(selectedNetwork);
+      },
+      itemBuilder: (BuildContext context) => [
+        PopupMenuItem(
+          value: BBNetwork.Mainnet,
+          child: Text(_getButtonText(BBNetwork.Mainnet)),
+        ),
+        PopupMenuItem(
+          value: BBNetwork.Testnet,
+          child: Text(_getButtonText(BBNetwork.Testnet)),
+        ),
+        PopupMenuItem(
+          value: BBNetwork.Regtest,
+          child: Text(_getButtonText(BBNetwork.Regtest)),
+        ),
+      ],
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: _getButtonColor(net),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          _getButtonText(net),
+          style: const TextStyle(color: Colors.white),
+        ),
       ),
     );
   }

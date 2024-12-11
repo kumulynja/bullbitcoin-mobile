@@ -1,3 +1,4 @@
+import 'package:bb_mobile/_model/wallet.dart';
 import 'package:bb_mobile/_ui/components/text.dart';
 import 'package:bb_mobile/currency/bloc/currency_cubit.dart';
 import 'package:bb_mobile/network/bloc/network_cubit.dart';
@@ -10,15 +11,19 @@ class ConversionAmt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fiatSelected = context.select((CurrencyCubit cubit) => cubit.state.fiatSelected);
-    final isDefaultSats = context.select((CurrencyCubit cubit) => cubit.state.unitsInSats);
+    final fiatSelected =
+        context.select((CurrencyCubit cubit) => cubit.state.fiatSelected);
+    final isDefaultSats =
+        context.select((CurrencyCubit cubit) => cubit.state.unitsInSats);
 
-    final fiatAmt = context.select((CurrencyCubit cubit) => cubit.state.fiatAmt);
+    final fiatAmt =
+        context.select((CurrencyCubit cubit) => cubit.state.fiatAmt);
     final satsAmt = context.select((CurrencyCubit cubit) => cubit.state.amount);
-    final defaultCurrency =
-        context.select((CurrencyCubit cubit) => cubit.state.defaultFiatCurrency);
+    final defaultCurrency = context
+        .select((CurrencyCubit cubit) => cubit.state.defaultFiatCurrency);
 
-    final isTestNet = context.select((NetworkCubit cubit) => cubit.state.testnet);
+    final bbNetwork =
+        context.select((NetworkCubit cubit) => cubit.state.bbNetwork);
 
     var amt = '';
     var unit = '';
@@ -34,7 +39,7 @@ class ConversionAmt extends StatelessWidget {
     } else {
       if (defaultCurrency == null) return const SizedBox.shrink();
       unit = defaultCurrency.name;
-      amt = isTestNet ? '0' : fiatAmt.toStringAsFixed(2);
+      amt = bbNetwork == BBNetwork.Testnet ? '0' : fiatAmt.toStringAsFixed(2);
     }
 
     return Row(

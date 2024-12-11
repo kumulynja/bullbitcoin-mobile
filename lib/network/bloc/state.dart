@@ -14,7 +14,7 @@ part 'state.g.dart';
 @freezed
 class NetworkState with _$NetworkState {
   const factory NetworkState({
-    @Default(false) bool testnet,
+    @Default(BBNetwork.Mainnet) BBNetwork bbNetwork,
     @Default(20) int reloadWalletTimer,
     @Default([]) List<ElectrumNetwork> networks,
     @Default(ElectrumTypes.bullbitcoin) ElectrumTypes selectedNetwork,
@@ -72,24 +72,27 @@ class NetworkState with _$NetworkState {
   String getNetworkUrl() {
     final network = getNetwork();
     if (network == null) return '';
-    return network.getNetworkUrl(testnet);
+    return network.getNetworkUrl(bbNetwork);
   }
 
   String getLiquidNetworkUrl() {
     final network = getLiquidNetwork();
     if (network == null) return '';
-    return network.getNetworkUrl(testnet, split: false);
+    return network.getNetworkUrl(bbNetwork);
   }
 
   bdk.Network getBdkNetwork() {
-    if (testnet) return bdk.Network.testnet;
-    return bdk.Network.bitcoin;
+    switch (bbNetwork) {
+      case BBNetwork.Mainnet:
+        return bdk.Network.bitcoin;
+      case BBNetwork.Testnet:
+        return bdk.Network.testnet;
+      case BBNetwork.Regtest:
+        return bdk.Network.regtest;
+    }
   }
 
-  BBNetwork getBBNetwork() {
-    if (testnet) return BBNetwork.Testnet;
-    return BBNetwork.Mainnet;
-  }
+  BBNetwork getBBNetwork() => bbNetwork;
 
   // boltz.Chain getBoltzChain() {
   // if (testnet) return boltz.Chain.Testnet;
@@ -102,11 +105,11 @@ class NetworkState with _$NetworkState {
     String unblindedUrl = '',
   }) {
     if (isLiquid) {
-      return testnet
+      return bbNetwork == BBNetwork.Testnet
           ? '$liquidMempoolTestnet/$unblindedUrl'
           : '$liquidMempool/$unblindedUrl';
     } else {
-      return testnet
+      return bbNetwork == BBNetwork.Testnet
           ? 'https://$mempoolapi/testnet/tx/$txid'
           : 'https://$mempoolapi/tx/$txid';
     }
@@ -114,11 +117,11 @@ class NetworkState with _$NetworkState {
 
   String explorerAddressUrl(String address, {bool isLiquid = false}) {
     if (isLiquid) {
-      return testnet
+      return bbNetwork == BBNetwork.Testnet
           ? '$liquidMempoolTestnet/address/$address'
           : '$liquidMempool/address/$address';
     } else {
-      return testnet
+      return bbNetwork == BBNetwork.Testnet
           ? 'https://$mempoolapi/testnet/address/$address'
           : 'https://$mempoolapi/address/$address';
     }
@@ -154,7 +157,7 @@ class NetworkState with _$NetworkState {
 
   String calculatePrice(int sats, Currency? currency) {
     if (currency == null) return '';
-    if (testnet) return currency.getSymbol() + '0';
+    if (bbNetwork == BBNetwork.Testnet) return currency.getSymbol() + '0';
     return currency.getSymbol() +
         fiatFormatting(
           (sats / 100000000 * currency.price!).toStringAsFixed(2),

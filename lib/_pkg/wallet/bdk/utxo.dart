@@ -13,7 +13,6 @@ class BDKUtxo {
       final List<Address> myAddresses = wallet.myAddressBook.toList();
 
       final network = wallet.getBdkNetwork();
-      if (network == null) return (null, Err('Network is null'));
 
       final List<UTXO> list = [];
 

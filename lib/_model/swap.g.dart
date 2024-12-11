@@ -162,6 +162,7 @@ Map<String, dynamic> _$$SwapTxImplToJson(_$SwapTxImpl instance) =>
 const _$BBNetworkEnumMap = {
   BBNetwork.Testnet: 'Testnet',
   BBNetwork.Mainnet: 'Mainnet',
+  BBNetwork.Regtest: 'Regtest',
 };
 
 const _$BaseWalletTypeEnumMap = {

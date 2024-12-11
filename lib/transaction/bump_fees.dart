@@ -1,4 +1,5 @@
 import 'package:bb_mobile/_model/transaction.dart';
+import 'package:bb_mobile/_model/wallet.dart';
 import 'package:bb_mobile/_pkg/barcode.dart';
 import 'package:bb_mobile/_pkg/boltz/swap.dart';
 import 'package:bb_mobile/_pkg/bull_bitcoin_api.dart';
@@ -123,7 +124,9 @@ class _BumpFeesPageState extends State<BumpFeesPage> {
       homeCubit: context.read<HomeCubit>(),
       watchTxsBloc: context.read<WatchTxsBloc>(),
       networkCubit: context.read<NetworkCubit>(),
-    )..fetchFees(context.read<NetworkCubit>().state.testnet);
+    )..fetchFees(
+        context.read<NetworkCubit>().state.bbNetwork == BBNetwork.Testnet,
+      );
 
     networkFees = NetworkFeesCubit(
       hiveStorage: locator<HiveStorage>(),

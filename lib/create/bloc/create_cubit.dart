@@ -122,8 +122,7 @@ class CreateWalletCubit extends Cubit<CreateWalletState> {
       }
     }
 
-    final network =
-        _networkCubit.state.testnet ? BBNetwork.Testnet : BBNetwork.Mainnet;
+    final network = _networkCubit.state.bbNetwork;
     final mnemonic = state.mnemonic!.join(' ');
     final (seed, sErr) =
         await _walletSensCreate.mnemonicSeed(mnemonic, network);

@@ -70,6 +70,31 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.31.2"
+  bech32:
+    dependency: transitive
+    description:
+      name: bech32
+      sha256: "156cbace936f7720c79a79d16a03efad343b1ef17106716e04b8b8e39f99f7f7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.2"
+  bip340:
+    dependency: transitive
+    description:
+      name: bip340
+      sha256: "2a92f6ed68959f75d67c9a304c17928b9c9449587d4f75ee68f34152f7f69e87"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
+  bip85:
+    dependency: "direct main"
+    description:
+      path: "bindings/dart-bip85"
+      ref: master
+      resolved-ref: beee977ad2608987ceb350ef3bc3cc05c9e36455
+      url: "https://github.com/ethicnology/rust-bip85.git"
+    source: git
+    version: "1.0.2"
   bitcoin_utils:
     dependency: "direct main"
     description:
@@ -256,7 +281,7 @@ packages:
     source: hosted
     version: "1.18.0"
   convert:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: convert
       sha256: b30acd5944035672bc15c6b7a8b47d773e41e2f17de064350988c5d02adb1c68
@@ -280,7 +305,7 @@ packages:
     source: hosted
     version: "0.3.4+2"
   crypto:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: crypto
       sha256: "1e445881f28f22d6140f181e07737b22f1e099a5e1ff94b0af2f9e4a463f4855"
@@ -644,7 +669,7 @@ packages:
     source: hosted
     version: "2.5.7"
   freezed_annotation:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: freezed_annotation
       sha256: c2e2d632dd9b8a2b7751117abcfc2b4888ecfe181bd9fca7170d9ef02e595fe2
@@ -748,10 +773,10 @@ packages:
     dependency: transitive
     description:
       name: http_multi_server
-      sha256: "97486f20f9c2f7be8f514851703d0119c3596d14ea63227af6f7a481ef2b2f8b"
+      sha256: aa6199f908078bb1c5efb8d8638d4ae191aac11b311132c3ef48ce352fb52ef8
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.1"
+    version: "3.2.2"
   http_parser:
     dependency: transitive
     description:
@@ -974,6 +999,23 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.2"
+  nostr:
+    dependency: "direct main"
+    description:
+      name: nostr
+      sha256: a99942e4eedd5823d16f42e6df96240488028666a329ee1047552f79db564123
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.0"
+  nostr_sdk:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: main
+      resolved-ref: cae2399dcba0a3ed03c0284db26236f9e5e31be6
+      url: "https://github.com/ethicnology/dart-nip17"
+    source: git
+    version: "0.0.1"
   oktoast:
     dependency: "direct main"
     description:
@@ -1271,10 +1313,10 @@ packages:
     dependency: transitive
     description:
       name: stream_transform
-      sha256: "14a00e794c7c11aa145a170587321aedce29769c08d7f58b1d141da75e3b1c6f"
+      sha256: ad47125e588cfd37a9a7f86c7d6356dde8dfe89d071d293f80ca9e9273a33871
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.0"
+    version: "2.1.1"
   string_scanner:
     dependency: transitive
     description:
@@ -1471,10 +1513,10 @@ packages:
     dependency: transitive
     description:
       name: watcher
-      sha256: "3d2ad6751b3c16cf07c7fca317a1413b3f26530319181b37e3b9039b84fc01d8"
+      sha256: "69da27e49efa56a15f8afe8f4438c4ec02eff0a117df1b22ea4aad194fe1c104"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0"
+    version: "1.1.1"
   web:
     dependency: transitive
     description:
@@ -1484,7 +1526,7 @@ packages:
     source: hosted
     version: "0.5.1"
   web_socket_channel:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: web_socket_channel
       sha256: "58c6666b342a38816b2e7e50ed0f1e261959630becd4c879c4f26bfa14aa5a42"
@@ -1540,5 +1582,5 @@ packages:
     source: hosted
     version: "3.1.2"
 sdks:
-  dart: ">=3.5.0 <4.0.0"
+  dart: ">=3.5.4 <4.0.0"
   flutter: ">=3.24.0"

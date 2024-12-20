@@ -138,8 +138,8 @@ class PayjoinEnabledOption extends StatelessWidget {
         context.select((SendCubit x) => x.state.payjoinEnabled);
     return Row(
       children: [
-        Expanded(
-          child: const Column(
+        const Expanded(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               BBText.title('Send with a payjoin transaction'),

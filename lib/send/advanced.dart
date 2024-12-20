@@ -129,6 +129,39 @@ class SendAllOption extends StatelessWidget {
   }
 }
 
+class PayjoinEnabledOption extends StatelessWidget {
+  const PayjoinEnabledOption({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final payjoinEnabled =
+        context.select((SendCubit x) => x.state.payjoinEnabled);
+    return Row(
+      children: [
+        Expanded(
+          child: const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              BBText.title('Send with a payjoin transaction'),
+              Gap(4),
+              BBText.bodySmall(
+                'This allows you to collaborate with the receiver to create a more private transaction.',
+                softwrap: true,
+              ),
+            ],
+          ),
+        ),
+        BBSwitch(
+          value: payjoinEnabled,
+          onChanged: (e) {
+            context.read<SendCubit>().enablePayjoin(e);
+          },
+        ),
+      ],
+    );
+  }
+}
+
 class EnableRBFOption extends StatelessWidget {
   const EnableRBFOption({super.key});
 

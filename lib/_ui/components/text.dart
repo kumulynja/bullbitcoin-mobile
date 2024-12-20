@@ -25,6 +25,7 @@ class BBText extends StatelessWidget {
     this.fontSize,
     this.uiKey,
     this.compact = false,
+    this.softwrap,
   })  : type = _FontTypes.headline,
         textAlign = TextAlign.left;
 
@@ -40,6 +41,7 @@ class BBText extends StatelessWidget {
     this.fontSize,
     this.uiKey,
     this.compact = false,
+    this.softwrap,
   }) : type = _FontTypes.titleLarge;
 
   const BBText.title(
@@ -54,6 +56,7 @@ class BBText extends StatelessWidget {
     this.fontSize,
     this.uiKey,
     this.compact = false,
+    this.softwrap,
   }) : type = _FontTypes.title;
 
   const BBText.body(
@@ -68,6 +71,7 @@ class BBText extends StatelessWidget {
     this.fontSize,
     this.uiKey,
     this.compact = false,
+    this.softwrap,
   }) : type = _FontTypes.body;
 
   const BBText.bodySmall(
@@ -82,6 +86,7 @@ class BBText extends StatelessWidget {
     this.fontSize,
     this.uiKey,
     this.compact = false,
+    this.softwrap,
   }) : type = _FontTypes.bodySmall;
 
   const BBText.bodyBold(
@@ -96,6 +101,7 @@ class BBText extends StatelessWidget {
     this.fontSize,
     this.uiKey,
     this.compact = false,
+    this.softwrap,
   }) : type = _FontTypes.body;
 
   const BBText.error(
@@ -110,6 +116,7 @@ class BBText extends StatelessWidget {
     this.fontSize,
     this.uiKey,
     this.compact = false,
+    this.softwrap,
   }) : type = _FontTypes.error;
 
   const BBText.errorSmall(
@@ -124,6 +131,7 @@ class BBText extends StatelessWidget {
     this.fontSize,
     this.uiKey,
     this.compact = false,
+    this.softwrap,
   }) : type = _FontTypes.errorSmall;
 
   final String text;
@@ -138,6 +146,7 @@ class BBText extends StatelessWidget {
   final Key? uiKey;
   final double? fontSize;
   final bool compact;
+  final bool? softwrap;
 
   @override
   Widget build(BuildContext context) {
@@ -180,6 +189,8 @@ class BBText extends StatelessWidget {
       style: style,
       key: uiKey,
       textAlign: textAlign,
+      overflow: TextOverflow.clip,
+      softWrap: softwrap,
     );
   }
 }

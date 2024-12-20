@@ -95,11 +95,12 @@ class _SendPageState extends State<SendPage> {
       walletTx: locator<WalletTx>(),
       barcode: locator<Barcode>(),
       defaultRBF: locator<SettingsCubit>().state.defaultRBF,
+      defaultPayjoin: locator<SettingsCubit>().state.defaultPayjoin,
       fileStorage: locator<FileStorage>(),
       payjoinSessionStorage: locator<PayjoinSessionStorage>(),
       payjoinManager: locator<PayjoinManager>(),
       networkCubit: locator<NetworkCubit>(),
-      networkFeesCubit: locator<NetworkFeesCubit>(),
+      networkFeesCubit: networkFees,
       homeCubit: locator<HomeCubit>(),
       swapBoltz: locator<SwapBoltz>(),
       currencyCubit: currency,
@@ -175,6 +176,10 @@ class _Screen extends StatelessWidget {
       (SendCubit x) => x.state.couldBeOnchainSwap(),
     );
 
+    final hasPayjoinEndpoint = context.select(
+      (SendCubit x) => x.state.payjoinEndpoint.isNotEmpty,
+    );
+
     if (showWarning && !walletIsLiquid && potentialonchainSwap == false) {
       return const _Warnings();
     }
@@ -199,6 +204,8 @@ class _Screen extends StatelessWidget {
                 ],
                 const Gap(24),
                 const AddressField(),
+                const Gap(8),
+                if (hasPayjoinEndpoint) const PayjoinEnabledOption(),
                 const Gap(24),
                 const AmountField(),
                 if (!isLn) const SendAllOption(),
@@ -644,6 +651,9 @@ class TxDetailsScreen extends StatelessWidget {
       (CurrencyCubit cubit) => cubit.state.defaultFiatCurrency?.shortName ?? '',
     );
 
+    final usePayjoin =
+        context.select((SendCubit cubit) => cubit.state.usePayjoin);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
@@ -680,6 +690,16 @@ class TxDetailsScreen extends StatelessWidget {
         BBText.body(
           '~ $feeFiat $fiatCurrency',
         ),
+        if (usePayjoin) ...[
+          const Gap(24),
+          const BBText.title(
+            'Payjoin',
+          ),
+          const Gap(4),
+          BBText.body(
+            'Yes',
+          ),
+        ],
         const Gap(32),
       ],
     );

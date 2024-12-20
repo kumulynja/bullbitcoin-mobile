@@ -162,6 +162,7 @@ class _BumpFeesPageState extends State<BumpFeesPage> {
       walletTx: locator<WalletTx>(),
       barcode: locator<Barcode>(),
       defaultRBF: locator<SettingsCubit>().state.defaultRBF,
+      defaultPayjoin: locator<SettingsCubit>().state.defaultPayjoin,
       fileStorage: locator<FileStorage>(),
       payjoinSessionStorage: locator<PayjoinSessionStorage>(),
       payjoinManager: locator<PayjoinManager>(),

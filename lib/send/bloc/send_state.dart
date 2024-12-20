@@ -38,7 +38,8 @@ class SendState with _$SendState {
     @Default('') String errDownloadingFile,
     @Default(false) bool downloaded,
     @Default(false) bool disableRBF,
-    Uri? payjoinEndpoint,
+    @Default('') String payjoinEndpoint,
+    @Default(false) bool payjoinEnabled,
     @Default(false) bool sendAllCoin,
     @Default([]) List<UTXO> selectedUtxos,
     @Default('') String errAddresses,
@@ -240,6 +241,8 @@ class SendState with _$SendState {
 
     return false;
   }
+
+  bool get usePayjoin => payjoinEndpoint != null && payjoinEnabled;
 
   String getSendButtonLabel(bool sending) {
     if (couldBeOnchainSwap() == true) return 'Create Swap';

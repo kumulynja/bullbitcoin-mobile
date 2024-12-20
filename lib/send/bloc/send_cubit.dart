@@ -42,6 +42,7 @@ class SendCubit extends Cubit<SendState> {
     required bool openScanner,
     required HomeCubit homeCubit,
     required bool defaultRBF,
+    required bool defaultPayjoin,
     required SwapBoltz swapBoltz,
     required CreateSwapCubit swapCubit,
     bool oneWallet = true,
@@ -65,6 +66,7 @@ class SendCubit extends Cubit<SendState> {
     emit(
       state.copyWith(
         disableRBF: !defaultRBF,
+        payjoinEnabled: defaultPayjoin,
         // selectedWalletBloc: walletBloc,
       ),
     );
@@ -127,8 +129,14 @@ class SendCubit extends Cubit<SendState> {
       return;
     }
 
-    emit(state.copyWith(paymentNetwork: paymentNetwork));
+    emit(state.copyWith(
+      paymentNetwork: paymentNetwork,
+    ));
 
+    if (paymentNetwork != AddressNetwork.bip21Bitcoin) {
+      // Clear the payjoin endpoint if it's not a bip21 address
+      emit(state.copyWith(payjoinEndpoint: ''));
+    }
     switch (paymentNetwork) {
       case AddressNetwork.bip21Bitcoin:
         final bip21Obj = bip21.decode(address.toLowerCase());
@@ -154,10 +162,14 @@ class SendCubit extends Cubit<SendState> {
             final encodedPjParam = partialEncodedPjParam.replaceAll('%20', '+');
             // ICK bitcoin:tb1qsfa6dqnwx9uya6jupaulwe8gtmvs4jgmgutujs?amount=0.3&pjos=0&pj=https%3A%2F%2Fpayjo.in%2Fc0vmd8xjuzaws%23rk1qdfp44eycle2g92w3qsk62tn6dnxk8vptucldkfelz25qr6tlwvgz+oh1qyphkle3uql8ae79y5lw8d6323rdnryf7auz43xe4ccgtzvzmktz92q+ex1urxkqec
             // TODO serialize properly and then pass to Uri.fromStr
-            emit(state.copyWith(payjoinEndpoint: Uri.parse(encodedPjParam)));
+            emit(state.copyWith(
+                payjoinEndpoint: Uri.parse(encodedPjParam).toString()));
           } catch (e) {
             print('error: $e');
           }
+        } else {
+          // Clear the payjoin endpoint if no pj parameter is present
+          emit(state.copyWith(payjoinEndpoint: ''));
         }
       case AddressNetwork.bip21Liquid:
         final bip21Obj = bip21.decode(
@@ -563,6 +575,10 @@ class SendCubit extends Cubit<SendState> {
   void updateNote(String note) => emit(state.copyWith(note: note));
 
   void disableRBF(bool disable) => emit(state.copyWith(disableRBF: disable));
+
+  void enablePayjoin(bool enable) => emit(state.copyWith(
+        payjoinEnabled: enable,
+      ));
 
   void sendAllCoin(bool sendAll) {
     if (state.selectedWalletBloc == null) return;
@@ -1144,22 +1160,13 @@ class SendCubit extends Cubit<SendState> {
 
     final isLn = state.isLnInvoice();
 
+    final fees = _networkFeesCubit.state.selectedOrFirst(false);
     if (!state.signed) {
       if (!isLn) {
-        final fees = _networkFeesCubit.state.selectedOrFirst(false);
-
         await baseLayerBuild(networkFees: fees);
         // wait until psbtSigned is not null FIXME!
         while (state.psbtSigned == null) {
           await Future.delayed(100.ms);
-        }
-        if (state.payjoinEndpoint != null) {
-          sendPayjoin(
-            networkFees: fees,
-            originalPsbt: state.psbtSigned!,
-            wallet: wallet,
-          );
-          return;
         }
       }
       // context.read<WalletBloc>().state.wallet;
@@ -1168,36 +1175,44 @@ class SendCubit extends Cubit<SendState> {
           ? _networkCubit.state.getNetworkUrl()
           : _networkCubit.state.getLiquidNetworkUrl();
 
-      _swapCubit.createSubSwapForSend(
-        wallet: wallet,
-        address: state.address,
-        amount: _currencyCubit.state.amount,
-        isTestnet: _networkCubit.state.testnet,
-        invoice: state.invoice!,
-        networkUrl: networkurl,
-        label: label,
-      );
+      if (state.invoice != null) {
+        _swapCubit.createSubSwapForSend(
+          wallet: wallet,
+          address: state.address,
+          amount: _currencyCubit.state.amount,
+          isTestnet: _networkCubit.state.testnet,
+          invoice: state.invoice!,
+          networkUrl: networkurl,
+          label: label,
+        );
+      }
       return;
     }
 
-    if (!isLn && state.payjoinEndpoint == null) {
-      baseLayerSend();
+    if (!isLn) {
+      if (state.usePayjoin) {
+        await sendPayjoin(
+          networkFees: fees,
+          originalPsbt: state.psbtSigned!,
+          wallet: wallet,
+        );
+      } else {
+        await baseLayerSend();
+      }
       return;
     }
-    if (state.payjoinEndpoint != null) {
-      return;
-    }
+
     sendSwap();
   }
 
-  void sendPayjoin({
+  Future<void> sendPayjoin({
     required int networkFees,
     required String originalPsbt,
     required Wallet wallet,
   }) async {
     // TODO build pjUri from state.payjoinEndpoint
     final pjUriString =
-        'bitcoin:${state.address}?amount=${_currencyCubit.state.amount / 100000000}&label=${Uri.encodeComponent(state.note)}&pj=${state.payjoinEndpoint!}&pjos=0';
+        'bitcoin:${state.address}?amount=${_currencyCubit.state.amount / 100000000}&label=${Uri.encodeComponent(state.note)}&pj=${state.payjoinEndpoint}&pjos=0';
     // find the substring starting pj= and CAPITALIZE everything after chars pj=
     final pjSubstring = pjUriString.substring(pjUriString.indexOf('pj=') + 3);
     final capitalizedPjSubstring = pjSubstring.toUpperCase();

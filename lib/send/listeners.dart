@@ -28,7 +28,8 @@ class SendListeners extends StatelessWidget {
           listener: (context, state) {
             final isLn = context.read<SendCubit>().state.isLnInvoice();
             if (isLn) return;
-            context.read<SendCubit>().updateAddress(null, changeWallet: false);
+            // Commented out the updateAddress here after changing the condition to check the balance in updateAddress
+            //context.read<SendCubit>().updateAddress(null, changeWallet: false);
             // context.read<SendCubit>().selectWallets();
           },
         ),

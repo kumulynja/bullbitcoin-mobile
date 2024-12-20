@@ -14,9 +14,9 @@ class BBSwitcher<T> extends StatelessWidget {
     required this.value,
   });
 
-  final Map<T, String> items;
-  final void Function(T) onChanged;
-  final T value;
+  final Map<Object, String> items;
+  final void Function(Object) onChanged;
+  final Object value;
 
   Widget _buildItem(String title, {bool darkMode = false}) {
     return SizedBox(
@@ -33,8 +33,8 @@ class BBSwitcher<T> extends StatelessWidget {
     );
   }
 
-  Map<T, Widget> _buildItems(bool darkMode) {
-    final map = <T, Widget>{};
+  Map<Object, Widget> _buildItems(bool darkMode) {
+    final map = <Object, Widget>{};
     for (final key in items.keys) {
       map[key] = _buildItem(items[key]!, darkMode: darkMode);
     }
@@ -60,7 +60,7 @@ class BBSwitcher<T> extends StatelessWidget {
         ),
         border: Border.all(color: borderColour),
       ),
-      child: CupertinoSlidingSegmentedControl(
+      child: CupertinoSlidingSegmentedControl<Object>(
         groupValue: value,
         padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 4),
         children: _buildItems(darkMode),

@@ -346,7 +346,7 @@ class SelectWalletType extends StatelessWidget {
         context.read<CreateSwapCubit>().removeWarnings();
 
         final isTestnet = context.read<NetworkCubit>().state.testnet;
-        context.read<ReceiveCubit>().updateWalletType(value, isTestnet);
+        context.read<ReceiveCubit>().updateWalletType(value as PaymentNetwork, isTestnet);
       },
     );
   }

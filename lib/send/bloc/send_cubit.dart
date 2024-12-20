@@ -257,7 +257,8 @@ class SendCubit extends Cubit<SendState> {
     emit(state.copyWith(scanningAddress: false));
     if (changeWallet == true) {
       selectWallets();
-    } else {
+    }
+    if (_currencyCubit.state.amount != 0) {
       _checkBalance();
     }
   }

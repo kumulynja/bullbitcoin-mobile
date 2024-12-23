@@ -12,6 +12,72 @@ import 'package:payjoin_flutter/send.dart';
 
 part 'send_state.freezed.dart';
 
+// TODO: check if a mixin can be used instead of defining isSelectWalletEnabled in each state.
+
+@freezed
+sealed class SendState with _$SendState {
+  const SendState._();
+
+  const factory SendState.initial() = SendInitialState;
+
+  const factory SendState.noWallet() = SendNoWalletState;
+
+  const factory SendState.unknownWalletId({
+    @Default('') String walletId,
+    Object? error,
+  }) = SendUnknownWalletIdState;
+
+  const factory SendState.bitcoin({
+    @Default(true) bool isSelectWalletEnabled,
+    @Default('') String paymentRequestInput,
+    @Default('') String address,
+    BigInt? amountSat,
+    @Default('') String label,
+  }) = SendBitcoinState;
+
+  const factory SendState.liquid({
+    @Default(true) bool isSelectWalletEnabled,
+    @Default('') String paymentRequestInput,
+    @Default('') String address,
+    BigInt? amountSat,
+    @Default('') String label,
+  }) = SendLiquidState;
+
+  const factory SendState.lightning({
+    @Default(true) bool isSelectWalletEnabled,
+    @Default('') String paymentRequestInput,
+    @Default('') String invoice,
+    BigInt? amountSat,
+  }) = SendLightningState;
+
+  bool get canSelectWallet => when(
+        bitcoin: (isSelectWalletEnabled, _, __, ___, ____) =>
+            isSelectWalletEnabled,
+        liquid: (isSelectWalletEnabled, _, __, ___, ____) =>
+            isSelectWalletEnabled,
+        lightning: (isSelectWalletEnabled, _, __, ___) => isSelectWalletEnabled,
+        initial: () => false,
+        noWallet: () => false,
+        unknownWalletId: (_, __) => false,
+      );
+}
+
+extension SendBitcoinStateMethods on SendBitcoinState {
+  // The canSend getter is used to enable the send button
+  bool get canSend => address.isNotEmpty && amountSat != null;
+}
+
+extension SendLiquidStateMethods on SendLiquidState {
+  // The canSend getter is used to enable the send button
+  bool get canSend => address.isNotEmpty && amountSat != null;
+}
+
+extension SendLightningStateMethods on SendLightningState {
+  // The canSend getter is used to enable the send button
+  bool get canSend => invoice.isNotEmpty && amountSat != null;
+}
+
+/*
 @freezed
 class SendState with _$SendState {
   const factory SendState({
@@ -272,7 +338,7 @@ class SendState with _$SendState {
                     : 'Send';
     return label;
   }
-}
+}*/
 
 enum AddressNetwork {
   bip21Bitcoin,

@@ -42,7 +42,8 @@ import 'package:go_router/go_router.dart';
 class SendPage extends StatefulWidget {
   const SendPage({super.key, this.openScanner = false, this.walletId});
 
-  final bool openScanner;
+  final bool
+      openScanner; // TODO: scanner should be another "feature" and screen with its own route and bloc and should navigate to send flow with the scanned data
   final String? walletId;
   @override
   State<SendPage> createState() => _SendPageState();
@@ -79,15 +80,18 @@ class _SendPageState extends State<SendPage> {
       defaultCurrencyCubit: context.read<CurrencyCubit>(),
     );
 
-    WalletBloc? walletBloc;
+    // TODO: This should be refactored to be walletServices instead of BLoCs/Cubits
+    List<WalletBloc> walletBlocs = [];
 
     if (widget.walletId != null) {
-      walletBloc =
+      final walletBloc =
           context.read<HomeCubit>().state.getWalletBlocById(widget.walletId!);
+      if (walletBloc != null) {
+        walletBlocs.add(walletBloc);
+      }
     } else {
       final isTestnet = context.read<NetworkCubit>().state.testnet;
-      walletBloc =
-          context.read<HomeCubit>().state.getMainWallets(isTestnet).first;
+      walletBlocs = context.read<HomeCubit>().state.getMainWallets(isTestnet);
     }
 
     send = SendCubit(
@@ -102,10 +106,10 @@ class _SendPageState extends State<SendPage> {
       swapBoltz: locator<SwapBoltz>(),
       currencyCubit: currency,
       openScanner: widget.openScanner,
-      walletBloc: walletBloc,
+      walletBlocs: walletBlocs,
       swapCubit: swap,
       oneWallet: false,
-    );
+    )..start();
 
     super.initState();
   }

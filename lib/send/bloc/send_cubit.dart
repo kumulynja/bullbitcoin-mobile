@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:bb_mobile/_model/address.dart';
 import 'package:bb_mobile/_model/swap.dart';
@@ -26,7 +27,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class SendCubit extends Cubit<SendState> {
   SendCubit({
     required Barcode barcode,
-    WalletBloc? walletBloc,
+    // TODO: refactor to List<WalletService> after refactoring the Wallet logic
+    List<WalletBloc> walletBlocs = const [],
     required WalletTx walletTx,
     required FileStorage fileStorage,
     required NetworkCubit networkCubit,
@@ -49,23 +51,20 @@ class SendCubit extends Cubit<SendState> {
         _payjoinManager = payjoinManager,
         _swapBoltz = swapBoltz,
         _swapCubit = swapCubit,
+        _walletBlocs = walletBlocs,
+        _disableRBF = !defaultRBF,
         super(
-          SendState(
-            selectedWalletBloc: walletBloc,
-            oneWallet: oneWallet,
-          ),
+          const SendState.initial(),
         ) {
-    emit(
-      state.copyWith(
-        disableRBF: !defaultRBF,
-        // selectedWalletBloc: walletBloc,
-      ),
-    );
-
-    if (openScanner) scanAddress();
-    if (walletBloc != null) selectWallets(fromStart: true);
+    if (openScanner)
+      scanAddress(); // TODO: The scanner should be a separate screen and have its own bloc/cubit and on capturing and succesfully parsing a QR code navigate to the Send page with the parsed data as arguments that can then be passed to the start method of the SendCubit.
   }
 
+  final List<WalletBloc>
+      _walletBlocs; // TODO: refactor to List<WalletService> after refactoring the Wallet repositories and blocs.
+  late WalletBloc? _selectedWalletBloc; // Todo: refactor to WalletService
+  final bool
+      _disableRBF; // TODO: refactor to a settings repository class that is injected to get all settings from that are needed in the send cubit (like enablePayjoin)
   final Barcode _barcode;
   final FileStorage _fileStorage;
   final WalletTx _walletTx;
@@ -77,6 +76,53 @@ class SendCubit extends Cubit<SendState> {
   final CurrencyCubit _currencyCubit;
   final HomeCubit _homeCubit;
   final CreateSwapCubit _swapCubit;
+
+  void start({
+    String? walletId,
+    String? scannedPaymentRequest,
+  }) {
+    if (walletId != null) {
+      try {
+        _selectedWalletBloc = _walletBlocs
+            .firstWhere((element) => element.state.wallet!.id == walletId);
+      } catch (e) {
+        emit(SendState.unknownWalletId(walletId: walletId, error: e));
+        return;
+      }
+    }
+    if (_walletBlocs.isEmpty) {
+      emit(const SendState.noWallet());
+      return;
+    } else {
+      // Default to the first wallet in the list
+      _selectedWalletBloc = _walletBlocs.first;
+    }
+
+    // If no specific walletId is passed at start, selecting another wallet will be enabled
+    final isSelectWalletEnabled = walletId == null;
+    if (_selectedWalletBloc!.state.isLiq()) {
+      emit(SendState.liquid(
+        isSelectWalletEnabled: isSelectWalletEnabled,
+      ));
+    } else {
+      emit(SendState.bitcoin(
+        isSelectWalletEnabled: isSelectWalletEnabled,
+      ));
+    }
+  }
+
+  void selectWallet(WalletBloc walletBloc) {
+    _selectedWalletBloc = walletBloc;
+    if (_selectedWalletBloc!.state.isLiq()) {
+      emit(SendState.liquid(
+        isSelectWalletEnabled: state.canSelectWallet,
+      ));
+    } else {
+      emit(SendState.bitcoin(
+        isSelectWalletEnabled: state.canSelectWallet,
+      ));
+    }
+  }
 
   Future<void> updateAddress(String? addr, {bool changeWallet = true}) async {
     if (!state.oneWallet) resetWalletSelection(changeWallet: changeWallet);

@@ -107,6 +107,7 @@ class PayjoinManager {
     required Wallet wallet,
     required String pjUri,
   }) async {
+    debugPrint('Spawning sender: $pjUri at ${DateTime.now()}');
     try {
       final completer = Completer<Err?>();
       final receivePort = ReceivePort();
@@ -212,13 +213,14 @@ class PayjoinManager {
     required Receiver receiver,
     required Wallet wallet,
   }) async {
+    debugPrint('Spawning receiver: ${receiver.id()} at ${DateTime.now()}');
     try {
       final completer = Completer<Err?>();
       final receivePort = ReceivePort();
       SendPort? mainToIsolateSendPort;
 
       receivePort.listen((message) async {
-        print('Receiver isolate: $message');
+        debugPrint('Receiver isolate: $message');
         if (message is Map<String, dynamic>) {
           try {
             switch (message['type']) {
@@ -280,9 +282,9 @@ class PayjoinManager {
               ),
             );
           }
-        } else if (message is Err) {
+        } else if (message is UnrecoverableError) {
+          await _payjoinStorage.markReceiverSessionUnrecoverable(receiver.id());
           await _cleanupSession(receiver.id());
-          completer.complete(message);
         }
       });
 
@@ -301,9 +303,6 @@ class PayjoinManager {
 
       return completer.future;
     } catch (e) {
-      if (e is UnrecoverableError) {
-        await _payjoinStorage.markReceiverSessionUnrecoverable(receiver.id());
-      }
       return Err(
         e.toString(),
         title: 'Error occurred while receiving Payjoin',
@@ -321,31 +320,44 @@ class PayjoinManager {
     final (senderSessions, senderErr) = await _payjoinStorage.readAllSenders();
     if (senderErr != null) throw senderErr;
 
+    debugPrint('Found ${receiverSessions.length} receiver sessions');
+    debugPrint('Found ${senderSessions.length} sender sessions');
+
     final filteredReceivers = receiverSessions
         .where((session) =>
             session.walletId == wallet.id &&
             session.status != PayjoinSessionStatus.success &&
             session.status != PayjoinSessionStatus.unrecoverable)
         .toList();
+    debugPrint('Filtered receivers: ${filteredReceivers.length}');
+
     final filteredSenders = senderSessions.where((session) {
       return session.walletId == wallet.id &&
           session.status != PayjoinSessionStatus.success &&
           session.status != PayjoinSessionStatus.unrecoverable;
     }).toList();
+    debugPrint('Filtered senders: ${filteredSenders.length}');
 
-    final spawnedReceivers = filteredReceivers.map((session) {
-      return spawnReceiver(
-        isTestnet: session.isTestnet,
-        receiver: session.receiver,
-        wallet: wallet,
+    var i = 0; // Use this to stagger the spawning of sessions
+    final spawnedReceivers = filteredReceivers.map((session) async {
+      return await Future.delayed(
+        Duration(seconds: 3 * i++),
+        () => spawnReceiver(
+          isTestnet: session.isTestnet,
+          receiver: session.receiver,
+          wallet: wallet,
+        ),
       );
     });
     final spawnedSenders = filteredSenders.map((session) {
-      return spawnSender(
-        isTestnet: session.isTestnet,
-        sender: session.sender,
-        wallet: wallet,
-        pjUri: session.pjUri,
+      return Future.delayed(
+        Duration(seconds: 3 * i++),
+        () => spawnSender(
+          isTestnet: session.isTestnet,
+          sender: session.sender,
+          wallet: wallet,
+          pjUri: session.pjUri,
+        ),
       );
     });
 

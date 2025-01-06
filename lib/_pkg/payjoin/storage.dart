@@ -98,6 +98,7 @@ class PayjoinStorage {
 
   Future<Err?> markReceiverSessionUnrecoverable(String id) async {
     try {
+      debugPrint('marking session as unrecoverable: $id');
       final (session, err) = await readReceiverSession(id);
       if (err != null) return err;
 

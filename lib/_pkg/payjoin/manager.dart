@@ -341,7 +341,7 @@ class PayjoinManager {
     var i = 0; // Use this to stagger the spawning of sessions
     final spawnedReceivers = filteredReceivers.map((session) async {
       return await Future.delayed(
-        Duration(seconds: 2 * i++),
+        Duration(seconds: 1 * i++),
         () => spawnReceiver(
           isTestnet: session.isTestnet,
           receiver: session.receiver,
@@ -351,7 +351,7 @@ class PayjoinManager {
     });
     final spawnedSenders = filteredSenders.map((session) {
       return Future.delayed(
-        Duration(seconds: 2 * i++),
+        Duration(seconds: 1 * i++),
         () => spawnSender(
           isTestnet: session.isTestnet,
           sender: session.sender,
